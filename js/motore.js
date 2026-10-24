@@ -74,6 +74,13 @@ function never(a, b) { return NEVER.some(([x, y]) => (x === a && y === b) || (x 
 function rel(a, b) { return G.rel[key2(a, b)] || 0; }
 function addRel(a, b, v) { if (a === b || !G.parties[a] || !G.parties[b]) return; const k = key2(a, b); G.rel[k] = clamp((G.rel[k] || 0) + v, -100, 100); }
 function willing(a, b) { return compat(a, b) * 0.6 + (rel(a, b) + 50) * 0.4; }
+// percentuale di italiani che conosce un partito
+function partyNoto(pid) {
+  const p = P(pid); if (!p) return 0;
+  const seats = p.seatsC + p.seatsS;
+  if (pid === 'MIO') return clamp(2 + G.player.fama * 0.7 + G.org * 0.12 + p.poll * 1.3 + seats * 0.05, 1, 99);
+  return clamp(38 + p.poll * 3 + seats * 0.08 + (p.lCar || 5) * 2, 30, 99);
+}
 function leaderName(pid) { return pid === myPid() && isLeader() ? G.player.name : P(pid).leader; }
 
 // ---------- leggi ----------
@@ -109,7 +116,7 @@ function newGame(cfg) {
     news: [], hist: { polls: [], econ: [] }, flags: {}, promises: [], program: null,
     cal: { election: weekOf('2027-05-23'), quirinale: weekOf('2029-01-24'), europee: weekOf('2029-06-10'), legStart: weekOf('2022-10-13') },
     queue: [], evCool: {}, pc: 0, lastElection: null, legislature: 19, referendums: [], consulta: [],
-    myPeople: [], primarie: null, pendingVotes: {}, myVotes: {}, careerLog: [], stats: { laws: 0, decreti: 0, fiducie: 0, weeksPremier: 0, govs: 0 },
+    myPeople: [], primarie: null, pendingVotes: {}, myVotes: {}, myPersonal: {}, usedActs: {}, tipsSeen: {}, careerLog: [], stats: { laws: 0, decreti: 0, fiducie: 0, weeksPremier: 0, govs: 0 },
     org: 5, cred: 50, funds: 0, formation: null, lastSummary: null, seenEvents: {},
   };
   // partiti
@@ -460,6 +467,13 @@ function computeVote(b, h, opts) {
     } else { a = n; }
     res.yes += y; res.no += no; res.abst += a; res.by[pid] = { yes: y, no, abst: a, vote, seats: n };
   });
+  // il tuo voto personale (se siedi in questa Camera e voti diversamente dal gruppo)
+  const mine = res.by[myPid()], pv = G.myPersonal && G.myPersonal[b.id];
+  if (mine && pv && G.player.parl === h && mine.vote !== pv) {
+    const take = mine.vote === 'yes' ? 'yes' : mine.vote === 'no' ? 'no' : 'abst';
+    const key = { yes: 'yes', no: 'no', abst: 'abst' };
+    if (mine[take] > 0) { mine[take]--; res[take]--; mine[key[pv]]++; res[pv]++; mine.me = pv; }
+  }
   // altri (autonomie, senatori a vita, misto)
   const o = G.otherSeats[h];
   const oy = Math.round(o * (isGovBill(b) ? 0.45 : 0.2)), on = Math.round(o * 0.25);
@@ -472,6 +486,18 @@ function computeVote(b, h, opts) {
   res.fiducia = fid; res.h = h;
   return res;
 }
+// provvedimenti in aula su cui devi decidere (il voto avviene alla settimana successiva)
+function upcomingVotes() {
+  return G.bills.filter(b => {
+    if (b.dead) return false;
+    const s = b.stages[b.stage]; if (!s || s.k !== 'aula' || (b.obstr || 0) > 0) return false;
+    if (b.askedAt === b.stage) return false;
+    const mine = G.player.parl === s.h || (isLeader() && seatsOf(myPid(), s.h) > 0) || (isPremier() && b.proposer === 'GOV');
+    return mine;
+  }).map(b => b.id);
+}
+// linea del partito su un provvedimento: 'yes' | 'no' | 'abst'
+function partyLine(b, h) { const s = stance(myPid(), b, h).s; return s > 0.15 ? 'yes' : s < -0.15 ? 'no' : 'abst'; }
 function predictVote(b) { const s = b.stages[b.stage]; const h = s && s.h ? s.h : 'C'; return computeVote(b, h, { fiducia: b.fiducia, det: true }); }
 
 function proposeBill(lawId, opt, type, proposer, house) {
@@ -1223,6 +1249,8 @@ function advanceWeek() {
   careerTick();
   calendarTick();
   if (G.gov && isPremier()) { G.stats.weeksPremier++; partnerTick(); }
+  // votazioni della prossima settimana in cui conti tu
+  if (G.phase === 'normale') { const up = upcomingVotes(); if (up.length) G._wk.specials.push({ k: 'voti', ids: up }); }
   // eventi casuali
   if (G.phase === 'normale') rollEvents();
   // presenza territoriale del tuo partito: lieve decadimento
@@ -1348,7 +1376,8 @@ function calendarTick() {
 // ============================================================
 const SAVE_PREFIX = 'palazzochigi_';
 function saveGame(slot) { try { localStorage.setItem(SAVE_PREFIX + slot, JSON.stringify(G)); return true; } catch (e) { return false; } }
-function loadGame(slot) { try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return false; G = JSON.parse(s); return true; } catch (e) { return false; } }
+function migrate() { G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
+function loadGame(slot) { try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return false; G = JSON.parse(s); migrate(); return true; } catch (e) { return false; } }
 function slotInfo(slot) {
   try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return null; const g = JSON.parse(s); return { name: g.player.name, party: g.parties[g.player.party].short, date: fmtDate(g.week), premier: g.gov && g.gov.premier === 'PLAYER' }; } catch (e) { return null; }
 }

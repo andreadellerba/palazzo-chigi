@@ -1,15 +1,21 @@
 // ============================================================
 //  SCHERMATE DI GIOCO
 // ============================================================
+const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const TABS = [
-  { id: 'home', n: 'Palazzo', i: '🏛' }, { id: 'leggi', n: 'Leggi', i: '📜' }, { id: 'aula', n: 'Aula', i: '🗳' },
-  { id: 'italia', n: 'Italia', i: '🗺' }, { id: 'partiti', n: 'Partiti', i: '📊' }, { id: 'conti', n: 'Conti', i: '💶' },
+  { id: 'home', n: 'Palazzo', c: '#ffd60a', svg: SVG('<path d="M3 9l9-5 9 5"/><path d="M5.5 10.5v7M9.8 10.5v7M14.2 10.5v7M18.5 10.5v7"/><path d="M3 20.5h18"/>') },
+  { id: 'leggi', n: 'Leggi', c: '#fb923c', svg: SVG('<path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/>') },
+  { id: 'aula', n: 'Aula', c: '#38bdf8', svg: SVG('<path d="M3 18a9 9 0 0 1 18 0"/><path d="M7.5 18a4.5 4.5 0 0 1 9 0"/><path d="M2 21h20"/>') },
+  { id: 'italia', n: 'Italia', c: '#22c55e', svg: SVG('<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/>') },
+  { id: 'partiti', n: 'Partiti', c: '#a78bfa', svg: SVG('<path d="M5 21V12"/><path d="M12 21V5"/><path d="M19 21v-6"/>') },
+  { id: 'conti', n: 'Conti', c: '#f472b6', svg: SVG('<path d="M17 6.5a7 7 0 1 0 0 11"/><path d="M4 10h9M4 14h9"/>') },
 ];
 function goTab(t) { const c = $('.content'); if (c) UI.scroll[UI.tab] = c.scrollTop; UI.tab = t; vib(8); renderGame(); }
 function weeksLeft(w) { const d = w - G.week; return d <= 0 ? 'oggi' : d === 1 ? 'tra 1 settimana' : d < 9 ? `tra ${d} settimane` : `tra ${Math.round(d / 4.35)} mesi`; }
 
 function renderGame() {
   const c = $('.content'); if (c) UI.scroll[UI.tab] = c.scrollTop;
+  $('#app').dataset.tab = UI.tab;
   $('#app').innerHTML = `${topbar()}<div class="tricolore"></div>${tickerHTML()}<div class="content" id="content">${tabContent()}</div>${fabHTML()}${navHTML()}`;
   const n = $('.content'); if (n) n.scrollTop = UI.scroll[UI.tab] || 0;
   postRender();
@@ -20,12 +26,15 @@ function topbar() {
   const old = G.hist.polls.length > 5 ? G.hist.polls[G.hist.polls.length - 5].p[myPid()] : mp.poll;
   const d = mp.poll - (old || mp.poll);
   const chips = [];
-  chips.push(`<span class="stat">${esc(mp.short)} <b>${fmt1(mp.poll)}%</b> <span class="${d >= 0 ? 'good' : 'bad'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</span></span>`);
-  if (G.gov) chips.push(`<span class="stat">Governo <b style="color:${pctColor(G.gov.approval * 1.4)}">${fmt0(G.gov.approval)}%</b></span>`);
-  chips.push(`<span class="stat">Spread <b class="${G.econ.spread > 200 ? 'bad' : ''}">${fmt0(G.econ.spread)}</b></span>`);
-  chips.push(`<span class="stat">Fama <b>${fmt0(p.fama)}</b></span>`);
-  chips.push(`<span class="stat">Fondi <b>${euro(G.funds)}</b></span>`);
-  chips.push(`<span class="stat">Stress <b class="${p.stress > 70 ? 'bad' : ''}">${fmt0(p.stress)}</b></span>`);
+  const st = (c, html, on) => `<span class="stat" style="--sc:${c}" ${on ? `onclick="${on}"` : ''}>${html}</span>`;
+  chips.push(st(mp.color, `${esc(mp.short)} <b>${fmt1(mp.poll)}%</b> <span class="${d >= 0 ? 'good' : 'bad'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</span>`));
+  if (!isLeader()) chips.push(st(relColorHex(p.rap), `Con ${esc(firstName(myParty().leader))} <b style="color:${relColor(p.rap)}">${p.rap > 0 ? '+' : ''}${fmt0(p.rap)}</b>`, "toast('Rapporto con il leader del tuo partito: da −100 a +100')"));
+  chips.push(st('#22d3ee', `Notorietà ${esc(mp.short)} <b>${fmt0(partyNoto(myPid()))}%</b>`, "toast('Percentuale di italiani che conosce il tuo partito')"));
+  if (G.gov) chips.push(st('#ffd60a', `Governo <b style="color:${pctColor(G.gov.approval * 1.4)}">${fmt0(G.gov.approval)}%</b>`));
+  chips.push(st('#f472b6', `Spread <b class="${G.econ.spread > 200 ? 'bad' : ''}">${fmt0(G.econ.spread)}</b>`));
+  chips.push(st('#a78bfa', `Fama <b>${fmt0(p.fama)}</b>`, "toast('La tua notorietà personale (0-100)')"));
+  chips.push(st('#22c55e', `Fondi <b>${euro(G.funds)}</b>`));
+  chips.push(st('#fb923c', `Stress <b class="${p.stress > 70 ? 'bad' : ''}">${fmt0(p.stress)}</b>`));
   return `<div class="topbar"><div class="row between"><div class="grow"><div class="date"><span class="flip" key="${G.week}">${fmtDate(G.week)}</span></div><div class="role ellipsis">${esc(roleLabel())}</div></div>
     <span class="pill pc" onclick="toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')">⚡ ${G.pc}/${pcMax()}</span><button class="iconbtn" onclick="openMenu()">☰</button></div>
     <div class="chips">${chips.join('')}</div></div>`;
@@ -42,7 +51,7 @@ function fabHTML() {
 }
 function navHTML() {
   const live = G.bills.filter(b => !b.dead && b.stages[b.stage] && b.stages[b.stage].k === 'aula').length;
-  return `<nav class="nav">${TABS.map(t => `<button class="${UI.tab === t.id ? 'on' : ''}" onclick="goTab('${t.id}')"><span class="i">${t.i}</span>${t.n}${t.id === 'aula' && live ? `<span class="badge">${live}</span>` : ''}</button>`).join('')}</nav>`;
+  return `<nav class="tabs-mobile2"><div class="tbar">${TABS.map(t => `<button type="button" class="tbtn ${UI.tab === t.id ? 'active' : ''}" style="--tc:${t.c}" onclick="goTab('${t.id}')" title="${t.n}">${t.svg}<span class="tl">${t.n}</span>${t.id === 'aula' && live && UI.tab !== 'aula' ? `<span class="badge">${live}</span>` : ''}</button>`).join('')}</div></nav>`;
 }
 function tabContent() {
   switch (UI.tab) {
@@ -62,7 +71,10 @@ function homeTab() {
   const p = G.player, mp = myParty(), g = G.gov;
   let h = '';
   // eroe
-  h += `<div class="card hero"><div class="row">${sym(myPid(), true)}<div class="grow"><div class="small gold" style="font-weight:700">${esc(roleLabel())}</div><h2 class="ellipsis">${esc(p.name)}</h2><div class="small muted">${esc(mp.name)} · ${fmt1(mp.poll)}% · ${mp.seatsC} dep. · ${mp.seatsS} sen.</div></div></div>`;
+  h += tipsHTML();
+  h += `<div class="card hero" style="--pc:${mp.color}"><div class="row">${sym(myPid(), true)}<div class="grow"><div class="small gold" style="font-weight:700">${esc(roleLabel())}</div><h2 class="ellipsis">${esc(p.name)}</h2><div class="small muted">${esc(mp.name)} · ${fmt1(mp.poll)}% · ${mp.seatsC} dep. · ${mp.seatsS} sen.</div></div></div>
+    <div class="grid2 mt"><div><div class="tiny muted">Notorietà del partito</div><b>${fmt0(partyNoto(myPid()))}%</b> <span class="tiny muted">degli italiani lo conosce</span>${barH(partyNoto(myPid()), 100, '#22d3ee', true)}</div>
+    ${isLeader() ? `<div><div class="tiny muted">La tua fama personale</div><b>${fmt0(p.fama)}</b><span class="tiny muted">/100</span>${barH(p.fama, 100, '#a78bfa', true)}</div>` : `<div><div class="tiny muted">Rapporto con ${esc(myParty().leader)}</div><b style="color:${relColor(p.rap)}">${p.rap > 0 ? '+' : ''}${fmt0(p.rap)} · ${relLabel(p.rap)}</b>${barH(p.rap + 100, 200, relColor(p.rap), true)}</div>`}</div>`;
   if (g) {
     const gs = govSeats('C'), gss = govSeats('S');
     h += `<div class="mt" style="border-top:1px solid var(--line);padding-top:10px"><div class="row between"><b>${esc(g.name)}${g.tecnico ? ' (tecnico)' : ''}</b><span class="small muted">dal ${fmtDate(g.start, true)}</span></div>
@@ -86,7 +98,7 @@ function homeTab() {
   if (al.length) h += `<div class="sec"><h4>Da sapere</h4></div><div class="card tight"><div class="list">${al.map(a => `<div class="li ${a.on ? 'click' : ''}" ${a.on ? `onclick="${a.on}"` : ''}><span style="font-size:20px">${a.i}</span><div class="grow small">${a.t}</div>${a.on ? '<span class="dim">›</span>' : ''}</div>`).join('')}</div></div>`;
   // agenda
   const acts = availableActions();
-  h += `<div class="sec"><h4>Agenda della settimana</h4><span class="small muted">⚡ ${G.pc} disponibili</span></div><div class="actions">${acts.map(a => `<button class="act ${a.ok ? '' : 'off'}" onclick="openAction('${a.id}')"><span class="c">${a.cost ? '⚡' + a.cost : ''}</span><span class="i">${a.ico}</span>${esc(a.n)}</button>`).join('')}</div>`;
+  h += `<div class="sec"><h4>Agenda della settimana</h4><span class="small muted">⚡ ${G.pc} disponibili</span></div><div class="tiny muted" style="margin:-4px 2px 8px">Ogni azione si può fare una volta a settimana.</div><div class="actions">${acts.map(a => `<button class="act ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''}" style="--ac:${a.ac}" onclick="openAction('${a.id}')"><span class="c">${a.cost ? '⚡' + a.cost : ''}</span><span class="i">${a.ico}</span>${esc(a.n)}</button>`).join('')}</div>`;
   // alleati (premier)
   if (isPremier() && g.parties.length > 1) {
     h += `<div class="sec"><h4>Umore degli alleati</h4></div><div class="card">${g.parties.filter(x => x !== myPid()).map(x => `<div class="row" style="margin:6px 0">${partyChip(x)}<span class="small grow ellipsis">${esc(P(x).leader)}</span><div style="width:110px">${barH(g.sat[x], 100, pctColor(g.sat[x]))}</div><b class="small" style="width:34px;text-align:right">${fmt0(g.sat[x])}</b></div>`).join('')}</div>`;
@@ -130,6 +142,12 @@ function leggiTab() {
   const cats = ['Tutte'].concat(Object.keys(LAW_CATS).filter(c => allLaws().some(l => l.cat === c)));
   let h = `<div class="row"><input id="lawq" placeholder="🔍 Cerca una legge (es. pensioni, cittadinanza)" value="${esc(UI.lawQ)}" oninput="UI.lawQ=this.value;$('#lawlist').innerHTML=lawListHTML()"></div>
     <div class="scrollx mt">${cats.map(c => `<button class="fchip ${UI.lawCat === c ? 'on' : ''}" onclick="UI.lawCat='${c}';renderGame()">${LAW_CATS[c] || '📚'} ${c}</button>`).join('')}</div>`;
+  if (!UI.howHidden) h += `<div class="card mt"><div class="row between"><h3>📜 Come si fa una legge</h3><button class="xbtn" onclick="UI.howHidden=1;renderGame()">✕</button></div><div class="howto mt">
+    <div>Tocca una legge: vedi <b>com’è oggi</b> e le <b>riforme possibili</b>.</div>
+    <div>Scegli la riforma e leggi <b>pro e contro</b>, chi è favorevole e la <b>previsione di voto</b>.</div>
+    <div>${isPremier() ? 'Presentala come <b>disegno di legge</b> (⚡3) o <b>decreto</b> (⚡5, subito in vigore).' : G.player.parl || (isLeader() && myParty().seatsC + myParty().seatsS > 0) ? 'Presentala come <b>proposta di legge</b> (⚡2): se la maggioranza non la vuole, resta ferma.' : 'Per presentarla devi avere parlamentari. Intanto puoi <b>metterla nel programma</b>.'}</div>
+    <div>Va in commissione, poi al <b>voto della Camera e del Senato</b>: quando arriva in aula ti chiedo come votare.</div>
+    <div>Se passa in entrambe e il Presidente firma, <b>è legge</b> e cambiano economia e consensi.</div></div></div>`;
   if (isPremier() || isLeader() || G.player.parl) h += `<button class="btn block mt" onclick="openCustomLaw()">✍️ Scrivi una nuova legge</button>`;
   const live = G.bills.filter(b => !b.dead).length;
   h += `<div class="card tight mt click" onclick="goTab('aula')"><div class="row"><span style="font-size:22px">🗳</span><div class="grow"><b>${live} provvedimenti in Parlamento</b><div class="small muted">Tuoi, del governo e degli altri partiti: vota e guarda pro e contro</div></div><span class="dim">›</span></div></div>`;
@@ -367,13 +385,28 @@ function openParty(id) {
       ${NEVER.some(([a, b]) => (a === id && b === myPid()) || (b === id && a === myPid())) ? '<div class="small bad mt">Alleanza impossibile</div>' : ''}${G.gov && inGov(id) ? `<div class="small mt">Soddisfazione nel governo: <b>${fmt0(G.gov.sat[id] || 0)}</b></div>` : ''}</div>`;
   }
   h += `<h4 class="mt2">Posizioni${me ? '' : ' a confronto'}</h4><div class="mt">${AXIS_KEYS.map(k => { const x = (p.ax[k] + 10) / 20 * 100, y = (myParty().ax[k] + 10) / 20 * 100; return `<div style="margin:9px 0"><div class="row between tiny muted"><span>${AXES[k].l}</span><b style="color:var(--text)">${AXES[k].n}</b><span>${AXES[k].r}</span></div><div style="position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.08);margin-top:4px">${!me ? `<i style="position:absolute;left:${y}%;top:-3px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:${myParty().color};border:2px solid #fff;opacity:.7"></i>` : ''}<i style="position:absolute;left:${x}%;top:-4px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:${p.color};border:2px solid #fff"></i></div></div>`; }).join('')}</div>${!me ? `<div class="tiny dim">Pallino pieno: ${esc(p.short)} · pallino chiaro: ${esc(myParty().short)}</div>` : ''}`;
-  if (!me && isLeader()) h += `<div class="col mt2"><button class="btn pri block" onclick="closeSheet();doIncontro('${id}')">☕ Incontro riservato con ${esc(p.leader)} · ⚡1</button></div>`;
+  if (!me && isLeader()) {
+    const myC = coalitionOf(myPid()), same = myC && myC.members.includes(id), sc = inviteScore(id);
+    h += `<div class="col mt2"><button class="btn pri block" onclick="closeSheet();doIncontro('${id}')">☕ Incontro riservato con ${esc(p.leader)} · ⚡1</button>`;
+    if (same) h += `<div class="small center good">Siete già alleati in ${esc(myC.name)}</div>`;
+    else if (sc.block) h += `<div class="small center bad">Alleanza impossibile: veto di ${esc(P(sc.block).short)}</div>`;
+    else h += `<button class="btn gold block" onclick="closeSheet();invitePartner('${id}')">🤝 ${myC ? `Invitalo in ${esc(myC.name)}` : 'Proponi un’alleanza'} · probabilità ${sc.score}% · ⚡1</button>`;
+    const theirC = coalitionOf(id);
+    if (theirC && !same && !myC) h += `<button class="btn block" onclick="closeSheet();UI.partiti='alleanze';goTab('partiti')">Oppure chiedi di entrare in ${esc(theirC.name)}</button>`;
+    h += `</div>`;
+  }
   openSheet(h);
 }
 function alleanzeHTML() {
   let h = '';
   const myC = coalitionOf(myPid());
   const locked = G.flags.listsDeposited === G.cal.election;
+  if (isLeader()) h += `<div class="card mt"><h3>🤝 Come funzionano le alleanze</h3><div class="howto mt">
+    <div>Puoi <b>chiedere di entrare</b> in una coalizione esistente (Centrodestra, Campo largo…): gli alleati ti chiederanno di mettere nel programma le loro leggi bandiera.</div>
+    <div>Se sei già in una coalizione, puoi <b>invitare altri partiti</b> a entrarci: devono accettare loro e non devono esserci veti con chi c’è già.</div>
+    <div>Se corri da solo, puoi <b>fondare la tua coalizione</b> invitando un partito: il candidato premier sei tu.</div>
+    <div>Più l’<b>affinità</b> (idee vicine) e il <b>rapporto</b> (incontri, voti, interviste) sono alti, più è facile. Alcune alleanze sono impossibili.</div>
+    <div>Le alleanze si chiudono con il <b>deposito delle liste</b>, 6 settimane prima del voto.</div></div></div>`;
   h += `<div class="card mt hero"><h3>La tua posizione</h3><div class="small mt">${myC ? `${esc(myParty().short)} fa parte di <b>${esc(myC.name)}</b>. Candidato premier: <b>${myC.cand === 'PLAYER' ? esc(G.player.name) + ' (tu)' : esc(myC.cand || 'da decidere (primarie)')}</b>.` : `${esc(myParty().short)} corre da solo. Con la legge elettorale 2026 servono il 3% per entrare e il 42% (in coalizione) per il premio di maggioranza.`}</div>${locked ? '<div class="tag w mt">Liste depositate: alleanze bloccate fino al voto</div>' : ''}</div>`;
   G.coalitions.forEach(c => {
     const s = c.members.reduce((t, m) => t + (G.parties[m] ? P(m).poll : 0), 0);
@@ -385,7 +418,8 @@ function alleanzeHTML() {
         if (c.cand !== 'PLAYER' && !(c.id === 'csx' && !c.cand)) h += `<button class="btn gold block mt" onclick="askPremiership('${c.id}')">Chiedi di essere tu il candidato premier · ⚡4</button>`;
         if (c.id === 'csx' && !c.cand && !(G.primarie && G.primarie.player)) h += `<button class="btn gold block mt" onclick="joinPrimarie()">Candidati alle primarie · ⚡3</button>`;
         if (G.primarie && G.primarie.player && !G.primarie.done) h += `<div class="small gold mt">Sei candidato alle primarie (spinta ${fmt1(G.primarie.boost || 0)}). Usa «Campagna per le primarie» nell’agenda.</div>`;
-        if (c.mine) { const free = PIDS().filter(id => id !== myPid() && !coalitionOf(id)); if (free.length) h += `<div class="mt small muted">Invita altri partiti:</div><div class="row wrap mt" style="gap:6px">${free.map(id => `<button class="btn sm" onclick="invitePartner('${id}')">${esc(P(id).short)} · ${Math.round(clamp(willing(id, myPid()) - D().accept, 0, 100))}%</button>`).join('')}</div>`; }
+        const others = PIDS().filter(id => !c.members.includes(id));
+        if (others.length) h += `<div class="mt small muted">Invita un partito in ${esc(c.name)} (· ⚡1):</div><div class="row wrap mt" style="gap:6px">${others.map(id => { const sc = inviteScore(id); return `<button class="btn sm ${sc.block ? 'off' : ''}" onclick="invitePartner('${id}')">${esc(P(id).short)} · ${sc.block ? 'veto' : sc.score + '%'}</button>`; }).join('')}</div><div class="tiny dim mt">I partiti già in un’altra coalizione accettano più raramente.</div>`;
         h += `<button class="btn red block mt" onclick="leaveCoalition()">Esci dalla coalizione</button>`;
       }
     }
@@ -393,7 +427,8 @@ function alleanzeHTML() {
   });
   if (isLeader() && !myC && !locked) {
     const free = PIDS().filter(id => id !== myPid() && !coalitionOf(id));
-    h += `<div class="card"><h3>Fonda una tua coalizione</h3><div class="small muted mt">Invita uno dei partiti che corrono da soli. Tu sarai il candidato premier.</div><div class="row wrap mt" style="gap:6px">${free.length ? free.map(id => `<button class="btn sm" onclick="invitePartner('${id}')">${esc(P(id).short)} · ${Math.round(clamp(willing(id, myPid()) - D().accept, 0, 100))}%</button>`).join('') : '<span class="small dim">Nessun partito libero</span>'}</div></div>`;
+    const all = PIDS().filter(id => id !== myPid());
+    h += `<div class="card"><h3>Fonda una tua coalizione</h3><div class="small muted mt">Invita un partito: se accetta nasce la tua coalizione e il candidato premier sei tu. Quelli già alleati con altri accettano più raramente.</div><div class="row wrap mt" style="gap:6px">${all.map(id => { const sc = inviteScore(id); return `<button class="btn sm ${sc.block ? 'off' : ''}" onclick="invitePartner('${id}')">${esc(P(id).short)} · ${sc.block ? 'veto' : sc.score + '%'}</button>`; }).join('')}</div>${free.length ? '' : ''}</div>`;
   }
   if (!isLeader()) h += `<div class="small muted center mt">Le alleanze le decide ${esc(myParty().leader)}. Diventa leader per trattare tu.</div>`;
   return h;
@@ -440,7 +475,7 @@ function openMenu() {
     </div></div><div class="card tight"><div class="list">
     ${item('💾', 'Salva partita', 'Tre slot sul telefono', 'closeSheet();openSave()')}
     ${item('📤', 'Esporta su file', 'Backup da conservare', 'exportSave()')}
-    ${item('❓', 'Come si gioca', '', 'closeSheet();openGuide()')}
+    ${item('🎓', 'Tutorial', 'Rivedi la guida passo passo', 'closeSheet();startTutorial(0)')}${item('❓', 'Come si gioca', 'Riassunto delle regole', 'closeSheet();openGuide()')}
     ${item('🚪', 'Torna al menu iniziale', 'La partita resta salvata', 'closeSheet();saveGame(\'auto\');showSplash()')}
     </div></div><div class="tiny dim center">Difficoltà ${D().n} · Legislatura ${['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX', 'XXI', 'XXII', 'XXIII', 'XXIV', 'XXV'][G.legislature] || G.legislature}</div>`);
 }

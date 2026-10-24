@@ -9,6 +9,9 @@ function partyChip(pid) { const p = G.parties[pid]; if (!p) return pid === 'ALT'
 function sym(pid, big) { const p = G.parties[pid]; return `<div class="sym ${big ? 'big' : ''}" style="--c:${p.color}">${esc(p.symbol && p.mine ? p.symbol : p.short)}</div>`; }
 function barH(v, max, color, thin) { return `<div class="bar ${thin ? 'thin' : ''}"><i style="width:${clamp(v / max * 100, 0, 100)}%;--c:${color || 'var(--blu)'}"></i></div>`; }
 function relColor(v) { return v > 25 ? 'var(--good)' : v < -25 ? 'var(--bad)' : 'var(--warn)'; }
+function relColorHex(v) { return v > 25 ? '#2ecc71' : v < -25 ? '#ff5c5c' : '#ffb547'; }
+function relLabel(v) { return v > 50 ? 'ottimo' : v > 25 ? 'buono' : v > -10 ? 'freddo' : v > -40 ? 'teso' : 'pessimo'; }
+function firstName(n) { return String(n || '').split(' ')[0]; }
 function pctColor(v) { return v >= 60 ? 'var(--good)' : v >= 35 ? 'var(--warn)' : 'var(--bad)'; }
 
 // ---------- toast ----------
@@ -212,7 +215,7 @@ function openLoad() {
 }
 function importSave(file) {
   if (!file) return; const r = new FileReader();
-  r.onload = () => { try { G = JSON.parse(r.result); closeSheet(true); renderGame(); toast('Partita importata', 'good'); } catch (e) { toast('File non valido', 'bad'); } };
+  r.onload = () => { try { G = JSON.parse(r.result); migrate(); closeSheet(true); renderGame(); toast('Partita importata', 'good'); } catch (e) { toast('File non valido', 'bad'); } };
   r.readAsText(file);
 }
 function exportSave() {
@@ -326,6 +329,6 @@ function setupNext() {
     confetti();
     openSheet(`<div class="center"><div style="font-size:56px" class="pop">🇮🇹</div><h2 class="mt">Benvenut${G.player.art === 'la' ? 'a' : 'o'} in politica</h2>
       <p class="muted">${fmtDate(0)}. ${G.mode === 'fondatore' ? `${esc(P('MIO').name)} parte dall’${fmt1(P('MIO').poll)}%. Hai circa 30 settimane prima delle elezioni politiche: fatti conoscere, scrivi il programma, cerca alleati.` : `Sei ${RANKS[G.player.rank].n.toLowerCase()} di ${esc(myParty().name)}. Il leader è ${esc(myParty().leader)}: conquista la sua fiducia, costruisci il tuo seguito e scala il partito.`}</p></div>
-      <button class="btn pri block mt" onclick="closeSheet()">Al lavoro</button>`);
+      <button class="btn gold block mt" onclick="closeSheet();setTimeout(()=>startTutorial(0),320)">Guida rapida (consigliata)</button><button class="btn block mt" onclick="closeSheet()">Salta, conosco il gioco</button>`);
   }, 300);
 }
