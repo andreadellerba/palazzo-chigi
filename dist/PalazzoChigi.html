@@ -6406,7 +6406,7 @@ function alleanzeHTML() {
   G.coalitions.forEach(c => {
     const s = c.members.reduce((t, m) => t + (G.parties[m] ? P(m).poll : 0), 0);
     const mine = c.members.includes(myPid());
-    h += `<div class="card"><div class="row between"><h3>${esc(c.name)}</h3><b class="gold" style="font-size:20px;font-weight:800">${fmt1(s)}%</b></div><div class="row wrap mt" style="gap:4px">${c.members.map(partyChip).join('')}</div><div class="small muted mt">Candidato premier: ${c.cand === 'PLAYER' ? '<b class="gold">tu</b>' : esc(c.cand || 'primarie da svolgere')}</div>`;
+    h += `<div class="card"><div class="row between"><h3>${esc(c.name)}${c.mine && c.members.includes(myPid()) && isLeader() ? ` <button class="btn sm" style="min-height:28px;padding:0 10px;vertical-align:middle" onclick="renameCoalition('${c.id}')">${icon('edit', 14)} Rinomina</button>` : ''}</h3><b class="gold" style="font-size:20px;font-weight:800">${fmt1(s)}%</b></div><div class="row wrap mt" style="gap:4px">${c.members.map(partyChip).join('')}</div><div class="small muted mt">Candidato premier: ${c.cand === 'PLAYER' ? '<b class="gold">tu</b>' : esc(c.cand || 'primarie da svolgere')}</div>`;
     if (isLeader() && !locked) {
       if (!mine && !myC) { const big = c.members.slice().sort((a, b) => P(b).poll - P(a).poll)[0]; h += `<button class="btn pri block mt" onclick="openDeal('${big}','${c.id}')">${icon('hands')} Tratta per entrare in ${esc(c.name)}</button>`; }
       if (mine) {
@@ -8391,7 +8391,7 @@ const routineOK = a => !ROUTINE_NO.includes(a.id) && (a.run || a.id === 'comizio
 function routineToggleHTML(a) {
   if (!routineOK(a)) return `<div class="tiny muted center mt2">È una decisione importante: non si può ripetere in automatico, la prendi tu ogni volta.</div>`;
   const on = !!(G.routine && G.routine[a.id]);
-  return `<div class="card tight mt2"><div class="li click" onclick="toggleRoutine('${a.id}')">${icon('refresh', 20)}<div class="grow"><b class="small">Ripeti ogni settimana</b><div class="tiny muted">${a.id === 'comizio' ? 'Nella regione dove conviene di più' : 'Il gioco la fa da solo quando passi alla settimana successiva'}, se hai capitale e fondi</div></div><span class="tgl ${on ? 'on' : ''}"><i></i></span></div></div>`;
+  return `<div class="card tight mt2"><div class="li click" onclick="toggleRoutine('${a.id}')">${icon('refresh', 20)}<div class="grow"><b class="small">Ripeti ogni settimana</b><div class="tiny muted">Il gioco la fa da solo quando passi alla settimana successiva, se hai capitale e fondi</div></div><span class="tgl ${on ? 'on' : ''}"><i></i></span></div>${on ? routinePickerHTML(a.id) : ''}</div>`;
 }
 function toggleRoutine(id) {
   G.routine = G.routine || {};
@@ -8408,7 +8408,7 @@ function runRoutine() {
     if (!ok || G.pc < actionCost(a) || G.funds < (a.funds || 0)) return;
     if (ROUTINE_AUTO[id]) { if (!spendPC(actionCost(a))) return; markUsed(id); if (a.funds) G.funds -= a.funds; const t = ROUTINE_AUTO[id](); if (t) done.push({ n: t, ico: ACT_ICON[id] || a.ico }); return; }
     if (id === 'comizio') {
-      const reg = REGIONS_DEF.slice().sort((x, y) => (y.el / (G.myReg[y.id] || 1)) - (x.el / (G.myReg[x.id] || 1)))[0];
+      const reg = REGIONS_DEF.find(x => x.id === routineTarget('comizio')) || REGIONS_DEF.slice().sort((x, y) => (y.el / (G.myReg[y.id] || 1)) - (x.el / (G.myReg[x.id] || 1)))[0];
       doComizioQuiet(reg.id); if (usedThisWeek('comizio')) done.push({ n: `Comizio in ${reg.n}`, ico: 'mega' }); return;
     }
     if (!spendPC(actionCost(a))) return;
@@ -8466,7 +8466,7 @@ function interviewerFace(iv) {
 const myLean = () => (myParty().ax.eco + myParty().ax.soc + myParty().ax.imm) / 30;
 function autoInterview(debate) {
   const pl = myLean();
-  const show = debate ? TALKSHOWS[0] : TALKSHOWS.slice().sort((a, b) => (b.reach - Math.abs(b.lean - pl) * 1.5) - (a.reach - Math.abs(a.lean - pl) * 1.5))[0];
+  const show = debate ? TALKSHOWS[0] : TALKSHOWS.find(s => s.n === routineTarget('tv')) || TALKSHOWS.slice().sort((a, b) => (b.reach - Math.abs(b.lean - pl) * 1.5) - (a.reach - Math.abs(a.lean - pl) * 1.5))[0];
   G.stats.tv = (G.stats.tv || 0) + 1;
   let good = 0;
   interviewTopics(3).forEach(t => { const q = interviewQuestion(t, show); const a = q.answers.slice().sort((x, y) => (y.pre.pro.length - y.pre.contro.length) - (x.pre.pro.length - x.pre.contro.length))[0]; const r = a.apply(show); if (r && r.good) good++; });
@@ -8479,16 +8479,45 @@ const ROUTINE_AUTO = {
     const me = myPid(), c = coalitionOf(me);
     const pool = PIDS().filter(p => p !== me && !never(p, me));
     const ally = c ? pool.filter(p => c.members.includes(p)).sort((a, b) => rel(a, me) - rel(b, me))[0] : null;
-    const id = ally || pool.sort((a, b) => willing(b, me) - willing(a, me))[0]; if (!id) return null;
+    const tg = routineTarget('incontro'); const id = (tg && G.parties[tg] ? tg : null) || ally || pool.sort((a, b) => willing(b, me) - willing(a, me))[0]; if (!id) return null;
     const g = Math.round(4 + G.player.car * 0.8 + rnd(-2, 3)); addRel(id, me, g);
     if (isPremier() && G.gov.sat[id] !== undefined) G.gov.sat[id] = clamp(G.gov.sat[id] + 4, 0, 100);
     return `Incontro con ${P(id).leader}`;
   },
-  poteri: () => { const gk = Object.keys(GROUPS).sort((a, b) => G.groups[a] - G.groups[b])[0]; G.groups[gk] = clamp(G.groups[gk] + Math.round(6 + G.player.car * 0.6), -100, 100); if (POWER_RIVAL[gk]) G.groups[POWER_RIVAL[gk]] -= 2; return `Incontro con ${GROUPS[gk].n}`; },
-  visita: () => { const r = REGIONS_DEF.slice().sort((a, b) => (b.el / (G.myReg[b.id] || 1)) - (a.el / (G.myReg[a.id] || 1)))[0]; G.myReg[r.id] = (G.myReg[r.id] || 1) + 0.1; G.gov.popBank += 0.4 + r.el * 0.08; addPin(r.id, 'map', 'Visita istituzionale'); return `Visita in ${r.n}`; },
-  tour: () => { const r = REGIONS_DEF.filter(x => !(G.tour || []).includes(x.id)).sort((a, b) => b.el - a.el)[0] || pick(REGIONS_DEF); ensureStory(); G.tour.push(r.id); G.myReg[r.id] = (G.myReg[r.id] || 1) + 0.2; myParty().spinta += 0.25 * Math.sqrt(r.el); addPin(r.id, 'bus', 'Tappa del tour'); return `Tappa del tour in ${r.n}`; },
+  poteri: () => { const gk = GROUPS[routineTarget('poteri')] ? routineTarget('poteri') : Object.keys(GROUPS).sort((a, b) => G.groups[a] - G.groups[b])[0]; G.groups[gk] = clamp(G.groups[gk] + Math.round(6 + G.player.car * 0.6), -100, 100); if (POWER_RIVAL[gk]) G.groups[POWER_RIVAL[gk]] -= 2; return `Incontro con ${GROUPS[gk].n}`; },
+  visita: () => { const r = REGIONS_DEF.find(x => x.id === routineTarget('visita')) || REGIONS_DEF.slice().sort((a, b) => (b.el / (G.myReg[b.id] || 1)) - (a.el / (G.myReg[a.id] || 1)))[0]; G.myReg[r.id] = (G.myReg[r.id] || 1) + 0.1; G.gov.popBank += 0.4 + r.el * 0.08; addPin(r.id, 'map', 'Visita istituzionale'); return `Visita in ${r.n}`; },
+  tour: () => { const r = REGIONS_DEF.find(x => x.id === routineTarget('tour')) || REGIONS_DEF.filter(x => !(G.tour || []).includes(x.id)).sort((a, b) => b.el - a.el)[0] || pick(REGIONS_DEF); ensureStory(); G.tour.push(r.id); G.myReg[r.id] = (G.myReg[r.id] || 1) + 0.2; myParty().spinta += 0.25 * Math.sqrt(r.el); addPin(r.id, 'bus', 'Tappa del tour'); return `Tappa del tour in ${r.n}`; },
   discorso: () => { const S = SPEECH.nazione; let maj = 0; S.rounds.forEach(rd => { const o = rd.o.slice().sort((a, b) => (b.maj + b.opp) - (a.maj + a.opp))[0]; applyFx(o.fx); maj += o.maj; }); applyFx({ fama: 2 }); return `Discorso alla nazione${maj >= 4 ? ': ovazione' : ''}`; },
 };
+
+// ---------- azioni ricorrenti: scegli tu il bersaglio, o lascia decidere il gioco ----------
+const routineTarget = id => { const t = G.routine && G.routine[id]; return t && t !== 1 && t !== 'auto' ? t : null; };
+const ROUTINE_PICK = {
+  incontro: { q: 'Chi incontrare', auto: 'l’alleato con cui il rapporto è più freddo; senza alleati, il partito più vicino a te', opts: () => PIDS().filter(p => p !== myPid()).map(p => [p, `${P(p).short} · ${leaderName(p)}`]) },
+  poteri: { q: 'Quale potere', auto: 'quello con cui il rapporto è peggiore', opts: () => Object.keys(GROUPS).map(k => [k, GROUPS[k].n]) },
+  comizio: { q: 'In quale regione', auto: 'dove ci sono più elettori e sei meno radicato', opts: () => REGIONS_DEF.map(r => [r.id, r.n]) },
+  visita: { q: 'In quale regione', auto: 'dove ci sono più elettori e sei meno radicato', opts: () => REGIONS_DEF.map(r => [r.id, r.n]) },
+  tour: { q: 'In quale regione', auto: 'la regione più popolosa non ancora visitata', opts: () => REGIONS_DEF.map(r => [r.id, r.n]) },
+  tv: { q: 'In quale programma', auto: 'il più seguito tra quelli vicini alle tue idee', opts: () => TALKSHOWS.map(s => [s.n, `${s.n} · ${s.ch}`]) },
+};
+function routinePickerHTML(id) {
+  const R = ROUTINE_PICK[id]; if (!R) return '';
+  const cur = routineTarget(id) || 'auto';
+  return `<div class="mt" style="padding:0 2px 4px"><label class="lbl" style="margin-top:0">${R.q}</label><select onchange="setRoutineTarget('${id}', this.value)"><option value="auto" ${cur === 'auto' ? 'selected' : ''}>Scelta automatica</option>${R.opts().map(([v, n]) => `<option value="${esc(v)}" ${cur === v ? 'selected' : ''}>${esc(n)}</option>`).join('')}</select><div class="tiny muted" style="margin-top:6px">${cur === 'auto' ? `In automatico sceglie ${R.auto}.` : 'Ogni settimana andrà sempre qui.'}</div></div>`;
+}
+function setRoutineTarget(id, v) { G.routine = G.routine || {}; G.routine[id] = v === 'auto' ? 1 : v; vib(6); closeSheet(); openAction(id); }
+
+// ---------- rinominare la propria coalizione ----------
+function renameCoalition(cid) {
+  const c = G.coalitions.find(x => x.id === cid); if (!c) return;
+  openSheet(`${head('Nome della coalizione')}<label class="lbl">Nuovo nome</label><input id="coalname" maxlength="40" value="${esc(c.name)}"><button class="btn gold block mt2" onclick="saveCoalitionName('${cid}')">${icon('check')} Salva</button>`);
+}
+function saveCoalitionName(cid) {
+  const c = G.coalitions.find(x => x.id === cid), v = (document.getElementById('coalname').value || '').trim();
+  if (!c || !v) return toast('Scrivi un nome', 'bad');
+  addNews(`${c.name} cambia nome: ora si chiama «${v}».`, 'mio'); c.name = v;
+  closeSheet(); renderGame(); toast('Nome della coalizione aggiornato', 'good');
+}
 
 </script>
 <script>

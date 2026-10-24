@@ -416,7 +416,7 @@ function alleanzeHTML() {
   G.coalitions.forEach(c => {
     const s = c.members.reduce((t, m) => t + (G.parties[m] ? P(m).poll : 0), 0);
     const mine = c.members.includes(myPid());
-    h += `<div class="card"><div class="row between"><h3>${esc(c.name)}</h3><b class="gold" style="font-size:20px;font-weight:800">${fmt1(s)}%</b></div><div class="row wrap mt" style="gap:4px">${c.members.map(partyChip).join('')}</div><div class="small muted mt">Candidato premier: ${c.cand === 'PLAYER' ? '<b class="gold">tu</b>' : esc(c.cand || 'primarie da svolgere')}</div>`;
+    h += `<div class="card"><div class="row between"><h3>${esc(c.name)}${c.mine && c.members.includes(myPid()) && isLeader() ? ` <button class="btn sm" style="min-height:28px;padding:0 10px;vertical-align:middle" onclick="renameCoalition('${c.id}')">${icon('edit', 14)} Rinomina</button>` : ''}</h3><b class="gold" style="font-size:20px;font-weight:800">${fmt1(s)}%</b></div><div class="row wrap mt" style="gap:4px">${c.members.map(partyChip).join('')}</div><div class="small muted mt">Candidato premier: ${c.cand === 'PLAYER' ? '<b class="gold">tu</b>' : esc(c.cand || 'primarie da svolgere')}</div>`;
     if (isLeader() && !locked) {
       if (!mine && !myC) { const big = c.members.slice().sort((a, b) => P(b).poll - P(a).poll)[0]; h += `<button class="btn pri block mt" onclick="openDeal('${big}','${c.id}')">${icon('hands')} Tratta per entrare in ${esc(c.name)}</button>`; }
       if (mine) {
