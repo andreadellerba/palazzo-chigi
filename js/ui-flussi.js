@@ -739,7 +739,7 @@ function renderConsultazioni() {
     const mem = winner.members.filter(m => G.parties[m]);
     const meIn = mem.includes(myPid());
     if (winner.cand === 'PLAYER' && isLeader()) {
-      h += `<div class="card hero center">${medal('crown', 64)}<h3 class="mt">${esc(winner.name)} ha la maggioranza</h3><p class="muted small">${esc(INSTITUTIONS.pdr)} ti affida l’incarico di formare il governo.</p><button class="btn gold block" onclick="acceptIncarico(${JSON.stringify(mem).replace(/"/g, '&quot;')})">Accetto con riserva ›</button></div>`;
+      h += `<div class="card hero center">${medal('crown', 64)}<h3 class="mt">${esc(winner.name)} ha la maggioranza</h3><p class="muted small">${esc(INSTITUTIONS.pdr)} ti affida l’incarico di formare il governo.</p><button class="btn gold block" onclick="acceptIncarico(${JSON.stringify(mem).replace(/"/g, '&quot;')})">Accetto con riserva ›</button><button class="btn block mt" onclick="openOtherPremier(${JSON.stringify(mem).replace(/"/g, '&quot;')})">${icon('swap')} Indica un altro premier</button></div>`;
     } else {
       const big = mem.slice().sort((a, b) => seatsOf(b, 'C') - seatsOf(a, 'C'))[0];
       const premier = winner.cand && winner.cand !== 'PLAYER' ? winner.cand : P(big).leader;

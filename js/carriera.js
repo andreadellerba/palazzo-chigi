@@ -153,3 +153,34 @@ ACTIONS.splice(ACTIONS.findIndex(a => a.id === 'riposo'), 0,
   { id: 'dimmin', n: 'Dimettiti da ministro', ico: 'door', cost: 0, show: () => !!G.player.minister && !isPremier(), d: 'Lasci il ministero per protesta, per coerenza o per dedicarti alla tua corsa.', risk: 'Perdi il ministero', custom: () => openResignMin() },
   { id: 'sonda', n: 'Sonda un altro partito', ico: 'phone', cost: 2, show: () => !isLeader() && G.player.fama >= 15, d: 'Una telefonata riservata con un partito vicino: senti cosa ti offrirebbe per passare con lui.', risk: '20% che finisca sui giornali', custom: () => openSonda() });
 ROUTINE_NO.push('dimmin', 'sonda');
+
+// ---------- indicare un altro premier quando l'incarico spetta a te ----------
+const TECNICI = ['Mario Draghi', 'Daniele Franco', 'Marta Cartabia', 'Elisabetta Belloni', 'Carlo Cottarelli', 'Fabio Panetta', 'Lucrezia Reichlin'];
+function openOtherPremier(mem) {
+  window._opMem = mem;
+  const me = myPid(), allies = mem.filter(p => p !== me && G.parties[p]).sort((a, b) => seatsOf(b, 'C') - seatsOf(a, 'C'));
+  const mates = allPeople().filter(x => x.party === me && !x.isPlayer && x.name !== G.player.name).sort((a, b) => b.comp - a.comp).slice(0, 3);
+  const tech = TECNICI.filter(t => !Object.values(G.gov ? G.gov.ministers : {}).includes(t)).slice(0, 3);
+  const row = (fn, arg, t, d) => `<button class="choice" onclick="${fn}('${arg}')"><div class="t">${esc(t)}</div><div class="small muted">${d}</div></button>`;
+  openSheet(`${head('Indica un altro premier', 'Tu resti leader e puoi entrare nel governo')}
+    ${allies.length ? sec('Un leader alleato') + allies.map(p => row('otherPremier', 'a:' + p, `${P(p).leader} (${P(p).short})`, `L’alleato è felice e il rapporto migliora molto. Tu puoi fare il vicepremier.`)).join('') : ''}
+    ${mates.length ? sec(`Una persona di ${esc(myParty().short)}`) + mates.map(x => row('otherPremier', 'm:' + x.name.replace(/'/g, '’'), x.name, `Competenza ${x.comp}/10. Il governo resta in mano al tuo partito, ma il premier non sei tu.`)).join('') : ''}
+    ${sec('Un tecnico esterno') + tech.map(t => row('otherPremier', 't:' + t, t, 'Mercati, Europa e Quirinale apprezzano: spread giù. Agli elettori piace meno.')).join('')}
+    <button class="btn block mt2" onclick="closeSheet()">Torna indietro</button>`);
+}
+function otherPremier(code) {
+  const mem = window._opMem, me = myPid(), kind = code[0], v = code.slice(2), p = G.player;
+  let name, party, note;
+  if (kind === 'a') { name = P(v).leader; party = v; }
+  else if (kind === 'm') { name = (allPeople().find(x => x.name.replace(/'/g, '’') === v) || { name: v }).name; party = me; }
+  else { name = v; party = null; }
+  formAIGovernment(mem, name, party, kind === 't');
+  if (kind === 'a') { addRel(v, me, 15); G.gov.sat[v] = clamp((G.gov.sat[v] || 60) + 15, 0, 100); applyFx({ fama: 2, cred: 2 }); note = `${name} ti ringrazia: «Un gesto di generosità che non dimenticherò».`; if (typeof remember === 'function') remember(v, 'Ti ha lasciato Palazzo Chigi', 2, 'favore'); }
+  else if (kind === 'm') { G.gov.sat[me] = 88; note = `${name} guida il governo, ma la linea la detti tu da leader di ${esc(myParty().short)}.`; }
+  else { applyFx({ spread: -15, grp: { merc: 8, quir: 8, ue: 5 }, my: -1 }); note = 'I mercati festeggiano, i tuoi elettori un po’ meno.'; }
+  G.player.fama = clamp(p.fama + 3, 0, 100);
+  addNews(`${p.name} rinuncia a Palazzo Chigi e indica ${name} come Presidente del Consiglio.`, 'mio');
+  G.careerLog.push({ w: G.week, t: `Rinunci alla premiership e indichi ${name}` });
+  closeSheet(true); renderGame();
+  toast(note, 'good'); setTimeout(() => offerMinistry(), 400);
+}
