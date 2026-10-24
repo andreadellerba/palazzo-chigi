@@ -283,6 +283,13 @@ const TALKSHOWS = [
   { n: 'Cachemire Podcast', ch: 'Podcast', lean: -0.2, reach: 1, t: 'podcast' },
   { n: 'Live su Twitch', ch: 'Twitch', lean: -0.2, reach: 2, t: 'live' }, { n: 'Diretta YouTube', ch: 'Il tuo canale', lean: 0, reach: 1, t: 'live' },
   { n: 'Diretta Instagram', ch: 'Instagram', lean: 0, reach: 2, t: 'live' }, { n: 'Live su TikTok', ch: 'TikTok', lean: 0, reach: 2, t: 'live' },
+  { n: 'Spazio su X', ch: 'X', lean: 0.2, reach: 1, t: 'live' }, { n: 'Diretta Facebook', ch: 'Facebook', lean: 0.3, reach: 2, t: 'live' }, { n: 'Domande e risposte', ch: 'Storie Instagram', lean: 0, reach: 2, t: 'live' },
+  // giornali e siti
+  { n: 'Corriere della Sera', ch: 'Intervista in prima pagina', lean: 0.1, reach: 3, t: 'carta' }, { n: 'la Repubblica', ch: 'Intervista', lean: -0.5, reach: 2, t: 'carta' },
+  { n: 'Fanpage', ch: 'Video intervista', lean: -0.3, reach: 3, t: 'carta' }, { n: 'Il Fatto Quotidiano', ch: 'Intervista', lean: -0.4, reach: 2, t: 'carta' },
+  { n: 'Il Giornale', ch: 'Intervista', lean: 0.7, reach: 2, t: 'carta' }, { n: 'La Stampa', ch: 'Intervista', lean: -0.1, reach: 2, t: 'carta' },
+  { n: 'Il Sole 24 Ore', ch: 'Intervista', lean: 0.2, reach: 1, t: 'carta' }, { n: 'Libero', ch: 'Intervista', lean: 0.8, reach: 1, t: 'carta' },
+  { n: 'Open', ch: 'Sito', lean: -0.1, reach: 2, t: 'carta' }, { n: 'Il Post', ch: 'Sito', lean: -0.2, reach: 1, t: 'carta' }, { n: 'TPI', ch: 'Sito', lean: -0.3, reach: 1, t: 'carta' },
 ];
 
 // Percorsi di provenienza del tuo personaggio

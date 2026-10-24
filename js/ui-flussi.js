@@ -201,9 +201,9 @@ function togglePromise(id, opt) {
 let TVS = null;
 function openTV(show, debate) {
   if (show) return startInterview(show, debate);
-  const row = (s, i) => `<div class="li click" onclick="closeSheet();startInterview(TALKSHOWS[${i}])"><span class="nico">${icon(s.t === 'podcast' ? 'mic' : s.t === 'live' ? 'phone' : 'tv')}</span><div class="grow"><b>${esc(s.n)}</b><div class="tiny muted">${esc(s.ch)} · pubblico ${s.t ? 'giovane' : s.lean < -0.3 ? 'progressista' : s.lean > 0.3 ? 'conservatore' : 'generalista'} · ${'★'.repeat(s.reach)}</div></div>${icon('chevron', 16)}</div>`;
+  const row = (s, i) => `<div class="li click" onclick="closeSheet();startInterview(TALKSHOWS[${i}])"><span class="nico">${icon(s.t === 'podcast' ? 'mic' : s.t === 'live' ? 'phone' : s.t === 'carta' ? 'news' : 'tv')}</span><div class="grow"><b>${esc(s.n)}</b><div class="tiny muted">${esc(s.ch)} · pubblico ${s.t === 'podcast' || s.t === 'live' ? 'giovane' : s.lean < -0.3 ? 'progressista' : s.lean > 0.3 ? 'conservatore' : 'generalista'} · ${'★'.repeat(s.reach)}</div></div>${icon('chevron', 16)}</div>`;
   const grp = (t, title) => sec(title) + `<div class="card tight"><div class="list">${TALKSHOWS.map((s, i) => (s.t || 'tv') === t ? row(s, i) : '').join('')}</div></div>`;
-  openSheet(`${head('Dove vai a parlare?', 'TV, podcast o una diretta tutta tua')}${grp('tv', 'In TV')}${grp('podcast', 'Podcast')}${grp('live', 'Dirette social')}`);
+  openSheet(`${head('Dove vai a parlare?', 'TV, giornali, podcast o social')}${grp('tv', 'In TV')}${grp('carta', 'Giornali e siti')}${grp('podcast', 'Podcast')}${grp('live', 'Social')}`);
 }
 function startInterview(show, debate) {
   const cost = debate ? 2 : (isPremier() ? 2 : 1);
