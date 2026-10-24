@@ -642,6 +642,7 @@ html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolut
 .tune-rail { position: relative; padding: 6px 0; }
 .tune-rail input { width: 100%; accent-color: var(--oro); height: 26px; margin: 0; }
 .tune-rail .now { position: absolute; top: 0; width: 2px; height: 8px; margin-left: -1px; background: var(--muted); border-radius: 1px; pointer-events: none; }
+.choice.on { border-color: var(--oro); box-shadow: 0 0 0 1px var(--oro) inset; }
 
 </style>
 </head>
@@ -3257,8 +3258,9 @@ function challengeLeader() {
 function doScissione(cfg) {
   const p = G.player, old = myPid(), op = P(old);
   const share = clamp(op.poll * (p.seguito / 100) * 0.45 + p.fama * 0.04, 0.5, op.poll * 0.6);
-  const takeC = p.parl === 'C' ? Math.max(1, Math.round(op.seatsC * p.seguito / 100 * 0.5)) : Math.round(op.seatsC * p.seguito / 100 * 0.15);
-  const takeS = p.parl === 'S' ? Math.max(1, Math.round(op.seatsS * p.seguito / 100 * 0.5)) : Math.round(op.seatsS * p.seguito / 100 * 0.15);
+  const inv = G.flags && G.flags.scInvite && G.week <= G.flags.scInvite ? 1.6 : 1; if (G.flags) G.flags.scInvite = 0;
+  const takeC = Math.round((p.parl === 'C' ? Math.max(1, Math.round(op.seatsC * p.seguito / 100 * 0.5)) : Math.round(op.seatsC * p.seguito / 100 * 0.15)) * inv);
+  const takeS = Math.round((p.parl === 'S' ? Math.max(1, Math.round(op.seatsS * p.seguito / 100 * 0.5)) : Math.round(op.seatsS * p.seguito / 100 * 0.15)) * inv);
   G.parties.MIO = { id: 'MIO', name: cfg.name, short: cfg.short, color: cfg.color, symbol: cfg.symbol, leader: p.name, lCar: p.car, lComp: p.comp, area: 'Il tuo partito', family: '—',
     ax: Object.assign({}, p.ax), geo: Object.assign({}, op.geo), rx: Object.assign({}, op.rx), poll: share, base: share, base0: share, spinta: 3, seatsC: Math.min(takeC, op.seatsC), seatsS: Math.min(takeS, op.seatsS), coal: null, mine: true };
   op.seatsC -= G.parties.MIO.seatsC; op.seatsS -= G.parties.MIO.seatsS; op.poll -= share * 0.85; op.base = Math.max(0.5, op.base - share * 0.8); op.base0 = Math.max(0.5, op.base0 - share * 0.8);
@@ -3272,12 +3274,28 @@ function doScissione(cfg) {
   for (let i = 0; i < 4; i++) G.myPeople.push({ name: randomName(), party: 'MIO', comp: irnd(4, 7), scandal: irnd(1, 5), pref: pick(MINISTRIES).id });
   // via dalla coalizione e dal governo
   G.coalitions.forEach(c => { c.members = c.members.filter(m => m !== 'MIO'); });
-  if (G.gov && G.gov.parties.includes(old)) {
-    if (p.minister) { delete G.gov.ministers[p.minister]; p.minister = null; }
-    if (chance(0.5) && G.gov.premier !== 'PLAYER') { G.gov.parties.push('MIO'); G.gov.sat.MIO = 40; addNews(`${cfg.name} resta in maggioranza con appoggio critico.`, 'parl'); }
+  let govNote = '';
+  if (G.gov && G.gov.parties.includes(old) && G.gov.premier !== 'PLAYER') {
+    const wasMin = p.minister, seats = G.parties.MIO.seatsC + G.parties.MIO.seatsS;
+    const loseMin = () => { if (p.minister) { if (typeof replaceMinister === 'function') replaceMinister(p.minister, old); else delete G.gov.ministers[p.minister]; p.minister = null; } };
+    if (cfg.stay === false) {
+      loseMin(); applyFx({ fama: 5 }); addRel(G.gov.premierParty, 'MIO', -15);
+      addNews(`${cfg.name} nasce all’opposizione${wasMin ? `: ${p.name} lascia il governo` : ''}.`, 'parl');
+      govNote = wasMin ? 'Hai lasciato il ministero: ora sei all’opposizione.' : 'Il nuovo partito sta all’opposizione.';
+    } else if (cfg.stay && wasMin) {
+      const ok = chance(clamp(0.35 + seats / 40 + rel(G.gov.premierParty, old) / 400 - (old === G.gov.premierParty ? 0.25 : 0), 0.1, 0.9));
+      G.gov.parties.push('MIO'); G.gov.sat.MIO = ok ? 55 : 35;
+      if (ok) { addNews(`${cfg.name} entra in maggioranza: ${p.name} resta ministr${p.art === 'la' ? 'a' : 'o'} (${MIN_BY_ID[wasMin].n}).`, 'parl'); govNote = `${G.gov.premier} accetta: resti al ministero e il tuo partito entra in maggioranza.`; }
+      else { loseMin(); addNews(`${G.gov.premier} non conferma ${p.name} al ministero: ${cfg.name} resta in maggioranza ma senza poltrone.`, 'parl'); govNote = `${G.gov.premier} non ti conferma: perdi il ministero, ma il partito resta in maggioranza con appoggio esterno.`; }
+      if (old === G.gov.premierParty || inGov(old)) G.gov.sat[old] = clamp((G.gov.sat[old] || 50) - 12, 0, 100);
+    } else {
+      loseMin();
+      if (chance(0.5)) { G.gov.parties.push('MIO'); G.gov.sat.MIO = 40; addNews(`${cfg.name} resta in maggioranza con appoggio critico.`, 'parl'); }
+    }
   }
   addNews(`SCISSIONE in ${op.name}: ${p.name} fonda «${cfg.name}». Con te ${G.parties.MIO.seatsC} deputati e ${G.parties.MIO.seatsS} senatori.`, 'mio');
   G.careerLog.push({ w: G.week, t: `Scissione: fondi ${cfg.name}` });
+  return govNote;
 }
 
 // ============================================================
@@ -3310,6 +3328,10 @@ function runPrimarie() {
   if (c.members.includes(myPid()) && (isLeader() || G.player.fama >= 30) && G.primarie && G.primarie.player) {
     cands.push({ name: G.player.name, party: myPid(), score: Math.sqrt(Math.max(0.5, myParty().poll)) * G.player.car * (0.7 + G.player.fama / 100) + (G.primarie.boost || 0), player: true });
   }
+  // nessuno in corsa (per esempio guidi tu il PD): corre il leader del partito più grande, o tu se sei leader
+  if (!cands.length && c.members.includes(myPid()) && isLeader()) cands.push({ name: G.player.name, party: myPid(), score: 10, player: true });
+  if (!cands.length && c.members.length) { const big = c.members.slice().sort((a, b) => P(b).poll - P(a).poll)[0]; cands.push({ name: P(big).leader, party: big, score: 10 }); }
+  if (!cands.length) { G.primarie = Object.assign(G.primarie || {}, { done: true, res: [] }); return null; }
   let tot = 0; cands.forEach(x => { x.v = Math.max(1, x.score + gauss() * 3); tot += x.v; });
   cands.forEach(x => { x.pct = x.v / tot * 100; });
   cands.sort((a, b) => b.pct - a.pct);
@@ -4592,7 +4614,7 @@ const EVENTS = [
       { t: 'Candidarti', fx: { stress: 6, funds: -10 }, r: '', run: () => { const p = G.player; const ok = chance(clamp(0.2 + p.fama / 120 + regionShares(p.region)[myPid()] / 50 + p.rap / 300, 0.05, 0.85)); if (ok) { p.rank = Math.max(p.rank, 3); p.parl = 'C'; myParty().seatsC++; addNews(`${p.name} vince le elezioni suppletive ed entra alla Camera!`, 'good'); G.careerLog.push({ w: G.week, t: 'Eletto alle suppletive' }); } else { p.fama += 3; addNews(`${p.name} perde le suppletive, ma si fa conoscere.`, 'bad'); } } },
       { t: 'Lasciare spazio ad altri', fx: { rap: 5 }, r: 'Il partito apprezza lo spirito di squadra.' },
     ] },
-  { id: 'offerta_altro_partito', for: 'member', w: 1, cool: 40, cond: () => G.player.fama > 25, prep: () => { const ps = PIDS().filter(p => p !== myPid() && compat(p, myPid()) > 40); return ps.length ? { p: pick(ps) } : null; }, img: 'phone', title: c => `${P(c.p).leader} ti corteggia`,
+  { id: 'offerta_altro_partito', for: 'member', w: 1, cool: 40, cond: () => G.player.fama > 25, prep: () => { const ps = typeof nearParties === 'function' ? nearParties() : []; return ps.length ? { p: pick(ps) } : null; }, img: 'phone', title: c => `${P(c.p).leader} ti corteggia`,
     text: c => `${P(c.p).leader} ti offre un ruolo di primo piano se passi a ${P(c.p).name}.`,
     choices: c => [
       { t: 'Accettare e cambiare partito', fx: { cred: -6, fama: 4 }, r: '', run: () => { const p = G.player, old = myPid(); addRel(old, c.p, -8); G.player.party = c.p; p.rank = Math.max(3, Math.min(p.rank, 5)); p.rap = 30; p.seguito = 5; if (p.parl) { const k = p.parl === 'C' ? 'seatsC' : 'seatsS'; P(old)[k]--; P(c.p)[k]++; } addNews(`${p.name} lascia ${P(old).short} e passa a ${P(c.p).short}.`, 'mio'); G.careerLog.push({ w: G.week, t: `Passi a ${P(c.p).short}` }); } },
@@ -6441,7 +6463,7 @@ function alleanzeHTML() {
   G.coalitions.forEach(c => {
     const s = c.members.reduce((t, m) => t + (G.parties[m] ? P(m).poll : 0), 0);
     const mine = c.members.includes(myPid());
-    h += `<div class="card"><div class="row between"><h3>${esc(c.name)}${c.mine && c.members.includes(myPid()) && isLeader() ? ` <button class="btn sm" style="min-height:28px;padding:0 10px;vertical-align:middle" onclick="renameCoalition('${c.id}')">${icon('edit', 14)} Rinomina</button>` : ''}</h3><b class="gold" style="font-size:20px;font-weight:800">${fmt1(s)}%</b></div><div class="row wrap mt" style="gap:4px">${c.members.map(partyChip).join('')}</div><div class="small muted mt">Candidato premier: ${c.cand === 'PLAYER' ? '<b class="gold">tu</b>' : esc(c.cand || 'primarie da svolgere')}</div>`;
+    h += `<div class="card"><div class="row between"><h3>${esc(c.name)}${c.mine && c.members.includes(myPid()) && isLeader() ? ` <button class="btn sm" style="min-height:28px;padding:0 10px;vertical-align:middle" onclick="renameCoalition('${c.id}')" aria-label="Rinomina">${icon('edit', 14)}</button>` : ''}</h3><b class="gold" style="font-size:20px;font-weight:800">${fmt1(s)}%</b></div><div class="row wrap mt" style="gap:4px">${c.members.map(partyChip).join('')}</div><div class="small muted mt">Candidato premier: ${c.cand === 'PLAYER' ? '<b class="gold">tu</b>' : esc(c.cand || 'primarie da svolgere')}</div>`;
     if (isLeader() && !locked) {
       if (!mine && !myC) { const big = c.members.slice().sort((a, b) => P(b).poll - P(a).poll)[0]; h += `<button class="btn pri block mt" onclick="openDeal('${big}','${c.id}')">${icon('hands')} Tratta per entrare in ${esc(c.name)}</button>`; }
       if (mine) {
@@ -6615,7 +6637,8 @@ const ACTIONS = [
   { id: 'scissione', n: 'Fonda il tuo partito', ico: 'split', cost: 6, show: () => !isLeader() && G.player.rank >= 2, d: 'Lasci il partito e ne fondi uno tuo, portando con te chi ti segue. Come Vannacci con Futuro Nazionale.', risk: 'Rottura definitiva con il vecchio partito', custom: () => openScissione() },
   { id: 'riposo', n: 'Weekend di riposo', ico: 'sun', cost: 0, show: () => true, fx: { stress: -15 }, d: 'Spegni il telefono. Perdi il capitale politico rimasto.', run: () => { applyFx({ stress: -15, salute: 3 }); G.pc = 0; return 'Torni con le idee più chiare.'; } },
 ];
-function actionCost(a) { return a.id === 'tv' && isPremier() ? 2 : a.cost; }
+const scInvite = () => !!(G.flags && G.flags.scInvite && G.week <= G.flags.scInvite);
+function actionCost(a) { return a.id === 'tv' && isPremier() ? 2 : a.id === 'scissione' && scInvite() ? 3 : a.cost; }
 const ACT_COLORS = ['#38bdf8', '#a78bfa', '#fb923c', '#22c55e', '#f472b6', '#facc15', '#2dd4bf', '#f87171', '#818cf8', '#4ade80'];
 // ogni azione una volta a settimana
 const usedThisWeek = id => G.usedActs && G.usedActs[id] === G.week;
@@ -6996,6 +7019,7 @@ function promote(rank) {
   return t;
 }
 function openCandidatura() {
+  if (G.player.listPromise === myPid()) { G.player.candidate = 'capolista'; G.player.listPromise = null; return choiceCard('clipboard', 'Le liste per le politiche', `Come promesso quando sei passat${G.player.art === 'la' ? 'a' : 'o'} a ${esc(myParty().short)}, sei capolista in ${regionName(G.player.region)}.`, [{ t: 'Perfetto', f: () => 'Elezione quasi sicura.' }]); }
   const p = G.player;
   choiceCard('clipboard', 'Le liste per le politiche', `${esc(myParty().leader)} chiude le liste. Che posto chiedi in ${regionName(p.region)}?`, [
     { t: `Chiedere il posto da capolista (serve un ottimo rapporto: oggi ${fmt0(p.rap)})`, f: () => { if (p.rap >= 40 || (p.rap >= 25 && chance(0.4))) { p.candidate = 'capolista'; return 'Sei capolista: elezione quasi sicura.'; } p.candidate = 'pref'; applyFx({ rap: -5 }); return 'Il leader preferisce un fedelissimo: corri con le preferenze.'; } },
@@ -7005,10 +7029,10 @@ function openCandidatura() {
 }
 function openPrimarie() {
   const c = G.coalitions.find(x => x.id === 'csx');
-  if (!c || !c.members.includes(myPid()) || (!isLeader() && G.player.fama < 30)) { const res = runPrimarie(); if (!res) { G.queue.shift(); return processQueue(); } return specialCard('vote', 'Primarie del Campo largo', res.map(x => `${esc(x.player ? G.player.name : x.name)} <b>${fmt1(x.pct)}%</b>`).join(' · ')); }
+  if (!c || !c.members.includes(myPid()) || (!isLeader() && G.player.fama < 30)) { const res = runPrimarie(); if (!res || !res.length) { G.queue.shift(); return processQueue(); } return specialCard('vote', 'Primarie del Campo largo', res.map(x => `${esc(x.player ? G.player.name : x.name)} <b>${fmt1(x.pct)}%</b>`).join(' · ')); }
   choiceCard('vote', 'Primarie del Campo largo', `Il centrosinistra sceglie il candidato premier con le primarie. In corsa ${esc(P('PD').leader)} e ${esc(P('M5S').leader)}.${G.primarie && G.primarie.player ? ' Sei già in corsa.' : ' Vuoi candidarti?'}`, [
-    { t: G.primarie && G.primarie.player ? 'Si vota!' : 'Candidarmi e sfidarli', f: () => { G.primarie = Object.assign(G.primarie || {}, { player: true }); G.primarie.boost = (G.primarie.boost || 0) + G.player.car * 0.5; const res = runPrimarie(); const w = res[0]; if (w.player) confetti(); return res.map(x => `${esc(x.player ? 'Tu' : x.name)}: ${fmt1(x.pct)}%`).join('<br>') + (w.player ? '<br><b class="gold">Sei il candidato premier del Campo largo!</b>' : ''); } },
-    { t: 'Sostenere un candidato', f: () => { if (G.primarie) G.primarie.player = false; const res = runPrimarie(); return res.map(x => `${esc(x.name)}: ${fmt1(x.pct)}%`).join('<br>'); } },
+    { t: G.primarie && G.primarie.player ? 'Si vota!' : 'Candidarmi e sfidarli', f: () => { G.primarie = Object.assign(G.primarie || {}, { player: true }); G.primarie.boost = (G.primarie.boost || 0) + G.player.car * 0.5; const res = runPrimarie(); if (!res || !res.length) return 'Le primarie sono già state decise.'; const w = res[0]; if (w.player) confetti(); return res.map(x => `${esc(x.player ? 'Tu' : x.name)}: ${fmt1(x.pct)}%`).join('<br>') + (w.player ? '<br><b class="gold">Sei il candidato premier del Campo largo!</b>' : ''); } },
+    { t: 'Sostenere un candidato', f: () => { if (G.primarie) G.primarie.player = false; const res = runPrimarie(); if (!res || !res.length) return 'Le primarie sono già state decise.'; return res.map(x => `${esc(x.name)}: ${fmt1(x.pct)}%`).join('<br>'); } },
   ]);
 }
 
@@ -7162,21 +7186,26 @@ function openScissione() {
   const p = G.player;
   if (p.fama < 20) { openSheet(`${head('Troppo presto')}<p class="muted">Con una fama di ${fmt0(p.fama)} nessuno ti seguirebbe. Servono almeno 20 punti.</p>`); return; }
   const est = clamp(myParty().poll * (p.seguito / 100) * 0.45 + p.fama * 0.04, 0.5, myParty().poll * 0.6);
-  window._sc = { name: '', short: '', symbol: 'crown', color: PARTY_COLORS[3] };
+  window._sc = { name: '', short: '', symbol: 'crown', color: PARTY_COLORS[3], stay: true };
+  const asMin = p.minister && G.gov && G.gov.premier !== 'PLAYER' && inGov(myPid()), cost = scInvite() ? 3 : 6;
   openSheet(`${head('Fonda il tuo partito', `Lasci ${esc(myParty().name)}`)}
     ${proConHTML({ pro: [{ k: 'pol', t: `Guidi tu: decidi linea e alleanze` }, { k: 'pop', t: `Partenza stimata: circa ${fmt1(est)}%` }, { k: 'pol', t: `Ti seguono parlamentari in base al tuo seguito (${fmt0(p.seguito)}%)` }], contro: [{ k: 'pol', t: `Rottura con ${myParty().short} (rapporto −60)` }, { k: 'per', t: 'Pochi fondi e organizzazione da costruire' }] }, { noParties: true })}
     <label class="lbl">Nome del nuovo partito</label><input oninput="_sc.name=this.value" placeholder="Es. Rinascita Nazionale">
     <label class="lbl">Sigla</label><input maxlength="6" oninput="_sc.short=this.value.toUpperCase()">
     <label class="lbl">Simbolo</label><div class="symgrid">${SYMBOLS.map(s => `<button onclick="_sc.symbol='${s}';this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));this.classList.add('on')">${icon(s)}</button>`).join('')}</div>
     <label class="lbl">Colore</label><div class="colgrid">${PARTY_COLORS.map(c => `<button style="background:${c}" onclick="_sc.color='${c}';this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));this.classList.add('on')"></button>`).join('')}</div>
-    <button class="btn red block mt2" onclick="confirmScissione()">Rompi e fonda il partito · ⚡6</button>`);
+    ${asMin ? `<label class="lbl">Sei ministr${p.art === 'la' ? 'a' : 'o'} (${esc(MIN_BY_ID[p.minister].n)}): e il governo?</label><div class="seg2">
+      <button class="choice on" onclick="_sc.stay=true;this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));this.classList.add('on')"><div class="t">Resto in maggioranza</div><div class="small muted">Chiedi a ${esc(G.gov.premier)} di tenerti al ministero: servono i tuoi parlamentari.</div></button>
+      <button class="choice" onclick="_sc.stay=false;this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));this.classList.add('on')"><div class="t">Lascio il governo</div><div class="small muted">Ti dimetti e passi all’opposizione: più visibilità, rottura totale.</div></button></div>` : ''}
+    ${scInvite() ? '<div class="tiny gold mt">Un gruppo di parlamentari ti ha chiesto di guidarli: costa meno e ti seguono in più.</div>' : ''}
+    <button class="btn red block mt2" onclick="confirmScissione()">Rompi e fonda il partito · ⚡${cost}</button>`);
 }
 function confirmScissione() {
   const s = window._sc; if (!s.name.trim() || !s.short.trim()) return toast('Nome e sigla obbligatori', 'bad');
-  if (!spendPC(6)) return toast('Capitale politico insufficiente', 'bad');
-  doScissione({ name: s.name.trim(), short: s.short.trim(), symbol: s.symbol, color: s.color });
+  if (!spendPC(scInvite() ? 3 : 6)) return toast('Capitale politico insufficiente', 'bad');
+  const govNote = doScissione({ name: s.name.trim(), short: s.short.trim(), symbol: s.symbol, color: s.color, stay: s.stay }) || '';
   closeSheet(); confetti(); renderGame();
-  resultSheet('rocket', `Nasce ${s.name}`, `Ora sei leader. Con te ${myParty().seatsC} deputati e ${myParty().seatsS} senatori. Primo sondaggio: ${fmt1(myParty().poll)}%.`);
+  resultSheet('rocket', `Nasce ${s.name}`, `Ora sei leader. Con te ${myParty().seatsC} deputati e ${myParty().seatsS} senatori. Primo sondaggio: ${fmt1(myParty().poll)}%.${govNote ? ' ' + govNote : ''}`);
 }
 
 // ============================================================
@@ -9225,6 +9254,7 @@ function renderTuner() {
   const sh = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null, st = sh ? sh.scrollTop : 0;
   const cats = Object.keys(LAW_CATS).filter(c => visibleLaws().some(l => l.cat === c && !l.custom && !l.cost));
   const busy = new Set(G.bills.filter(b => !b.dead && b.lawId).map(b => b.lawId));
+  if (!cats.includes(TUNE.cat)) TUNE.cat = cats[0];
   const S = tuneSummary();
   const fmtV = (k, v) => k === 'deficit' ? `${v > 0 ? '+' : ''}${fmt1(v)}% PIL` : k === 'spread' ? `${v > 0 ? '+' : ''}${fmt0(v)}` : k === 'consenso' ? `${v > 0 ? '+' : ''}${fmt1(v)}` : `${v > 0 ? '+' : ''}${(Math.round(v * 100) / 100).toString().replace('.', ',')}`;
   const rows = Object.keys(METRICS).map(k => { const v = S.raw[k]; if (Math.abs(v) < EFF_THR[k]) return ''; const good = (v > 0 ? 1 : -1) * METRICS[k].good > 0; return `<div class="tsum ${good ? 'g' : 'b'}">${icon(METRICS[k].ico, 16)}<span class="grow">${METRICS[k].n}</span><b>${v > 0 ? '▲' : '▼'} ${fmtV(k, v)}</b></div>`; }).join('');
@@ -9244,9 +9274,10 @@ function renderTuner() {
       <div class="row between tiny dim"><span>${esc(AXES[l.ax].l)}</span><span>oggi: ${esc(l.opts[cur].t)}</span><span>${esc(AXES[l.ax].r)}</span></div>
       ${changed ? effChipsHTML(effectsOf(l, cur, sel), lawGain(myPid(), l, cur, sel)) : ''}</div>`;
   });
-  const can = isPremier() || (isLeader() && (myParty().seatsC + myParty().seatsS > 0)) || G.player.parl;
+  const asMin = !isPremier() && !!G.player.minister && G.gov;
+  const can = isPremier() || asMin || (isLeader() && (myParty().seatsC + myParty().seatsS > 0)) || G.player.parl;
   const cost = S.n * 2;
-  h += can ? `<button class="btn gold block mt2" ${S.n ? '' : 'disabled'} onclick="submitTuner()">${icon('doc')} ${isPremier() ? 'Presenta il pacchetto del governo' : 'Presenta le proposte'} · ⚡${cost}</button><div class="tiny muted center mt">Ogni modifica diventa un ${isPremier() ? 'disegno di legge' : 'proposta di legge'} e passa da Camera e Senato.</div>`
+  h += can ? `<button class="btn gold block mt2" ${S.n ? '' : 'disabled'} onclick="submitTuner()">${icon('doc')} ${isPremier() ? 'Presenta il pacchetto del governo' : asMin ? 'Porta il pacchetto in Consiglio dei ministri' : 'Presenta le proposte'} · ⚡${cost}</button><div class="tiny muted center mt">${asMin ? `Il premier ${esc(G.gov.premier)} deve dare il via libera a ogni modifica; poi passa da Camera e Senato.` : `Ogni modifica diventa un ${isPremier() ? 'disegno di legge' : 'proposta di legge'} e passa da Camera e Senato.`}</div>`
     : `<div class="tiny muted center mt2">Per presentare le modifiche devi essere in Parlamento o guidare un partito con parlamentari. Puoi comunque provarle per vedere gli effetti.</div>`;
   replaceSheet(h);
   const s2 = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null; if (s2) s2.scrollTop = st;
@@ -9261,12 +9292,180 @@ function submitTuner() {
   const list = Object.entries(TUNE.ch).filter(([id, opt]) => opt !== G.laws[id] && !busy.has(id));
   if (!list.length) return toast('Nessuna modifica da presentare', 'bad');
   if (!spendPC(list.length * 2)) return toast('Capitale politico insufficiente', 'bad');
+  // da ministro passa dal Consiglio dei ministri: il premier può fermare le modifiche che non gli piacciono
+  if (!isPremier() && G.player.minister && G.gov) {
+    const ok = [], no = [];
+    list.forEach(([id, opt]) => { const l = getLaw(id); (lawGain(G.gov.premierParty, l, G.laws[id], +opt) > -0.2 ? ok : no).push([id, +opt]); });
+    ok.forEach(([id, opt]) => proposeBill(id, opt, 'ddl', 'GOV', 'C'));
+    G.player.fama = clamp(G.player.fama + ok.length * 1.5, 0, 100);
+    if (ok.length) addNews(`Il Consiglio dei ministri approva il pacchetto di ${G.player.name}: ${ok.length} riforme in Parlamento.`, 'gov');
+    TUNE = null; closeSheet(); renderGame();
+    return resultSheet(ok.length ? 'building' : 'hand', ok.length ? 'Via libera del Consiglio dei ministri' : 'Il premier frena', `${ok.length ? `${ok.length} ${ok.length > 1 ? 'riforme vanno' : 'riforma va'} in Parlamento come disegni di legge del governo.` : ''}${no.length ? ` ${G.gov.premier} blocca: ${no.map(([id, o]) => '«' + esc(getLaw(id).opts[o].t) + '»').join(', ')}.` : ''}`);
+  }
   const proposer = isPremier() ? 'GOV' : 'PLAYER';
   list.forEach(([id, opt]) => proposeBill(id, +opt, 'ddl', proposer, 'C'));
   if (!isPremier()) { G.player.fama = clamp(G.player.fama + list.length, 0, 100); }
   addNews(`${isPremier() ? 'Il governo' : G.player.name} presenta un pacchetto di ${list.length} riforme.`, isPremier() ? 'gov' : 'mio');
   TUNE = null; closeSheet(); renderGame(); toast(`${list.length} ${list.length > 1 ? 'riforme presentate' : 'riforma presentata'} in Parlamento`, 'good');
 }
+
+</script>
+<script>
+// ============================================================
+//  CARRIERA DA MINISTRO E CAMBI DI CASACCA
+//  dimissioni dal ministero, sondaggi con i partiti vicini,
+//  offerte che arrivano da sole, scissione restando al governo
+// ============================================================
+
+// partiti vicini: mai l'opposizione, solo chi ti somiglia o sta con te
+function nearParties() {
+  const me = myPid(), myC = coalitionOf(me);
+  return PIDS().filter(p => {
+    if (p === me || !G.parties[p] || P(p).poll < 0.8) return false;
+    if (myInGov()) return inGov(p) && compat(p, me) >= 40;
+    if (G.gov && inGov(p)) return false;
+    return compat(p, me) >= 50 || (myC && coalitionOf(p) === myC);
+  });
+}
+// un nuovo titolare per un ministero lasciato libero
+function replaceMinister(k, party) {
+  const busy = Object.values(G.gov.ministers);
+  const cand = allPeople().filter(x => x.party === party && !x.isPlayer && x.name !== G.player.name && !busy.includes(x.name));
+  G.gov.ministers[k] = cand.length ? pick(cand).name : randomName();
+  return G.gov.ministers[k];
+}
+
+// ---------- 1. dimissioni da ministro ----------
+const RESIGN_WHY = {
+  protesta: { t: 'Per protesta contro il governo', d: 'Ti smarchi dalle scelte del premier: più fama e seguito, ma l’alleanza si incrina.', fx: { fama: 6, seguito: 6, rap: -6, cred: 2 } },
+  coerenza: { t: 'Per coerenza, dopo una scelta che non condivido', d: 'Un gesto di principio: guadagni credibilità e rispetto.', fx: { fama: 4, rap: 2, cred: 4, integ: 1 } },
+  ambizione: { t: 'Per dedicarmi al partito e alla mia corsa', d: 'Hai le mani libere per la carriera: più seguito interno, il leader si insospettisce.', fx: { seguito: 10, fama: 2, rap: -10, stress: -12 } },
+};
+function openResignMin() {
+  const m = MIN_BY_ID[G.player.minister];
+  openSheet(`${head('Dimettiti da ministro', esc(m.n))}
+    <p class="muted small">Lasci il ministero e torni ${G.player.parl ? 'in Parlamento' : 'al lavoro nel partito'}. Il posto resta a ${esc(myParty().short)}, ma la notizia apre i giornali. Perché lo fai?</p>
+    ${Object.keys(RESIGN_WHY).map(k => `<button class="choice" onclick="resignMinistry('${k}')"><div class="t">${esc(RESIGN_WHY[k].t)}</div><div class="small muted">${esc(RESIGN_WHY[k].d)}</div>${fxChips(RESIGN_WHY[k].fx)}</button>`).join('')}`);
+}
+function resignMinistry(why) {
+  const p = G.player, k = p.minister, m = MIN_BY_ID[k], W = RESIGN_WHY[why];
+  if (!k || !G.gov) return;
+  const who = replaceMinister(k, myPid());
+  p.minister = null; p.exMin = { w: G.week, k, why };
+  G.gov.vice = (G.gov.vice || []).filter(n => n !== p.name);
+  applyFx(W.fx);
+  if (why === 'protesta') { addRel(G.gov.premierParty, myPid(), -12); if (G.gov.sat[myPid()] !== undefined && G.gov.premierParty !== myPid()) G.gov.sat[myPid()] = clamp(G.gov.sat[myPid()] - 8, 0, 100); G.gov.approval = clamp(G.gov.approval - 1, 0, 100); }
+  G.flags.offerSoon = G.week + 4;
+  addNews(`${p.name} si dimette da ministr${p.art === 'la' ? 'a' : 'o'} (${m.n})${why === 'protesta' ? ' in polemica con il governo' : why === 'coerenza' ? ': «Una questione di coerenza»' : ': «Ora mi dedico al partito»'}. Al suo posto ${who}.`, 'mio');
+  G.careerLog.push({ w: G.week, t: `Ti dimetti da ministro (${m.n})` });
+  if (why === 'protesta' && typeof remember === 'function') remember(G.gov.premierParty, 'Ti sei dimesso sbattendo la porta', 0, 'sgarbo');
+  closeSheet(); renderGame();
+  resultSheet('door', 'Hai lasciato il ministero', `${esc(W.d)} Nelle prossime settimane potrebbero arrivarti offerte da altri partiti vicini.`);
+}
+
+// ---------- 2. sondare un partito vicino ----------
+function makeOffer(pid) {
+  const p = G.player, items = [];
+  if (inGov(pid) && p.minister) items.push({ k: 'min', t: `Tieni il ministero (${MIN_BY_ID[p.minister].n})` });
+  if (inGov(pid) && !p.minister && G.gov && G.gov.premier !== 'PLAYER') {
+    const mine = Object.keys(G.gov.ministers).filter(k => { const x = person(G.gov.ministers[k]); return x && x.party === pid && MIN_BY_ID[k]; });
+    if (mine.length) { const k = mine.sort((a, b) => MIN_BY_ID[a].w - MIN_BY_ID[b].w)[0]; items.push({ k: 'newmin', m: k, t: `Un ministero: ${MIN_BY_ID[k].n}` }); }
+  }
+  const pool = [];
+  if (p.rank < 6) pool.push({ k: 'vice', t: `Vicesegretario di ${P(pid).short}` });
+  pool.push({ k: 'lista', t: 'Capolista sicuro alle prossime politiche' });
+  pool.push({ k: 'corrente', t: 'Una corrente tutta tua nel partito' });
+  pool.push({ k: 'tv', t: 'Spazio fisso in TV e sui giornali d’area' });
+  const n = items.length ? 1 : (p.fama > 50 ? 2 : 1);
+  for (let i = 0; i < n && pool.length; i++) items.push(pool.splice(irnd(0, pool.length - 1), 1)[0]);
+  return { p: pid, items, extra: pool.length ? pool[irnd(0, pool.length - 1)] : null };
+}
+function openSonda() {
+  const near = nearParties();
+  if (!near.length) return resultSheet('phone', 'Nessuno da sondare', 'Non ci sono partiti abbastanza vicini a te. Le offerte dall’opposizione non le cerchi.');
+  openSheet(`${head('Sonda un altro partito', 'Una telefonata riservata')}
+    <p class="muted small">Chiami di nascosto un leader vicino e senti cosa ti offrirebbe se passassi con lui. Attento: la voce può arrivare al tuo partito.</p>
+    <div class="list">${near.map(id => `<div class="li click" onclick="sondaAt('${id}')">${partyChip(id)}<div class="grow small">${esc(P(id).leader)}<div class="tiny muted">affinità ${fmt0(compat(id, myPid()))}% · ${inGov(id) ? 'al governo' : coalitionOf(id) && coalitionOf(id) === coalitionOf(myPid()) ? 'stessa coalizione' : 'area vicina'}</div></div><span class="small" style="color:${relColor(rel(id, myPid()))}">${rel(id, myPid()) > 0 ? '+' : ''}${fmt0(rel(id, myPid()))}</span></div>`).join('')}</div>`);
+}
+function sondaAt(pid) {
+  if (usedThisWeek('sonda')) return toast('Hai già fatto una telefonata così questa settimana', 'bad');
+  if (!spendPC(2)) return toast('Capitale politico insufficiente', 'bad');
+  markUsed('sonda'); closeSheet();
+  const p = G.player;
+  if (chance(0.2)) { applyFx({ rap: -8 }); addNews(`Retroscena: ${p.name} in contatto con ${P(pid).short}. Gelo in ${myParty().short}.`, 'bad'); toast('La telefonata è finita sui giornali', 'bad'); }
+  const interest = clamp(0.25 + compat(pid, myPid()) / 250 + p.fama / 180 + rel(pid, myPid()) / 300, 0.15, 0.92);
+  if (!chance(interest)) { renderGame(); return resultSheet('phone', `${P(pid).leader} prende tempo`, `«Ti stimo, ma ora non è il momento.» Con più fama o rapporti migliori con ${esc(P(pid).short)} andrà meglio.`); }
+  G.queue.unshift({ id: 'offerta_vicina', ctx: Object.assign(makeOffer(pid), { src: 'sonda' }) });
+  processQueue();
+}
+// passare a un altro partito con il pacchetto concordato
+function switchTo(pid, items) {
+  const p = G.player, old = myPid(), has = k => items.some(x => x.k === k);
+  addRel(old, pid, -10);
+  if (p.parl) { const k = p.parl === 'C' ? 'seatsC' : 'seatsS'; if (P(old)[k] > 0) { P(old)[k]--; P(pid)[k]++; } }
+  p.party = pid; p.rap = 30; p.seguito = has('corrente') ? 30 : 8;
+  p.rank = has('vice') ? 6 : p.minister ? Math.max(p.rank, 6) : Math.max(3, Math.min(p.rank, 5));
+  if (p.minister && G.gov) {
+    if (has('min') && inGov(pid)) { if (G.gov.sat[old] !== undefined) G.gov.sat[old] = clamp(G.gov.sat[old] - 10, 0, 100); if (G.gov.sat[pid] !== undefined) G.gov.sat[pid] = clamp(G.gov.sat[pid] + 6, 0, 100); }
+    else { replaceMinister(p.minister, old); p.minister = null; }
+  }
+  const nm = items.find(x => x.k === 'newmin');
+  if (nm && G.gov && inGov(pid)) { G.gov.ministers[nm.m] = p.name; p.minister = nm.m; p.rank = Math.max(p.rank, 6); }
+  if (has('lista')) p.listPromise = pid;
+  if (has('tv')) applyFx({ fama: 6 });
+  applyFx({ fama: 4, cred: -3 });
+  addNews(`${p.name} lascia ${P(old).short} e passa a ${P(pid).short}${p.minister ? `, restando ministr${p.art === 'la' ? 'a' : 'o'}` : ''}.`, 'mio');
+  G.careerLog.push({ w: G.week, t: `Passi a ${P(pid).short}` });
+}
+// contesti di riserva se l'evento arriva senza dati (vecchi salvataggi, test)
+function offCtx(c) { if (!c.p || !G.parties[c.p] || !c.items) { const n = nearParties(); Object.assign(c, makeOffer(n[0] || PIDS().find(p => p !== myPid()))); } return c; }
+function rimCtx(c) { if (!c.k || !MIN_BY_ID[c.k]) c.k = 'MEF'; return c; }
+const offerText = c => c.items.map(x => x.t.charAt(0).toLowerCase() + x.t.slice(1)).join('; ') + '.';
+
+// ---------- 3. offerte che arrivano da sole ----------
+const CARRIERA_EVENTS = [
+  { id: 'offerta_vicina', for: 'member', w: 1.4, cool: 26,
+    cond: () => G.player.fama > 30 && nearParties().length > 0 && (G.player.rap < 15 || G.player.fama > 50 || (G.flags.offerSoon && G.week <= G.flags.offerSoon) || chance(0.4)),
+    prep: () => makeOffer(pick(nearParties())), img: 'phone', look: 'call',
+    title: c => offCtx(c).src === 'sonda' ? `${P(c.p).leader} ti fa un’offerta` : `${P(c.p).leader} ti corteggia`,
+    text: c => `${offCtx(c).src === 'sonda' ? 'La tua telefonata ha funzionato.' : `${P(c.p).leader} ti chiama in privato.`} Se passi a ${P(c.p).name}, sul piatto c’è: ${offerText(c)}`,
+    choices: c => {
+      offCtx(c); const ch = [];
+      ch.push({ t: `Accetto: passo a ${P(c.p).short}`, fx: {}, r: 'Cambi casacca: nuovo partito, nuove regole.', run: () => switchTo(c.p, c.items) });
+      if (c.extra) { const a = { t: `Rilancio: voglio anche «${c.extra.t}»`, fx: {}, r: '' }; a.run = () => { if (chance(clamp(0.35 + G.player.fama / 200 + rel(c.p, myPid()) / 300, 0.15, 0.8))) { switchTo(c.p, c.items.concat([c.extra])); a.r = `${P(c.p).leader} accetta il rilancio: passi a ${P(c.p).short} con tutto il pacchetto.`; } else { addRel(c.p, myPid(), -6); a.r = `${P(c.p).leader} si irrita: «Hai tirato troppo la corda». L’offerta è ritirata.`; } }; ch.push(a); }
+      const b = { t: 'La uso per alzare il prezzo nel mio partito', fx: {}, r: '' };
+      b.run = () => { const p = G.player; if (chance(clamp(0.4 + p.rap / 200 + p.fama / 300, 0.1, 0.85))) { if (p.rank < 6 && !p.minister) { p.rank++; b.r = `${myParty().leader} non vuole perderti: diventi ${RANKS[p.rank].n.toLowerCase()}.`; } else { applyFx({ seguito: 10, rap: 4 }); b.r = `${myParty().leader} ti dà più spazio: il tuo seguito interno cresce.`; } } else { applyFx({ rap: -15 }); b.r = `${myParty().leader} la prende come una minaccia: «Chi vuole andarsene, se ne vada».`; } };
+      ch.push(b);
+      ch.push({ t: 'Rifiuto e lo dico al mio leader', fx: { rap: 8, rel: { [c.p]: -4 } }, r: 'Lealtà premiata.' });
+      return ch;
+    } },
+  { id: 'rimpasto_offerta', for: 'member', w: 1, cool: 40,
+    cond: () => G.player.minister && G.gov && G.gov.premier !== 'PLAYER' && G.player.fama > 35,
+    prep: () => { const cur = MIN_BY_ID[G.player.minister]; if (!cur || !G.gov) return null; const ks = Object.keys(G.gov.ministers).filter(k => MIN_BY_ID[k] && MIN_BY_ID[k].w > cur.w && G.gov.ministers[k] !== G.player.name); return ks.length ? { k: pick(ks) } : null; },
+    img: 'refresh', look: 'call',
+    title: c => `${G.gov ? G.gov.premier : 'Il premier'} ti offre un altro ministero`,
+    text: c => `${rimCtx(c) && ''}Il premier prepara un piccolo rimpasto e ti propone di passare a ${MIN_BY_ID[c.k].n}. Oggi lo guida ${(G.gov && G.gov.ministers[c.k]) || "un collega"}, che prenderebbe il tuo posto: non la prenderà bene.`,
+    choices: c => [rimCtx(c)].length && [
+      { t: `Accetto: vado a ${MIN_BY_ID[c.k].n}`, fx: { fama: 5, rap: 3 }, r: 'Promozione sul campo: un ministero più pesante.', run: () => { const p = G.player, old = p.minister, other = G.gov && G.gov.ministers[c.k], op = person(other); if (!old || !other) return; G.gov.ministers[c.k] = p.name; G.gov.ministers[old] = other; p.minister = c.k; if (op && G.gov.sat[op.party] !== undefined) G.gov.sat[op.party] = clamp(G.gov.sat[op.party] - 6, 0, 100); addNews(`Mini rimpasto: ${p.name} passa a ${MIN_BY_ID[c.k].n}, ${other} va a ${MIN_BY_ID[old].n}.`, 'gov'); G.careerLog.push({ w: G.week, t: `Ministro: ${MIN_BY_ID[c.k].n}` }); } },
+      { t: 'Resto dove sono: il lavoro non è finito', fx: { cred: 2, rel: G.gov ? { [G.gov.premierParty]: 3 } : {} }, r: 'Il premier apprezza la serietà.' },
+    ] },
+  { id: 'chiamata_scissione', for: 'member', w: 1, cool: 50,
+    cond: () => G.player.rank >= 3 && G.player.fama > 30 && (G.player.rap < 0 || G.player.seguito > 30),
+    img: 'split', look: 'chat', title: 'Ti chiedono di guidare una scissione',
+    text: () => `Un gruppo di parlamentari di ${myParty().short}, delusi da ${myParty().leader}, vuole uscire e fondare un nuovo partito. Manca solo un volto: il tuo.`,
+    choices: () => [
+      { t: 'Ci sto: prepariamo il nuovo partito', fx: { seguito: 10, rap: -8 }, r: 'Per due settimane «Fonda il tuo partito» costa la metà (⚡3) e ti seguono più parlamentari.', run: () => { G.flags.scInvite = G.week + 2; } },
+      { t: 'Uso la minaccia per trattare col leader', fx: { seguito: 5, rap: -4 }, r: 'Il leader capisce l’antifona: ti tratta con più rispetto, ma non si fida.' },
+      { t: 'Non è il momento', fx: { rap: 5 }, r: 'Il gruppo si scioglie, per ora.' },
+    ] },
+];
+CARRIERA_EVENTS.forEach(e => { if (EVENT_BY_ID[e.id]) { const i = EVENTS.indexOf(EVENT_BY_ID[e.id]); if (i >= 0) EVENTS.splice(i, 1); } EVENTS.push(e); EVENT_BY_ID[e.id] = e; });
+
+// ---------- azioni ----------
+ACTIONS.splice(ACTIONS.findIndex(a => a.id === 'riposo'), 0,
+  { id: 'dimmin', n: 'Dimettiti da ministro', ico: 'door', cost: 0, show: () => !!G.player.minister && !isPremier(), d: 'Lasci il ministero per protesta, per coerenza o per dedicarti alla tua corsa.', risk: 'Perdi il ministero', custom: () => openResignMin() },
+  { id: 'sonda', n: 'Sonda un altro partito', ico: 'phone', cost: 2, show: () => !isLeader() && G.player.fama >= 15, d: 'Una telefonata riservata con un partito vicino: senti cosa ti offrirebbe per passare con lui.', risk: '20% che finisca sui giornali', custom: () => openSonda() });
+ROUTINE_NO.push('dimmin', 'sonda');
 
 </script>
 </body>

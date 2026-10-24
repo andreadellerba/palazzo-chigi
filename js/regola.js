@@ -26,6 +26,7 @@ function renderTuner() {
   const sh = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null, st = sh ? sh.scrollTop : 0;
   const cats = Object.keys(LAW_CATS).filter(c => visibleLaws().some(l => l.cat === c && !l.custom && !l.cost));
   const busy = new Set(G.bills.filter(b => !b.dead && b.lawId).map(b => b.lawId));
+  if (!cats.includes(TUNE.cat)) TUNE.cat = cats[0];
   const S = tuneSummary();
   const fmtV = (k, v) => k === 'deficit' ? `${v > 0 ? '+' : ''}${fmt1(v)}% PIL` : k === 'spread' ? `${v > 0 ? '+' : ''}${fmt0(v)}` : k === 'consenso' ? `${v > 0 ? '+' : ''}${fmt1(v)}` : `${v > 0 ? '+' : ''}${(Math.round(v * 100) / 100).toString().replace('.', ',')}`;
   const rows = Object.keys(METRICS).map(k => { const v = S.raw[k]; if (Math.abs(v) < EFF_THR[k]) return ''; const good = (v > 0 ? 1 : -1) * METRICS[k].good > 0; return `<div class="tsum ${good ? 'g' : 'b'}">${icon(METRICS[k].ico, 16)}<span class="grow">${METRICS[k].n}</span><b>${v > 0 ? '▲' : '▼'} ${fmtV(k, v)}</b></div>`; }).join('');
@@ -45,9 +46,10 @@ function renderTuner() {
       <div class="row between tiny dim"><span>${esc(AXES[l.ax].l)}</span><span>oggi: ${esc(l.opts[cur].t)}</span><span>${esc(AXES[l.ax].r)}</span></div>
       ${changed ? effChipsHTML(effectsOf(l, cur, sel), lawGain(myPid(), l, cur, sel)) : ''}</div>`;
   });
-  const can = isPremier() || (isLeader() && (myParty().seatsC + myParty().seatsS > 0)) || G.player.parl;
+  const asMin = !isPremier() && !!G.player.minister && G.gov;
+  const can = isPremier() || asMin || (isLeader() && (myParty().seatsC + myParty().seatsS > 0)) || G.player.parl;
   const cost = S.n * 2;
-  h += can ? `<button class="btn gold block mt2" ${S.n ? '' : 'disabled'} onclick="submitTuner()">${icon('doc')} ${isPremier() ? 'Presenta il pacchetto del governo' : 'Presenta le proposte'} · ⚡${cost}</button><div class="tiny muted center mt">Ogni modifica diventa un ${isPremier() ? 'disegno di legge' : 'proposta di legge'} e passa da Camera e Senato.</div>`
+  h += can ? `<button class="btn gold block mt2" ${S.n ? '' : 'disabled'} onclick="submitTuner()">${icon('doc')} ${isPremier() ? 'Presenta il pacchetto del governo' : asMin ? 'Porta il pacchetto in Consiglio dei ministri' : 'Presenta le proposte'} · ⚡${cost}</button><div class="tiny muted center mt">${asMin ? `Il premier ${esc(G.gov.premier)} deve dare il via libera a ogni modifica; poi passa da Camera e Senato.` : `Ogni modifica diventa un ${isPremier() ? 'disegno di legge' : 'proposta di legge'} e passa da Camera e Senato.`}</div>`
     : `<div class="tiny muted center mt2">Per presentare le modifiche devi essere in Parlamento o guidare un partito con parlamentari. Puoi comunque provarle per vedere gli effetti.</div>`;
   replaceSheet(h);
   const s2 = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null; if (s2) s2.scrollTop = st;
@@ -62,6 +64,16 @@ function submitTuner() {
   const list = Object.entries(TUNE.ch).filter(([id, opt]) => opt !== G.laws[id] && !busy.has(id));
   if (!list.length) return toast('Nessuna modifica da presentare', 'bad');
   if (!spendPC(list.length * 2)) return toast('Capitale politico insufficiente', 'bad');
+  // da ministro passa dal Consiglio dei ministri: il premier può fermare le modifiche che non gli piacciono
+  if (!isPremier() && G.player.minister && G.gov) {
+    const ok = [], no = [];
+    list.forEach(([id, opt]) => { const l = getLaw(id); (lawGain(G.gov.premierParty, l, G.laws[id], +opt) > -0.2 ? ok : no).push([id, +opt]); });
+    ok.forEach(([id, opt]) => proposeBill(id, opt, 'ddl', 'GOV', 'C'));
+    G.player.fama = clamp(G.player.fama + ok.length * 1.5, 0, 100);
+    if (ok.length) addNews(`Il Consiglio dei ministri approva il pacchetto di ${G.player.name}: ${ok.length} riforme in Parlamento.`, 'gov');
+    TUNE = null; closeSheet(); renderGame();
+    return resultSheet(ok.length ? 'building' : 'hand', ok.length ? 'Via libera del Consiglio dei ministri' : 'Il premier frena', `${ok.length ? `${ok.length} ${ok.length > 1 ? 'riforme vanno' : 'riforma va'} in Parlamento come disegni di legge del governo.` : ''}${no.length ? ` ${G.gov.premier} blocca: ${no.map(([id, o]) => '«' + esc(getLaw(id).opts[o].t) + '»').join(', ')}.` : ''}`);
+  }
   const proposer = isPremier() ? 'GOV' : 'PLAYER';
   list.forEach(([id, opt]) => proposeBill(id, +opt, 'ddl', proposer, 'C'));
   if (!isPremier()) { G.player.fama = clamp(G.player.fama + list.length, 0, 100); }

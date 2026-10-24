@@ -625,3 +625,4 @@ html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolut
 .tune-rail { position: relative; padding: 6px 0; }
 .tune-rail input { width: 100%; accent-color: var(--oro); height: 26px; margin: 0; }
 .tune-rail .now { position: absolute; top: 0; width: 2px; height: 8px; margin-left: -1px; background: var(--muted); border-radius: 1px; pointer-events: none; }
+.choice.on { border-color: var(--oro); box-shadow: 0 0 0 1px var(--oro) inset; }

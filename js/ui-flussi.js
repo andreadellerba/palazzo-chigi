@@ -53,7 +53,8 @@ const ACTIONS = [
   { id: 'scissione', n: 'Fonda il tuo partito', ico: 'split', cost: 6, show: () => !isLeader() && G.player.rank >= 2, d: 'Lasci il partito e ne fondi uno tuo, portando con te chi ti segue. Come Vannacci con Futuro Nazionale.', risk: 'Rottura definitiva con il vecchio partito', custom: () => openScissione() },
   { id: 'riposo', n: 'Weekend di riposo', ico: 'sun', cost: 0, show: () => true, fx: { stress: -15 }, d: 'Spegni il telefono. Perdi il capitale politico rimasto.', run: () => { applyFx({ stress: -15, salute: 3 }); G.pc = 0; return 'Torni con le idee più chiare.'; } },
 ];
-function actionCost(a) { return a.id === 'tv' && isPremier() ? 2 : a.cost; }
+const scInvite = () => !!(G.flags && G.flags.scInvite && G.week <= G.flags.scInvite);
+function actionCost(a) { return a.id === 'tv' && isPremier() ? 2 : a.id === 'scissione' && scInvite() ? 3 : a.cost; }
 const ACT_COLORS = ['#38bdf8', '#a78bfa', '#fb923c', '#22c55e', '#f472b6', '#facc15', '#2dd4bf', '#f87171', '#818cf8', '#4ade80'];
 // ogni azione una volta a settimana
 const usedThisWeek = id => G.usedActs && G.usedActs[id] === G.week;
@@ -434,6 +435,7 @@ function promote(rank) {
   return t;
 }
 function openCandidatura() {
+  if (G.player.listPromise === myPid()) { G.player.candidate = 'capolista'; G.player.listPromise = null; return choiceCard('clipboard', 'Le liste per le politiche', `Come promesso quando sei passat${G.player.art === 'la' ? 'a' : 'o'} a ${esc(myParty().short)}, sei capolista in ${regionName(G.player.region)}.`, [{ t: 'Perfetto', f: () => 'Elezione quasi sicura.' }]); }
   const p = G.player;
   choiceCard('clipboard', 'Le liste per le politiche', `${esc(myParty().leader)} chiude le liste. Che posto chiedi in ${regionName(p.region)}?`, [
     { t: `Chiedere il posto da capolista (serve un ottimo rapporto: oggi ${fmt0(p.rap)})`, f: () => { if (p.rap >= 40 || (p.rap >= 25 && chance(0.4))) { p.candidate = 'capolista'; return 'Sei capolista: elezione quasi sicura.'; } p.candidate = 'pref'; applyFx({ rap: -5 }); return 'Il leader preferisce un fedelissimo: corri con le preferenze.'; } },
@@ -443,10 +445,10 @@ function openCandidatura() {
 }
 function openPrimarie() {
   const c = G.coalitions.find(x => x.id === 'csx');
-  if (!c || !c.members.includes(myPid()) || (!isLeader() && G.player.fama < 30)) { const res = runPrimarie(); if (!res) { G.queue.shift(); return processQueue(); } return specialCard('vote', 'Primarie del Campo largo', res.map(x => `${esc(x.player ? G.player.name : x.name)} <b>${fmt1(x.pct)}%</b>`).join(' · ')); }
+  if (!c || !c.members.includes(myPid()) || (!isLeader() && G.player.fama < 30)) { const res = runPrimarie(); if (!res || !res.length) { G.queue.shift(); return processQueue(); } return specialCard('vote', 'Primarie del Campo largo', res.map(x => `${esc(x.player ? G.player.name : x.name)} <b>${fmt1(x.pct)}%</b>`).join(' · ')); }
   choiceCard('vote', 'Primarie del Campo largo', `Il centrosinistra sceglie il candidato premier con le primarie. In corsa ${esc(P('PD').leader)} e ${esc(P('M5S').leader)}.${G.primarie && G.primarie.player ? ' Sei già in corsa.' : ' Vuoi candidarti?'}`, [
-    { t: G.primarie && G.primarie.player ? 'Si vota!' : 'Candidarmi e sfidarli', f: () => { G.primarie = Object.assign(G.primarie || {}, { player: true }); G.primarie.boost = (G.primarie.boost || 0) + G.player.car * 0.5; const res = runPrimarie(); const w = res[0]; if (w.player) confetti(); return res.map(x => `${esc(x.player ? 'Tu' : x.name)}: ${fmt1(x.pct)}%`).join('<br>') + (w.player ? '<br><b class="gold">Sei il candidato premier del Campo largo!</b>' : ''); } },
-    { t: 'Sostenere un candidato', f: () => { if (G.primarie) G.primarie.player = false; const res = runPrimarie(); return res.map(x => `${esc(x.name)}: ${fmt1(x.pct)}%`).join('<br>'); } },
+    { t: G.primarie && G.primarie.player ? 'Si vota!' : 'Candidarmi e sfidarli', f: () => { G.primarie = Object.assign(G.primarie || {}, { player: true }); G.primarie.boost = (G.primarie.boost || 0) + G.player.car * 0.5; const res = runPrimarie(); if (!res || !res.length) return 'Le primarie sono già state decise.'; const w = res[0]; if (w.player) confetti(); return res.map(x => `${esc(x.player ? 'Tu' : x.name)}: ${fmt1(x.pct)}%`).join('<br>') + (w.player ? '<br><b class="gold">Sei il candidato premier del Campo largo!</b>' : ''); } },
+    { t: 'Sostenere un candidato', f: () => { if (G.primarie) G.primarie.player = false; const res = runPrimarie(); if (!res || !res.length) return 'Le primarie sono già state decise.'; return res.map(x => `${esc(x.name)}: ${fmt1(x.pct)}%`).join('<br>'); } },
   ]);
 }
 
@@ -600,21 +602,26 @@ function openScissione() {
   const p = G.player;
   if (p.fama < 20) { openSheet(`${head('Troppo presto')}<p class="muted">Con una fama di ${fmt0(p.fama)} nessuno ti seguirebbe. Servono almeno 20 punti.</p>`); return; }
   const est = clamp(myParty().poll * (p.seguito / 100) * 0.45 + p.fama * 0.04, 0.5, myParty().poll * 0.6);
-  window._sc = { name: '', short: '', symbol: 'crown', color: PARTY_COLORS[3] };
+  window._sc = { name: '', short: '', symbol: 'crown', color: PARTY_COLORS[3], stay: true };
+  const asMin = p.minister && G.gov && G.gov.premier !== 'PLAYER' && inGov(myPid()), cost = scInvite() ? 3 : 6;
   openSheet(`${head('Fonda il tuo partito', `Lasci ${esc(myParty().name)}`)}
     ${proConHTML({ pro: [{ k: 'pol', t: `Guidi tu: decidi linea e alleanze` }, { k: 'pop', t: `Partenza stimata: circa ${fmt1(est)}%` }, { k: 'pol', t: `Ti seguono parlamentari in base al tuo seguito (${fmt0(p.seguito)}%)` }], contro: [{ k: 'pol', t: `Rottura con ${myParty().short} (rapporto −60)` }, { k: 'per', t: 'Pochi fondi e organizzazione da costruire' }] }, { noParties: true })}
     <label class="lbl">Nome del nuovo partito</label><input oninput="_sc.name=this.value" placeholder="Es. Rinascita Nazionale">
     <label class="lbl">Sigla</label><input maxlength="6" oninput="_sc.short=this.value.toUpperCase()">
     <label class="lbl">Simbolo</label><div class="symgrid">${SYMBOLS.map(s => `<button onclick="_sc.symbol='${s}';this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));this.classList.add('on')">${icon(s)}</button>`).join('')}</div>
     <label class="lbl">Colore</label><div class="colgrid">${PARTY_COLORS.map(c => `<button style="background:${c}" onclick="_sc.color='${c}';this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));this.classList.add('on')"></button>`).join('')}</div>
-    <button class="btn red block mt2" onclick="confirmScissione()">Rompi e fonda il partito · ⚡6</button>`);
+    ${asMin ? `<label class="lbl">Sei ministr${p.art === 'la' ? 'a' : 'o'} (${esc(MIN_BY_ID[p.minister].n)}): e il governo?</label><div class="seg2">
+      <button class="choice on" onclick="_sc.stay=true;this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));this.classList.add('on')"><div class="t">Resto in maggioranza</div><div class="small muted">Chiedi a ${esc(G.gov.premier)} di tenerti al ministero: servono i tuoi parlamentari.</div></button>
+      <button class="choice" onclick="_sc.stay=false;this.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));this.classList.add('on')"><div class="t">Lascio il governo</div><div class="small muted">Ti dimetti e passi all’opposizione: più visibilità, rottura totale.</div></button></div>` : ''}
+    ${scInvite() ? '<div class="tiny gold mt">Un gruppo di parlamentari ti ha chiesto di guidarli: costa meno e ti seguono in più.</div>' : ''}
+    <button class="btn red block mt2" onclick="confirmScissione()">Rompi e fonda il partito · ⚡${cost}</button>`);
 }
 function confirmScissione() {
   const s = window._sc; if (!s.name.trim() || !s.short.trim()) return toast('Nome e sigla obbligatori', 'bad');
-  if (!spendPC(6)) return toast('Capitale politico insufficiente', 'bad');
-  doScissione({ name: s.name.trim(), short: s.short.trim(), symbol: s.symbol, color: s.color });
+  if (!spendPC(scInvite() ? 3 : 6)) return toast('Capitale politico insufficiente', 'bad');
+  const govNote = doScissione({ name: s.name.trim(), short: s.short.trim(), symbol: s.symbol, color: s.color, stay: s.stay }) || '';
   closeSheet(); confetti(); renderGame();
-  resultSheet('rocket', `Nasce ${s.name}`, `Ora sei leader. Con te ${myParty().seatsC} deputati e ${myParty().seatsS} senatori. Primo sondaggio: ${fmt1(myParty().poll)}%.`);
+  resultSheet('rocket', `Nasce ${s.name}`, `Ora sei leader. Con te ${myParty().seatsC} deputati e ${myParty().seatsS} senatori. Primo sondaggio: ${fmt1(myParty().poll)}%.${govNote ? ' ' + govNote : ''}`);
 }
 
 // ============================================================

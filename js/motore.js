@@ -1152,8 +1152,9 @@ function challengeLeader() {
 function doScissione(cfg) {
   const p = G.player, old = myPid(), op = P(old);
   const share = clamp(op.poll * (p.seguito / 100) * 0.45 + p.fama * 0.04, 0.5, op.poll * 0.6);
-  const takeC = p.parl === 'C' ? Math.max(1, Math.round(op.seatsC * p.seguito / 100 * 0.5)) : Math.round(op.seatsC * p.seguito / 100 * 0.15);
-  const takeS = p.parl === 'S' ? Math.max(1, Math.round(op.seatsS * p.seguito / 100 * 0.5)) : Math.round(op.seatsS * p.seguito / 100 * 0.15);
+  const inv = G.flags && G.flags.scInvite && G.week <= G.flags.scInvite ? 1.6 : 1; if (G.flags) G.flags.scInvite = 0;
+  const takeC = Math.round((p.parl === 'C' ? Math.max(1, Math.round(op.seatsC * p.seguito / 100 * 0.5)) : Math.round(op.seatsC * p.seguito / 100 * 0.15)) * inv);
+  const takeS = Math.round((p.parl === 'S' ? Math.max(1, Math.round(op.seatsS * p.seguito / 100 * 0.5)) : Math.round(op.seatsS * p.seguito / 100 * 0.15)) * inv);
   G.parties.MIO = { id: 'MIO', name: cfg.name, short: cfg.short, color: cfg.color, symbol: cfg.symbol, leader: p.name, lCar: p.car, lComp: p.comp, area: 'Il tuo partito', family: '—',
     ax: Object.assign({}, p.ax), geo: Object.assign({}, op.geo), rx: Object.assign({}, op.rx), poll: share, base: share, base0: share, spinta: 3, seatsC: Math.min(takeC, op.seatsC), seatsS: Math.min(takeS, op.seatsS), coal: null, mine: true };
   op.seatsC -= G.parties.MIO.seatsC; op.seatsS -= G.parties.MIO.seatsS; op.poll -= share * 0.85; op.base = Math.max(0.5, op.base - share * 0.8); op.base0 = Math.max(0.5, op.base0 - share * 0.8);
@@ -1167,12 +1168,28 @@ function doScissione(cfg) {
   for (let i = 0; i < 4; i++) G.myPeople.push({ name: randomName(), party: 'MIO', comp: irnd(4, 7), scandal: irnd(1, 5), pref: pick(MINISTRIES).id });
   // via dalla coalizione e dal governo
   G.coalitions.forEach(c => { c.members = c.members.filter(m => m !== 'MIO'); });
-  if (G.gov && G.gov.parties.includes(old)) {
-    if (p.minister) { delete G.gov.ministers[p.minister]; p.minister = null; }
-    if (chance(0.5) && G.gov.premier !== 'PLAYER') { G.gov.parties.push('MIO'); G.gov.sat.MIO = 40; addNews(`${cfg.name} resta in maggioranza con appoggio critico.`, 'parl'); }
+  let govNote = '';
+  if (G.gov && G.gov.parties.includes(old) && G.gov.premier !== 'PLAYER') {
+    const wasMin = p.minister, seats = G.parties.MIO.seatsC + G.parties.MIO.seatsS;
+    const loseMin = () => { if (p.minister) { if (typeof replaceMinister === 'function') replaceMinister(p.minister, old); else delete G.gov.ministers[p.minister]; p.minister = null; } };
+    if (cfg.stay === false) {
+      loseMin(); applyFx({ fama: 5 }); addRel(G.gov.premierParty, 'MIO', -15);
+      addNews(`${cfg.name} nasce all’opposizione${wasMin ? `: ${p.name} lascia il governo` : ''}.`, 'parl');
+      govNote = wasMin ? 'Hai lasciato il ministero: ora sei all’opposizione.' : 'Il nuovo partito sta all’opposizione.';
+    } else if (cfg.stay && wasMin) {
+      const ok = chance(clamp(0.35 + seats / 40 + rel(G.gov.premierParty, old) / 400 - (old === G.gov.premierParty ? 0.25 : 0), 0.1, 0.9));
+      G.gov.parties.push('MIO'); G.gov.sat.MIO = ok ? 55 : 35;
+      if (ok) { addNews(`${cfg.name} entra in maggioranza: ${p.name} resta ministr${p.art === 'la' ? 'a' : 'o'} (${MIN_BY_ID[wasMin].n}).`, 'parl'); govNote = `${G.gov.premier} accetta: resti al ministero e il tuo partito entra in maggioranza.`; }
+      else { loseMin(); addNews(`${G.gov.premier} non conferma ${p.name} al ministero: ${cfg.name} resta in maggioranza ma senza poltrone.`, 'parl'); govNote = `${G.gov.premier} non ti conferma: perdi il ministero, ma il partito resta in maggioranza con appoggio esterno.`; }
+      if (old === G.gov.premierParty || inGov(old)) G.gov.sat[old] = clamp((G.gov.sat[old] || 50) - 12, 0, 100);
+    } else {
+      loseMin();
+      if (chance(0.5)) { G.gov.parties.push('MIO'); G.gov.sat.MIO = 40; addNews(`${cfg.name} resta in maggioranza con appoggio critico.`, 'parl'); }
+    }
   }
   addNews(`SCISSIONE in ${op.name}: ${p.name} fonda «${cfg.name}». Con te ${G.parties.MIO.seatsC} deputati e ${G.parties.MIO.seatsS} senatori.`, 'mio');
   G.careerLog.push({ w: G.week, t: `Scissione: fondi ${cfg.name}` });
+  return govNote;
 }
 
 // ============================================================
@@ -1205,6 +1222,10 @@ function runPrimarie() {
   if (c.members.includes(myPid()) && (isLeader() || G.player.fama >= 30) && G.primarie && G.primarie.player) {
     cands.push({ name: G.player.name, party: myPid(), score: Math.sqrt(Math.max(0.5, myParty().poll)) * G.player.car * (0.7 + G.player.fama / 100) + (G.primarie.boost || 0), player: true });
   }
+  // nessuno in corsa (per esempio guidi tu il PD): corre il leader del partito più grande, o tu se sei leader
+  if (!cands.length && c.members.includes(myPid()) && isLeader()) cands.push({ name: G.player.name, party: myPid(), score: 10, player: true });
+  if (!cands.length && c.members.length) { const big = c.members.slice().sort((a, b) => P(b).poll - P(a).poll)[0]; cands.push({ name: P(big).leader, party: big, score: 10 }); }
+  if (!cands.length) { G.primarie = Object.assign(G.primarie || {}, { done: true, res: [] }); return null; }
   let tot = 0; cands.forEach(x => { x.v = Math.max(1, x.score + gauss() * 3); tot += x.v; });
   cands.forEach(x => { x.pct = x.v / tot * 100; });
   cands.sort((a, b) => b.pct - a.pct);
