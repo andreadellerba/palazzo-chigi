@@ -130,7 +130,7 @@ function openDeal(pid, cid) {
       ${never(myPid(), who) ? `<div class="card tight"><div class="small">Un veto si può superare solo con un rapporto <b>ottimo</b> con ${esc(P(who).leader)} (almeno +55). Oggi: <b style="color:${relColorHex(r)}">${relNum(r)}</b>.</div>${barH(r + 100, 200, relColor(r), true)}<div class="tiny muted mt">Incontri riservati, voti comuni in aula e interviste concilianti avvicinano i leader.</div></div><button class="btn block mt" onclick="closeSheet();doIncontro('${who}')">${icon('cup')} Incontro riservato con ${esc(firstName(P(who).leader))} · ⚡1</button>` : ''}`);
     return;
   }
-  DEAL = { pid, cid: cid || null, offers: {}, law: null };
+  DEAL = { pid, cid: cid || null, offers: {}, law: null, patience: 3, log: [] };
   // la legge bandiera che chiede il partito
   const best = allLaws().filter(l => !l.custom && !G.bills.some(x => !x.dead && x.lawId === l.id)).map(l => { const bo = bestOpt(pid, l); if (bo === G.laws[l.id]) return null; return { l, bo, v: lawGain(pid, l, G.laws[l.id], bo) * l.sal }; }).filter(Boolean).sort((a, b) => b.v - a.v)[0];
   if (best) DEAL.law = { lawId: best.l.id, opt: best.bo };
@@ -155,7 +155,7 @@ function dealOffers() {
 function dealScore() {
   const b = dealBase(DEAL.pid, DEAL.cid);
   const pts = dealOffers().filter(o => DEAL.offers[o.id]).reduce((s, o) => s + o.pts, 0);
-  const tot = clamp(b.base + pts, 0, 100);
+  const tot = clamp(b.base + pts + (DEAL.bonus || 0), 0, 100);
   const prob = tot >= 50 ? clamp(0.55 + (tot - 50) / 60, 0.55, 0.97) : clamp(tot / 50 * 0.35, 0.02, 0.35);
   return { b, pts, tot, prob };
 }
@@ -174,11 +174,26 @@ function renderDeal() {
     h += `<button class="offer ${on ? 'on' : ''}" ${dis ? 'disabled style="opacity:.45"' : ''} onclick="DEAL.offers['${o.id}']=!DEAL.offers['${o.id}'];renderDealKeep()"><span class="ck ${on ? 'on' : ''}">${on ? icon('check', 14) : ''}</span>${medal(o.i, 40)}<div class="grow"><b class="small">${esc(o.t)}</b><div class="tiny muted">${esc(o.s)}</div></div><span class="pts" style="${o.pts < 0 ? 'color:var(--bad)' : ''}">${o.pts > 0 ? '+' : ''}${o.pts}</span></button>`;
   });
   h += `<div class="tiny muted mt">Le promesse vanno mantenute: se diventi premier, gli alleati si aspettano quei ministeri e quelle leggi. Tradirle costa caro.</div>`;
+  if (DEAL.log && DEAL.log.length) h += sec('Il negoziato') + `<div class="bids">${DEAL.log.map(x => `<div class="bid ${x.me ? 'me' : 'th'}"><span>${esc(x.t)}</span>${x.p ? `<b class="${x.me ? 'gold' : 'bad'}">${x.p}</b>` : ''}</div>`).join('')}</div><div class="pat">Pazienza di ${esc(p.short)} ${[0, 1, 2].map(i => `<i class="${i < DEAL.patience ? '' : 'x'}"></i>`).join('')}</div>`;
+  if (DEAL.counter) { const o = dealOffers().find(x => x.id === DEAL.counter); h += `<div class="card hero mt"><div class="small"><b>${esc(p.leader)} rilancia:</b> «Ci serve anche ${esc(o.t.toLowerCase())}.»</div><div class="row mt" style="gap:6px"><button class="btn sm gold grow" onclick="acceptCounter()">Accetta</button><button class="btn sm grow" onclick="DEAL.counter=null;renderDealKeep()">Rilancia tu</button><button class="btn sm red grow" onclick="breakDeal()">Rompi</button></div></div>`; }
   h += `<button class="btn gold block mt2" onclick="closeDeal()">${icon('hands')} Firma l’accordo · ⚡2 · ${Math.round(sc.prob * 100)}%</button>`;
   replaceSheet(h);
 }
 function renderDealKeep() { const sh = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null, st = sh ? sh.scrollTop : 0; vib(6); renderDeal(); if (sh) sh.scrollTop = st; }
+// D3: prima di firmare, se sono incerti, rilanciano (massimo tre volte)
 function closeDeal() {
+  const sc = dealScore(), p = P(DEAL.pid);
+  const chosen = dealOffers().filter(o => DEAL.offers[o.id] && o.pts > 0).map(o => o.t);
+  DEAL.log.push({ me: true, t: chosen.length ? chosen.join(', ') : 'Nessuna concessione', p: `${sc.tot}/100` });
+  if (sc.tot < 58 && sc.tot >= 25 && DEAL.patience > 0) {
+    const left = dealOffers().filter(o => !DEAL.offers[o.id] && o.pts > 0 && (!o.need || o.need())).sort((a, b) => b.pts - a.pts);
+    if (left.length) { DEAL.patience--; DEAL.counter = left[Math.min(left.length - 1, irnd(0, 1))].id; DEAL.log.push({ me: false, t: `${firstName(p.leader)}: vogliamo anche ${left.find(o => o.id === DEAL.counter).t.toLowerCase()}`, p: 'rilancia' }); vib(10); renderDealKeep(); return; }
+  }
+  finalizeDeal();
+}
+function acceptCounter() { DEAL.offers[DEAL.counter] = true; DEAL.counter = null; DEAL.bonus = (DEAL.bonus || 0) + 8; finalizeDeal(); }
+function breakDeal() { addRel(DEAL.pid, myPid(), -3); addNews(`Salta la trattativa tra ${myParty().short} e ${P(DEAL.pid).short}.`, 'parl'); DEAL = null; closeSheet(); renderGame(); toast('Trattativa rotta'); }
+function finalizeDeal() {
   const sc = dealScore(), b = sc.b, pid = DEAL.pid, p = P(pid), of = DEAL.offers;
   const extra = of.serrata ? 2 : 0;
   if (G.pc < 2 + extra) return toast('Capitale politico insufficiente', 'bad');

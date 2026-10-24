@@ -942,8 +942,10 @@ function renderGiuramento() {
 }
 function renderFiducia() {
   const f = G.formation;
+  // prima del voto, il discorso alle Camere: convince (o no) gli alleati
+  if (!f.speechDone && typeof openSpeech === 'function') { f.speechDone = true; return openSpeech('fiducia', res => { f.speechBonus = res.maj * 2 + res.opp; renderFiducia(); }); }
   const qi = quotaInfo(f.set, f.ministers);
-  const sat = {}; f.set.forEach(p => { sat[p] = p === myPid() ? 90 : clamp(55 + (qi[p].w - qi[p].q) * 120 + (f.vice.some(n => person(n) && person(n).party === p) ? 8 : 0) + rel(p, myPid()) * 0.2, 5, 95); });
+  const sat = {}; f.set.forEach(p => { sat[p] = p === myPid() ? 90 : clamp(55 + (qi[p].w - qi[p].q) * 120 + (f.vice.some(n => person(n) && person(n).party === p) ? 8 : 0) + rel(p, myPid()) * 0.2 + (f.speechBonus || 0), 5, 95); });
   const vote = h => {
     const by = {}; let yes = 0, no = 0, ab = 0;
     PIDS().forEach(p => { const n = seatsOf(p, h); if (!n) return; let y = 0, nn = 0, a = 0; if (f.set.includes(p)) { if (sat[p] >= 20) { const d = Math.round(n * rnd(0, 0.02) * D().defect); y = n - d; a = d; } else { a = n; } } else { if (compat(p, myPid()) > 55 && rel(p, myPid()) > 20) a = n; else nn = n; } by[p] = { yes: y, no: nn, abst: a }; yes += y; no += nn; ab += a; });
