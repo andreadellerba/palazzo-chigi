@@ -322,6 +322,7 @@ function setupNext() {
   if (SETUP.mode === 'fondatore') cfg.party = Object.assign({}, SETUP.party, { name: SETUP.party.name.trim(), short: SETUP.party.short.trim().toUpperCase() });
   else cfg.join = SETUP.join;
   newGame(cfg);
+  rerollPlayerAvatar();
   UI.tab = 'home';
   renderGame();
   saveGame('auto');

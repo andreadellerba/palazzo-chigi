@@ -602,7 +602,7 @@ function enactBill(b) {
     if (G.gov) G.gov.popBank += pop * 0.6;
     G.flags['manovra' + b.year] = true;
     addNews(`Approvata definitivamente la ${billName(b)}. Entra in vigore il 1° gennaio.`, by === 'player' ? 'good' : 'gov');
-    if (by === 'player') { G.stats.laws++; }
+    if (by === 'player') { G.stats.laws++; G.flags.playerManovra = true; }
     return;
   }
   const l = getLaw(b.lawId);
@@ -920,6 +920,7 @@ function runGeneralElection() {
   G.otherSeats = { C: 4, S: 2 + 5 };
   const turnout = clamp(58 + gauss() * 2 + (G.flags.hotCampaign ? 2 : 0), 48, 70);
   const regional = {}; REGIONS_DEF.forEach(r => { regional[r.id] = regionShares(r.id); });
+  G.electHist = G.electHist || []; G.electHist.push({ w: G.week, party: P(myPid()).short, vote: votes[myPid()] || 0, seatsC: rc.seats[myPid()] || 0 });
   G.lastElection = { w: G.week, votes, votesS, seatsC: rc.seats, seatsS: rs.seats, premio: rc.premio, units: rc.units.map(u => ({ id: u.id, name: u.name, members: u.members, share: u.share, color: u.color, cand: u.cand, candParty: u.candParty, coal: u.coal })), turnout, sys, prev, regional, legislature: G.legislature + 1 };
   G.legislature++;
   G.cal.legStart = G.week;
@@ -1259,6 +1260,7 @@ function advanceWeek() {
   // umore pubblico: torna lentamente
   AXIS_KEYS.forEach(k => { G.mood[k] += (G.mood0[k] - G.mood[k]) * 0.01; });
   snapshot();
+  G._wk.ach = typeof checkAchievements === 'function' ? checkAchievements() : [];
   const s = G._wk; G._wk = null;
   G.lastSummary = s;
   return s;
@@ -1377,7 +1379,7 @@ function calendarTick() {
 // ============================================================
 const SAVE_PREFIX = 'palazzochigi_';
 function saveGame(slot) { try { localStorage.setItem(SAVE_PREFIX + slot, JSON.stringify(G)); return true; } catch (e) { return false; } }
-function migrate() { if (G.gov && !G.gov.premierParty) G.gov.premierParty = largestIn(G.gov.parties); G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
+function migrate() { if (G.player && !G.player.av && typeof rerollPlayerAvatar === 'function') rerollPlayerAvatar(); G.stats.tv = G.stats.tv || 0; if (G.gov && !G.gov.premierParty) G.gov.premierParty = largestIn(G.gov.parties); G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
 function loadGame(slot) { try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return false; G = JSON.parse(s); migrate(); return true; } catch (e) { return false; } }
 function slotInfo(slot) {
   try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return null; const g = JSON.parse(s); return { name: g.player.name, party: g.parties[g.player.party].short, date: fmtDate(g.week), premier: g.gov && g.gov.premier === 'PLAYER' }; } catch (e) { return null; }

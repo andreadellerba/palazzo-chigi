@@ -300,6 +300,38 @@ h3 { font-weight: 800; }
 .paper .headline { font-family: "Bebas Neue", serif; font-size: 30px; line-height: 1.05; margin-top: 10px; text-align: center; color: #1b1712 !important; }
 details summary { cursor: pointer; list-style: none; padding: 6px 0; }
 
+/* ===================== RITRATTI, SCORRIMENTO, DIRETTA, TRAGUARDI, STORIA ===================== */
+.portrait { display: inline-block; flex: none; border-radius: 50%; overflow: hidden; background: #1b2238; box-shadow: 0 0 0 2px var(--ring, rgba(255,255,255,.2)), 0 6px 16px rgba(0,0,0,.4); }
+.portrait img { width: 100%; height: 100%; display: block; }
+.evcard .img .portrait { animation: pop .6s .1s both; }
+.av-badge { position: relative; flex: none; cursor: pointer; }
+.av-badge .pbadge { position: absolute; right: -4px; bottom: -4px; min-width: 24px; height: 24px; padding: 0 5px; border-radius: 12px; background: var(--c); color: #fff; font-size: 11px; font-weight: 900; display: grid; place-items: center; box-shadow: 0 0 0 2px var(--bg2); }
+.swipe-hint { text-align: center; font-size: 12px; color: var(--muted); margin: 10px 0 2px; font-weight: 600; }
+.swipe-card { position: relative; background: linear-gradient(170deg, #22305a 0%, #151d33 70%); border: 1px solid color-mix(in srgb, var(--vc, #ffd60a) 50%, transparent); border-left: 5px solid var(--vc, #ffd60a); border-radius: 22px; padding: 16px; margin-top: 10px; box-shadow: 0 20px 40px rgba(0,0,0,.45); touch-action: none; user-select: none; -webkit-user-select: none; animation: cardIn .45s both; }
+.evcard { position: relative; touch-action: pan-y; }
+.swipe-lab { position: absolute; top: 18px; left: 50%; transform: translateX(-50%) rotate(-8deg); padding: 6px 14px; border: 3px solid currentColor; border-radius: 10px; font-family: "Bebas Neue", sans-serif; font-size: 26px; letter-spacing: 1px; opacity: 0; pointer-events: none; z-index: 5; white-space: nowrap; max-width: 90%; overflow: hidden; text-overflow: ellipsis; background: rgba(10,15,29,.7); }
+.swipe-lab.right { color: #2ecc71; } .swipe-lab.left { color: #ff5c5c; } .swipe-lab.up { color: #ffd60a; }
+.swbtn { width: 64px; height: 64px; border-radius: 50%; font-size: 28px; font-weight: 900; display: grid; place-items: center; border: 2px solid; background: rgba(255,255,255,.04); transition: transform .1s; }
+.swbtn:active { transform: scale(.9); }
+.swbtn.no { color: #ff5c5c; border-color: #ff5c5c; } .swbtn.si { color: #2ecc71; border-color: #2ecc71; } .swbtn.ab { color: #ffd60a; border-color: #ffd60a; width: 52px; height: 52px; align-self: center; }
+.live { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; letter-spacing: .08em; color: #ff5c5c; }
+.live i { width: 9px; height: 9px; border-radius: 50%; background: #ff5c5c; animation: pulseBar 1s infinite; }
+.gauge { margin-top: 10px; }
+.gauge .bar { height: 10px; margin-top: 4px; }
+.timer { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+.timer i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #ff5c5c, #ffb547, #2ecc71); transform-origin: left; animation: timer linear forwards; }
+@keyframes timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.ach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ach { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px; text-align: center; opacity: .45; font-size: 13px; }
+.ach.on { opacity: 1; border-color: rgba(255,214,10,.45); background: linear-gradient(160deg, rgba(255,214,10,.14), var(--card)); }
+.ach .ai { font-size: 30px; }
+.tl { position: relative; padding-left: 8px; }
+.tl::before { content: ''; position: absolute; left: 25px; top: 0; bottom: 0; width: 2px; background: linear-gradient(var(--oro), #a78bfa, #38bdf8); opacity: .5; }
+.tl-year { font-family: "Bebas Neue", sans-serif; font-size: 22px; color: var(--oro); margin: 14px 0 6px 44px; letter-spacing: 1px; }
+.tl-item { position: relative; display: flex; gap: 12px; align-items: flex-start; padding: 6px 0; animation: fadeUp .35s both; }
+.tl-dot { width: 36px; height: 36px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--card2); border: 2px solid var(--line2); font-size: 17px; z-index: 1; }
+.tl-item.ach .tl-dot { border-color: #ffd60a; } .tl-item.law .tl-dot { border-color: #fb923c; } .tl-item.vote .tl-dot { border-color: #38bdf8; }
+
 </style>
 </head>
 <body>
@@ -1913,7 +1945,7 @@ function enactBill(b) {
     if (G.gov) G.gov.popBank += pop * 0.6;
     G.flags['manovra' + b.year] = true;
     addNews(`Approvata definitivamente la ${billName(b)}. Entra in vigore il 1° gennaio.`, by === 'player' ? 'good' : 'gov');
-    if (by === 'player') { G.stats.laws++; }
+    if (by === 'player') { G.stats.laws++; G.flags.playerManovra = true; }
     return;
   }
   const l = getLaw(b.lawId);
@@ -2231,6 +2263,7 @@ function runGeneralElection() {
   G.otherSeats = { C: 4, S: 2 + 5 };
   const turnout = clamp(58 + gauss() * 2 + (G.flags.hotCampaign ? 2 : 0), 48, 70);
   const regional = {}; REGIONS_DEF.forEach(r => { regional[r.id] = regionShares(r.id); });
+  G.electHist = G.electHist || []; G.electHist.push({ w: G.week, party: P(myPid()).short, vote: votes[myPid()] || 0, seatsC: rc.seats[myPid()] || 0 });
   G.lastElection = { w: G.week, votes, votesS, seatsC: rc.seats, seatsS: rs.seats, premio: rc.premio, units: rc.units.map(u => ({ id: u.id, name: u.name, members: u.members, share: u.share, color: u.color, cand: u.cand, candParty: u.candParty, coal: u.coal })), turnout, sys, prev, regional, legislature: G.legislature + 1 };
   G.legislature++;
   G.cal.legStart = G.week;
@@ -2570,6 +2603,7 @@ function advanceWeek() {
   // umore pubblico: torna lentamente
   AXIS_KEYS.forEach(k => { G.mood[k] += (G.mood0[k] - G.mood[k]) * 0.01; });
   snapshot();
+  G._wk.ach = typeof checkAchievements === 'function' ? checkAchievements() : [];
   const s = G._wk; G._wk = null;
   G.lastSummary = s;
   return s;
@@ -2688,10 +2722,339 @@ function calendarTick() {
 // ============================================================
 const SAVE_PREFIX = 'palazzochigi_';
 function saveGame(slot) { try { localStorage.setItem(SAVE_PREFIX + slot, JSON.stringify(G)); return true; } catch (e) { return false; } }
-function migrate() { if (G.gov && !G.gov.premierParty) G.gov.premierParty = largestIn(G.gov.parties); G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
+function migrate() { if (G.player && !G.player.av && typeof rerollPlayerAvatar === 'function') rerollPlayerAvatar(); G.stats.tv = G.stats.tv || 0; if (G.gov && !G.gov.premierParty) G.gov.premierParty = largestIn(G.gov.parties); G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
 function loadGame(slot) { try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return false; G = JSON.parse(s); migrate(); return true; } catch (e) { return false; } }
 function slotInfo(slot) {
   try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return null; const g = JSON.parse(s); return { name: g.player.name, party: g.parties[g.player.party].short, date: fmtDate(g.week), premier: g.gov && g.gov.premier === 'PLAYER' }; } catch (e) { return null; }
+}
+
+</script>
+<script>
+// Avatar disegnati (generatore preso da Laurera: LAV, _lc, lavSvg)
+const LAV={
+  pelle:['#fde7d6','#fbdcc6','#f6d0b6','#f2c6a8','#ecbd9c','#e5b18c','#dca47c','#cf9469','#c08560','#a8714f'],
+  colCap:['#0f0d0c','#2a1d16','#3d2b20','#5a3a24','#7a5232','#9a6a3f','#b98a55','#d8b06c','#ecd29a','#f3e6c4','#8a3a22','#b4532a','#d0703a','#6b6b6b','#9a9a9a','#cfcfcf','#f2f2f2'],
+  colOcchi:['#3b2618','#1b1b1f','#6b4a2a','#5a7a3a','#3c7fbf','#6f8fa8','#8aa0b0'],
+  colori:['#ef4444','#f97316','#f59e0b','#e8ff00','#22c55e','#15803d','#14b8a6','#38bdf8','#2563eb','#1e3a8a','#a78bfa','#7c3aed','#ff4fb8','#be123c','#f4f4f5','#9ca3af','#374151','#111827'],
+  sfondi:['auto','#14151a','#0e1c33','#24507f','#1f2937','#3b0764','#064e3b','#7f1d1d','#78350f','#e8ff00','#f4f4f5'],
+  // [chiave, etichetta]
+  viso:[['ovale','Ovale'],['tondo','Tondo'],['squadrato','Squadrato'],['allungato','Allungato'],['cuore','A cuore']],
+  capelli:[['corti','Corti'],['rasato','Rasati'],['spazzola','A spazzola'],['ciuffo','Ciuffo'],['riga','Riga di lato'],['indietro','Tirati indietro'],['frangia','Frangia'],['mossi','Mossi'],['ricci','Ricci'],['ricciCorti','Ricci corti'],['cresta','Cresta'],['codino','Codino'],['stempiato','Stempiato'],['chierica','Calvo ai lati'],['pelato','Pelato'],['pixie','Corti da donna'],['caschetto','Caschetto'],['lunghi','Lunghi lisci'],['lunghiMossi','Lunghi mossi'],['coda','Coda'],['codaAlta','Coda alta'],['chignon','Chignon'],['treccia','Treccia']],
+  sfum:[['no','Nessuna'],['fade','Sfumati ai lati'],['tempie','Tempie grigie'],['brizzolato','Brizzolati'],['meches','Colpi di sole'],['ombre','Punte chiare']],
+  barba:[['no','Nessuna'],['accenno','Accenno'],['corta','Corta'],['incolta','Incolta'],['piena','Piena'],['lunga','Lunga'],['pizzetto','Pizzetto'],['cerchio','A cerchio'],['baffi','Baffi'],['baffiPizzetto','Baffi e pizzetto'],['mento','Sul mento'],['basette','Basette']],
+  sopr:[['normali','Normali'],['arcuate','Arcuate'],['dritte','Dritte'],['folte','Folte'],['sottili','Sottili'],['angolate','Angolate']],
+  occhi:[['mandorla','A mandorla'],['tondi','Tondi'],['piccoli','Piccoli'],['sottili','Socchiusi']],
+  naso:[['piccolo','Piccolo'],['medio','Medio'],['grande','Grande'],['aquilino','Aquilino'],['largo','Largo']],
+  bocca:[['sorriso','Sorriso'],['aperto','Sorriso aperto'],['mezzo','Mezzo sorriso'],['serio','Serio'],['sottile','Labbra sottili']],
+  occhiali:[['no','Nessuno'],['tondi','Da vista tondi'],['rett','Da vista squadrati'],['meta','Mezza montatura'],['sole','Da sole'],['aviator','Aviatore'],['sport','Sportivi']],
+  testa:[['no','Nessuno'],['fascia','Fascia'],['fasciaLarga','Fascia larga'],['cappello','Cappellino'],['rovescio','Cappellino al contrario'],['visiera','Visiera'],['bandana','Bandana'],['berretto','Berretto di lana'],['pescatore','Cappello da pescatore']],
+  maglia:[['polo','Polo'],['girocollo','Girocollo'],['scolloV','Scollo a V'],['sport','Sportiva'],['canotta','Canotta'],['felpa','Felpa']],
+};
+const _lc=(c,a)=>{if(!/^#[0-9a-f]{6}$/i.test(c))return c;const n=parseInt(c.slice(1),16),f=v=>Math.max(0,Math.min(255,v-a));return`rgb(${f(n>>16)},${f((n>>8)&255)},${f(n&255)})`;};   // a>0 scurisce, a<0 schiarisce
+function lavSvg(c){
+  const FS={ovale:{w:36,jw:22,cy:142},tondo:{w:39,jw:30,cy:138},squadrato:{w:37,jw:32,cy:138,sq:1},allungato:{w:33,jw:20,cy:148},cuore:{w:38,jw:15,cy:142}};
+  const f=FS[c.viso]||FS.ovale,L=100-f.w,R=100+f.w,k=f.w/36,sk=c.pelle,hc=c.colCap,bc=c.colBarba||hc,E=94,ex=f.w*.42,cy=f.cy;
+  const sx=s=>`<g transform="translate(100 0) scale(${k} 1) translate(-100 0)">${s}</g>`;
+  let defs=`<radialGradient id="bg" cx="50%" cy="38%" r="72%"><stop offset="0" stop-color="${c.sfondo==='auto'?c.colMaglia:_lc(c.sfondo,-30)}" stop-opacity="${c.sfondo==='auto'?.4:1}"/><stop offset="1" stop-color="${c.sfondo==='auto'?'#14151a':c.sfondo}"/></radialGradient>`
+    +`<radialGradient id="sk" cx="46%" cy="40%" r="70%"><stop offset="0" stop-color="${_lc(sk,-10)}"/><stop offset=".65" stop-color="${sk}"/><stop offset="1" stop-color="${_lc(sk,24)}"/></radialGradient>`
+    +`<linearGradient id="hg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${_lc(hc,-28)}"/><stop offset=".45" stop-color="${hc}"/><stop offset="1" stop-color="${c.sfum==='ombre'?_lc(hc,-70):_lc(hc,18)}"/></linearGradient>`
+    +`<linearGradient id="mg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${_lc(c.colMaglia,-14)}"/><stop offset="1" stop-color="${_lc(c.colMaglia,26)}"/></linearGradient>`
+    +`<pattern id="bz" width="13" height="11" patternUnits="userSpaceOnUse"><path d="M1 2l3 1.2M7 5l2.6-.8M3 8.5l2.4 1.4M10 9.5l2.2.6" stroke="#ececec" stroke-width="1.2" stroke-opacity=".6" stroke-linecap="round"/></pattern>`
+    +`<pattern id="rz" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="${_lc(hc,-20)}" opacity=".7"/></pattern>`
+    +`<linearGradient id="fd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sk}" stop-opacity="0"/><stop offset="1" stop-color="${sk}" stop-opacity=".95"/></linearGradient>`;
+  const H='url(#hg)';
+  // forma dei capelli rasati: segue il cranio (coordinate per testa larga 36, poi adattata al viso)
+  const BUZZ='M63.6 92C63.6 57.6 77.6 45.6 100 45.6C122.4 45.6 136.4 57.6 136.4 92L134.2 92C133.4 83 131.6 75.5 127.6 70.4C121 65.4 108.4 64.2 100 64.6C91.6 64.2 79 65.4 72.4 70.4C68.4 75.5 66.6 83 65.8 92Z';
+  defs+=`<pattern id="bz2" width="6" height="5.6" patternUnits="userSpaceOnUse" patternTransform="rotate(17)">${[[.6,.9],[2.3,.4],[4.1,1.3],[5.4,.2],[1.4,2.5],[3.3,3],[5,3.6],[.4,4.4],[2.4,4.9],[4.4,5.2]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r=".33" fill="${_lc(hc,25)}"/>`).join('')}</pattern><mask id="bzm"><path d="${BUZZ}" fill="#fff" filter="url(#bzb)"/></mask><filter id="bzb" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="1.3"/></filter>`;
+  // ── capelli: parte dietro (passa dietro collo e spalle) e parte davanti ──
+  const C=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="FILL"/>`;
+  const capBase=`<path d="M62 96C56 52 80 34 100 34C120 34 144 52 138 96C136 80 132 72 126 68C116 64 84 64 74 68C68 72 64 80 62 96Z" fill="FILL"/>`;
+  const hairs={
+    corti:{f:capBase},
+    // rasati: aderenti al cranio (non sporgono), attaccatura sfumata, pelo fine
+    rasato:{f:`<g mask="url(#bzm)"><path d="${BUZZ}" fill="${hc}" opacity=".5"/><path d="${BUZZ}" fill="url(#bz2)"/></g>`},
+    spazzola:{f:`<path d="M62 94C58 64 66 50 72 46L72 36L80 42L84 30L91 40L97 27L103 39L110 28L115 40L122 32L126 44L130 40C138 52 142 70 138 94C136 80 132 72 126 68C116 64 84 64 74 68C68 72 64 80 62 94Z" fill="FILL"/>`},
+    ciuffo:{f:capBase+`<path d="M72 70C66 50 80 32 100 30C118 22 138 32 136 48C134 58 122 62 110 66C98 70 84 72 72 70Z" fill="FILL"/>`},
+    riga:{f:`<path d="M62 96C56 52 80 34 100 34C120 34 144 52 138 96C136 80 130 70 120 66C110 63 98 66 86 72C80 66 72 70 66 80C64 84 63 90 62 96Z" fill="FILL"/>`,x:`<path d="M86 38Q83 56 86 72" stroke="${_lc(hc,30)}" stroke-width="1.6" fill="none"/>`},
+    indietro:{f:`<path d="M63 92C58 50 80 32 100 32C120 32 142 50 137 92C135 72 128 62 116 58C108 56 92 56 84 58C72 62 65 72 63 92Z" fill="FILL"/>`,x:`<path d="M78 58Q96 40 124 50M74 66Q96 46 130 58M84 56Q100 36 116 42" stroke="${_lc(hc,-30)}" stroke-width="1.3" fill="none" opacity=".6"/>`},
+    frangia:{f:`<path d="M62 98C56 52 80 34 100 34C120 34 144 52 138 98C136 86 134 80 130 78L126 82L120 76L114 82L108 76L102 82L96 76L90 82L84 76L78 82L72 77C68 80 64 86 62 98Z" fill="FILL"/>`},
+    mossi:{b:`<path d="M58 88C52 104 54 118 62 124L68 100Z" fill="FILL"/><path d="M142 88C148 104 146 118 138 124L132 100Z" fill="FILL"/>`,f:`<path d="M60 104C52 52 80 32 100 32C122 32 148 52 140 104C138 92 136 84 130 80C128 74 120 70 112 72C114 78 110 82 104 82C104 74 96 70 86 72C76 72 66 80 60 104Z" fill="FILL"/>`},
+    ricci:{f:[[70,82],[70,68],[78,56],[90,48],[104,46],[117,50],[127,59],[132,72],[134,86],[66,94],[86,58],[100,56],[114,60],[76,72],[124,72],[96,64],[110,66]].map(([x,y])=>C(x,y,11.5)).join('')},
+    ricciCorti:{f:capBase+[[72,70],[80,58],[92,51],[106,50],[118,56],[128,66],[86,64],[100,60],[114,63]].map(([x,y])=>C(x,y,7.5)).join('')},
+    cresta:{f:`<g mask="url(#bzm)"><path d="${BUZZ}" fill="${hc}" opacity=".42"/><path d="${BUZZ}" fill="url(#bz2)"/></g><path d="M88 67C86 55 90 41 100 37C110 41 114 55 112 67C107 64.5 93 64.5 88 67Z" fill="FILL"/>`},
+    codino:{f:C(100,30,12)+`<path d="M63 92C58 50 80 34 100 34C120 34 142 50 137 92C135 72 128 62 116 58C108 56 92 56 84 58C72 62 65 72 63 92Z" fill="FILL"/>`},
+    stempiato:{f:`<path d="M62 96C56 52 80 34 100 34C120 34 144 52 138 96C136 82 134 70 128 58C122 64 120 70 114 68C108 62 92 62 86 68C80 70 78 64 72 58C66 70 64 82 62 96Z" fill="FILL"/>`},
+    chierica:{f:`<path d="M62 98C58 82 60 70 66 62L71 66C67 74 66 86 67 99Z" fill="FILL"/><path d="M138 98C142 82 140 70 134 62L129 66C133 74 134 86 133 99Z" fill="FILL"/>`,shine:1},
+    pelato:{f:'',shine:1},
+    pixie:{f:`<path d="M62 98C56 50 82 32 102 34C126 34 144 52 138 94C134 78 126 70 116 70C104 72 90 78 74 86C68 88 64 92 62 98Z" fill="FILL"/>`},
+    caschetto:{b:`<path d="M58 92C56 118 60 130 68 132L132 132C140 130 144 118 142 92Z" fill="FILL"/>`,f:`<path d="M60 106C58 52 80 34 100 34C120 34 142 52 140 106C138 92 136 82 130 78C116 80 84 80 70 78C64 82 62 92 60 106Z" fill="FILL"/>`},
+    lunghi:{b:`<path d="M58 88C50 120 54 150 66 168C76 158 74 142 72 126L128 126C126 142 124 158 134 168C146 150 150 120 142 88Z" fill="FILL"/>`,f:`<path d="M62 102C58 54 80 34 100 34C122 34 142 54 138 102C134 80 118 64 101 62C84 64 66 80 62 102Z" fill="FILL"/>`,x:`<path d="M101 36V62" stroke="${_lc(hc,30)}" stroke-width="1.4"/>`},
+    lunghiMossi:{b:[[60,96],[56,112],[58,128],[62,144],[68,160],[140,96],[144,112],[142,128],[138,144],[132,160]].map(([x,y])=>C(x,y,12)).join('')+`<path d="M64 100L136 100L134 160L66 160Z" fill="FILL"/>`,f:`<path d="M60 104C54 54 80 34 100 34C122 34 146 54 140 104C136 82 122 66 106 64C112 72 106 78 98 78C96 70 90 66 82 70C72 76 64 88 60 104Z" fill="FILL"/>`},
+    coda:{b:`<path d="M128 70C162 70 168 114 152 150C154 118 146 98 128 94Z" fill="FILL"/>`,f:`<path d="M62 96C58 52 80 34 100 34C122 34 142 52 138 92C132 74 118 66 100 66C84 66 68 76 62 96Z" fill="FILL"/>`},
+    codaAlta:{b:`<path d="M104 38C134 20 162 48 152 98C148 74 134 58 114 54Z" fill="FILL"/>`,f:`<path d="M62 96C58 52 80 34 100 34C122 34 142 52 138 92C132 74 118 66 100 66C84 66 68 76 62 96Z" fill="FILL"/><circle cx="110" cy="38" r="4" fill="${c.colTesta}"/>`},
+    chignon:{f:C(100,30,15)+`<path d="M62 96C58 52 80 36 100 36C122 36 142 52 138 92C132 74 118 66 100 66C84 66 68 76 62 96Z" fill="FILL"/>`},
+    treccia:{b:[[64,112],[62,126],[63,140],[66,154],[70,166]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="9" ry="8" fill="FILL" stroke="${_lc(hc,30)}" stroke-width="1.2"/>`).join(''),f:`<path d="M62 102C58 52 80 34 100 34C122 34 142 52 138 92C132 74 118 66 100 66C84 66 70 78 66 104Z" fill="FILL"/>`},
+  };
+  const hs=hairs[c.capelli]||hairs.corti;
+  const hairBack=(hs.b||'').split('FILL').join(H),hairFront=(hs.f||'').split('FILL').join(H);
+  let hairOver='';
+  if(hs.f&&c.sfum==='brizzolato')hairOver+=(hs.f||'').split('FILL').join('url(#bz)');
+  if(hs.f&&c.sfum==='meches')hairOver+=`<path d="M78 50Q86 44 92 58M98 42Q104 40 106 56M114 46Q122 46 124 60M70 64Q74 56 80 60" stroke="${_lc(hc,-80)}" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".55"/>`;
+  if(hs.f&&!['rasato','pelato','chierica','cresta'].includes(c.capelli)&&c.sfum!=='brizzolato')hairOver+=`<path d="M84 44Q96 38 112 42M80 52Q88 47 96 48" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".16"/>`;
+  if(hs.f&&['fade','tempie'].includes(c.sfum)){const col=c.sfum==='fade'?'url(#fd)':'#c9c9c9',op=c.sfum==='fade'?1:.8;hairOver+=`<path d="M62 98C60 88 61 80 65 74C69 76 71 80 71 86C71 92 69 96 66 100Z" fill="${col}" opacity="${op}"/><path d="M138 98C140 88 139 80 135 74C131 76 129 80 129 86C129 92 131 96 134 100Z" fill="${col}" opacity="${op}"/>`;}
+  if(hs.x)hairOver+=hs.x;
+  // ── maglia ──
+  const md=c.colDett,mt=c.maglia;
+  let shirt='',under='';
+  const body=`<path d="M20 214C24 178 56 162 100 162C144 162 176 178 180 214Z" fill="url(#mg)"/><path d="M50 182Q56 196 54 214M150 182Q144 196 146 214" stroke="${_lc(c.colMaglia,40)}" stroke-width="1.6" fill="none" opacity=".6"/>`;
+  if(mt==='canotta'){under=`<path d="M20 214C24 180 50 166 82 163L118 163C150 166 176 180 180 214Z" fill="${_lc(sk,14)}"/>`;shirt=`<path d="M58 214C60 188 70 172 78 165L86 165Q100 182 114 165L122 165C130 172 140 188 142 214Z" fill="url(#mg)"/><path d="M86 165Q100 182 114 165" stroke="${md}" stroke-width="3" fill="none"/>`;}
+  else if(mt==='felpa'){under=`<path d="M64 170C66 148 134 148 136 170Z" fill="${_lc(c.colMaglia,30)}"/>`;shirt=body+`<path d="M84 163Q100 176 116 163" stroke="${_lc(c.colMaglia,40)}" stroke-width="4" fill="none"/><path d="M100 172V214" stroke="${md}" stroke-width="2.4"/><path d="M92 170V190M108 170V190" stroke="${md}" stroke-width="1.8" stroke-linecap="round"/>`;}
+  else{shirt=body;
+    if(mt==='girocollo')shirt+=`<path d="M80 163Q100 180 120 163" stroke="${md}" stroke-width="4.5" fill="none" stroke-linecap="round"/>`;
+    if(mt==='sport')shirt+=`<path d="M80 163Q100 180 120 163" stroke="${md}" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M40 176L70 166L66 214L40 214ZM160 176L130 166L134 214L160 214Z" fill="${md}" opacity=".85"/>`;
+    if(mt==='scolloV')shirt+=`<path d="M82 162L100 188L118 162Z" fill="${_lc(sk,14)}"/><path d="M82 162L100 188L118 162" stroke="${md}" stroke-width="3.5" fill="none" stroke-linejoin="round"/>`;
+    if(mt==='polo')shirt+=`<path d="M100 172V196" stroke="${_lc(c.colMaglia,40)}" stroke-width="2"/><circle cx="100" cy="181" r="1.8" fill="${md}"/><circle cx="100" cy="190" r="1.8" fill="${md}"/><path d="M82 160L100 172L92 182L77 166Z" fill="${md}"/><path d="M118 160L100 172L108 182L123 166Z" fill="${md}"/>`;
+  }
+  // ── viso ──
+  const face=`M${L} 92C${L} 58 ${100-f.w*.62} 46 100 46C${100+f.w*.62} 46 ${R} 58 ${R} 92C${R} ${f.sq?126:116} ${100+f.jw} ${cy-6} 100 ${cy}C${100-f.jw} ${cy-6} ${L} ${f.sq?126:116} ${L} 92Z`;
+  const ears=`<ellipse cx="${L+1}" cy="98" rx="7" ry="11" fill="${sk}"/><ellipse cx="${R-1}" cy="98" rx="7" ry="11" fill="${sk}"/><path d="M${L-1} 92Q${L-4} 98 ${L} 104M${R+1} 92Q${R+4} 98 ${R} 104" stroke="${_lc(sk,30)}" stroke-width="1.6" fill="none"/>`
+    +(c.orecchini?`<circle cx="${L}" cy="110" r="2.6" fill="#f0c040"/><circle cx="${R}" cy="110" r="2.6" fill="#f0c040"/>`:'');
+  const neck=`<path d="M86 ${cy-24}L86 163Q100 171 114 163L114 ${cy-24}Z" fill="${_lc(sk,16)}"/><ellipse cx="100" cy="${cy+4}" rx="16" ry="5" fill="${_lc(sk,42)}" opacity=".3" filter="url(#bl2)"/>`;
+  // occhi
+  const eye=(x)=>{const ir=c.occhi==='tondi'?3.8:c.occhi==='piccoli'?2.9:3.4;let w='',lid='';
+    if(c.occhi==='tondi'){w=`<ellipse cx="${x}" cy="${E}" rx="6.6" ry="5.6" fill="#fff"/>`;lid=`<path d="M${x-6.6} ${E}Q${x} ${E-7.5} ${x+6.6} ${E}" stroke="#2b1d16" stroke-width="1.6" fill="none"/>`;}
+    else if(c.occhi==='piccoli'){w=`<ellipse cx="${x}" cy="${E}" rx="5" ry="3.8" fill="#fff"/>`;lid=`<path d="M${x-5} ${E}Q${x} ${E-5} ${x+5} ${E}" stroke="#2b1d16" stroke-width="1.5" fill="none"/>`;}
+    else if(c.occhi==='sottili'){w=`<path d="M${x-7} ${E+.5}Q${x} ${E-3.5} ${x+7} ${E+.5}Q${x} ${E+4} ${x-7} ${E+.5}Z" fill="#fff"/>`;lid=`<path d="M${x-7.5} ${E+.5}Q${x} ${E-4} ${x+7.5} ${E+.5}" stroke="#2b1d16" stroke-width="1.9" fill="none"/>`;}
+    else{w=`<path d="M${x-7} ${E}Q${x} ${E-6} ${x+7} ${E}Q${x} ${E+5} ${x-7} ${E}Z" fill="#fff"/>`;lid=`<path d="M${x-7.4} ${E+.3}Q${x} ${E-6.6} ${x+7.4} ${E+.3}" stroke="#2b1d16" stroke-width="1.7" fill="none"/>`;}
+    const id='e'+Math.round(x);
+    return`<clipPath id="${id}">${w.replace('fill="#fff"','')}</clipPath>${w}<g clip-path="url(#${id})"><circle cx="${x}" cy="${E}" r="${ir}" fill="${c.colOcchi}"/><circle cx="${x}" cy="${E}" r="${ir*.48}" fill="#0b0b0d"/><circle cx="${x+1.1}" cy="${E-1.3}" r="${ir*.3}" fill="#fff"/></g>${lid}`;};
+  const eyes=eye(100-ex)+eye(100+ex);
+  // sopracciglia
+  const bw={sottili:1.5,normali:2.6,folte:4,arcuate:2.4,dritte:3,angolate:2.8}[c.sopr]||2.6,B=E-11;
+  const brow=(x,s)=>{const o=x+s*8.5,i=x-s*8.5;   // s=1 occhio destro: esterno a destra
+    if(c.sopr==='arcuate')return`M${i} ${B+1}Q${x} ${B-6} ${o} ${B+1.5}`;
+    if(c.sopr==='dritte'||c.sopr==='folte')return`M${i} ${B}Q${x} ${B-2} ${o} ${B+.5}`;
+    if(c.sopr==='angolate')return`M${i} ${B+1.5}L${x+s*2} ${B-3}L${o} ${B+1}`;
+    return`M${i} ${B+.5}Q${x} ${B-3.5} ${o} ${B+1}`;};
+  const brows=`<path d="${brow(100-ex,-1)} ${brow(100+ex,1)}" stroke="${_lc(c.colBarba||hc,10)}" stroke-width="${bw}" fill="none" stroke-linecap="round"/>`;
+  // naso
+  const ns=_lc(sk,45);
+  const nose={piccolo:`<path d="M97 111Q100 114 103 111" stroke="${ns}" stroke-width="1.7" fill="none" stroke-linecap="round"/>`,
+    medio:`<path d="M98.5 99Q95 110 96 112.5Q100 116 104 112.5" stroke="${ns}" stroke-width="1.7" fill="none" stroke-linecap="round"/>`,
+    grande:`<path d="M98 97Q92 112 93.5 115.5Q100 120 106.5 115.5Q108 112 104 110" stroke="${ns}" stroke-width="1.9" fill="none" stroke-linecap="round"/>`,
+    aquilino:`<path d="M99 97Q102 103 100 108Q95 113 97 115.5Q100 117.5 104 115.5" stroke="${ns}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`,
+    largo:`<path d="M99 100Q97 109 95 111Q92 115 96 116Q100 118 104 116Q108 115 105 111" stroke="${ns}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`}[c.naso]||'';
+  const noseSh=`<ellipse cx="101" cy="112" rx="6" ry="3" fill="${_lc(sk,22)}" opacity=".35"/>`;
+  // bocca
+  // bocca con le labbra: linea della bocca, labbro superiore sottile, inferiore più pieno con riflesso, angoli in ombra
+  const M=Math.min(126,cy-14),P=v=>+v.toFixed(2);
+  const qy=(x0,y0,q1,x1,y1,x)=>{const t=Math.max(0,Math.min(1,(x-x0)/(x1-x0)));return(1-t)*(1-t)*y0+2*t*(1-t)*q1+t*t*y1;};
+  const bk=c.bocca||'sorriso',thin=bk==='sottile';
+  const MG={sorriso:[88.5,111.5,M-1.4,M+4.6],aperto:[87.5,112.5,M-2,M+1.4],mezzo:[90,111,M+.2,M+2.4,M-3.2],serio:[91,109,M+.4,M+.9],sottile:[89,111,M-.6,M+3]}[bk]||[88.5,111.5,M-1.4,M+4.6];
+  const [mxL,mxR]=MG,mHw=(mxR-mxL)/2,mc=(mxL+mxR)/2;
+  const mLine=x=>qy(mxL,MG[2],MG[3],mxR,MG[4]!=null?MG[4]:MG[2],x);   // linea tra le labbra (per "aperto": bordo dei denti)
+  const mOpen=x=>bk==='aperto'?qy(mxL,M-2,M+11,mxR,M-2,x):mLine(x);    // bordo alto del labbro inferiore
+  const fr=(x,p)=>Math.pow(Math.max(0,1-Math.pow((x-mc)/mHw,2)),p);
+  const UH=thin?1.5:2.5,LH=thin?2.2:3.7;
+  const mUp=x=>mLine(x)-UH*fr(x,.7)+(Math.abs(x-mc)<2.2?.55*(1-Math.abs(x-mc)/2.2):0);   // bordo alto del labbro superiore (con l'arco di cupido)
+  const mLow=x=>mOpen(x)+LH*fr(x,.6);                                                  // bordo basso del labbro inferiore
+  const xs=Array.from({length:15},(_,i)=>mxL+(mxR-mxL)*i/14),pl=(f,a)=>a.map(x=>`${P(x)} ${P(f(x))}`).join('L');
+  // colore delle labbra: la pelle spostata verso il rosa scuro
+  const lipC=c.rossetto?'#b3263a':'#'+[1,3,5].map(i=>{const a=parseInt(sk.slice(i,i+2),16),b=parseInt('b8504a'.slice(i-1,i+1),16);return Math.round(a+(b-a)*.46).toString(16).padStart(2,'0');}).join('');
+  const ms=_lc(sk,48);
+  let mouth=``
+    +`<path d="M${P(mc-1.2)} ${P(mUp(mc)-4.2)}L${P(mc-1.05)} ${P(mUp(mc-1.05)-.4)}M${P(mc+1.2)} ${P(mUp(mc)-4.2)}L${P(mc+1.05)} ${P(mUp(mc+1.05)-.4)}" stroke="${ms}" stroke-width=".8" opacity=".12"/>`;   // solco sopra il labbro
+  if(bk==='aperto'){
+    mouth+=`<path d="M${pl(mLine,xs)}L${pl(mOpen,[...xs].reverse())}Z" fill="#5a1d18"/>`
+      +`<path d="M${pl(mLine,xs)}L${pl(x=>Math.min(mLine(x)+3.4,mOpen(x)),[...xs].reverse())}Z" fill="#f3efe7"/>`
+      +`<path d="M${P(mc-4.2)} ${P(mLine(mc-4.2))}V${P(mLine(mc-4.2)+3)}M${P(mc)} ${P(mLine(mc)+.2)}V${P(mLine(mc)+3.2)}M${P(mc+4.2)} ${P(mLine(mc+4.2))}V${P(mLine(mc+4.2)+3)}" stroke="#d8d0c4" stroke-width=".5"/>`;
+  }
+  mouth+=`<path d="M${pl(mLine,xs)}L${pl(mUp,[...xs].reverse())}Z" fill="${_lc(lipC,16)}"/>`
+    +`<path d="M${pl(mOpen,xs)}L${pl(mLow,[...xs].reverse())}Z" fill="${lipC}"/>`
+    +`<ellipse cx="${P(mc)}" cy="${P(mOpen(mc)+LH*.45)}" rx="3.6" ry=".95" fill="#fff" opacity=".28"/>`
+    +(bk==='aperto'?'':`<path d="M${pl(mLine,xs)}" stroke="#6b2a24" stroke-width="1.05" fill="none" stroke-linecap="round" opacity=".9"/>`)
+    +`<circle cx="${P(mxL-.6)}" cy="${P(mLine(mxL))}" r="1.1" fill="${ms}" opacity=".35"/><circle cx="${P(mxR+.6)}" cy="${P(mLine(mxR))}" r="1.1" fill="${ms}" opacity=".35"/>`
+    +`<ellipse cx="${P(mc)}" cy="${P(mLow(mc)+1.7)}" rx="5" ry="1.2" fill="${ms}" opacity=".18"/>`;   // ombra sotto il labbro
+  // ── barba: segue la mascella, bordi "pelosi", trama dei peli, sfuma nella pelle sulle guance ──
+  const X=d=>+(100+d).toFixed(2),jy=f.sq?126:116;
+  defs+=`<filter id="fur2" x="-15%" y="-15%" width="130%" height="130%"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="7" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="1" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".45"/></filter>`
+    +`<filter id="fur" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="1" seed="4" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="2.2" xChannelSelector="R" yChannelSelector="G"/></filter>`
+    +`<filter id="bl1" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation=".8"/></filter><filter id="bl2" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.8"/></filter><filter id="bl4" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3.5"/></filter>`
+    +`<linearGradient id="bgr" x1="0" y1="90" x2="0" y2="${cy+20}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${_lc(bc,-14)}"/><stop offset=".55" stop-color="${bc}"/><stop offset="1" stop-color="${_lc(bc,28)}"/></linearGradient>`
+    +`<pattern id="bst" width="7" height="6.6" patternUnits="userSpaceOnUse" patternTransform="rotate(11)">${[[.8,1.1,.45],[3.4,.6,.38],[5.6,2.2,.42],[2.1,3.5,.4],[4.6,4.6,.36],[6.3,5.6,.4],[1.2,5.8,.38],[3.9,2.7,.3]].map(([x,y,r])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${_lc(bc,10)}"/>`).join("")}</pattern>`
+    +`<pattern id="bsn" width="9" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(7)"><path d="M1 .5l.6 3.2M6.2 .8l.7 3.4M2.2 4.8l.5 2.8M7.4 5.6l.3 2.2" stroke="${_lc(bc,34)}" stroke-width=".7" stroke-linecap="round" opacity=".5"/><path d="M3.6 2.2l.3 2.8M8 3.2l.4 2.4M5 5.4l.6 2.4" stroke="${_lc(bc,-30)}" stroke-width=".55" stroke-linecap="round" opacity=".35"/></pattern>`
+    +`<linearGradient id="bmg" x1="0" y1="86" x2="0" y2="104" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#000"/><stop offset="1" stop-color="#fff"/></linearGradient><mask id="bmk"><rect width="200" height="220" fill="url(#bmg)"/></mask>`
+    +`<clipPath id="fcl"><path d="${face}"/></clipPath>`;
+  const bOut=e=>`M${L+1} 84L${L+1} 92C${+(L+1-e*.15).toFixed(2)} ${jy+e*.3} ${+(100-f.jw-e*.5).toFixed(2)} ${cy-6+e} 100 ${+(cy+e*1.05).toFixed(2)}C${+(100+f.jw+e*.5).toFixed(2)} ${cy-6+e} ${+(R-1+e*.15).toFixed(2)} ${jy+e*.3} ${R-1} 92L${R-1} 84`;
+  const bIn=`C${R-5} 96 ${R-9} 106 ${R-13} 112C${R-17} 116 ${X(14)} ${M-6} ${X(12)} ${M-8}C${X(8)} ${M-11} ${X(3)} ${M-10.5} 100 ${M-9.5}C${X(-3)} ${M-10.5} ${X(-8)} ${M-11} ${X(-12)} ${M-8}C${X(-14)} ${M-6} ${L+17} 116 ${L+13} 112C${L+9} 106 ${L+5} 96 ${L+1} 84Z`;
+  const bFull=e=>bOut(e)+bIn;
+  // baffi e pizzetto costruiti sulla bocca: seguono la curva del sorriso senza toccarla
+  const mTop=mUp,mh=mHw+1.6;
+  const mustPts=[];for(let i=0;i<=14;i++)mustPts.push(mxL-1.6+(mxR-mxL+3.2)*i/14);
+  const mBot=x=>mTop(Math.max(mxL,Math.min(mxR,x)))-1.1,mTh=x=>2+4.4*Math.max(0,1-Math.pow((x-mc)/mh,2));
+  const must='M'+mustPts.map(x=>`${P(x)} ${P(mBot(x))}`).join('L')+'L'+[...mustPts].reverse().map(x=>`${P(x)} ${P(mBot(x)-mTh(x)-(Math.abs(x-mc)<1.2?-.6:0))}`).join('L')+'Z';
+  const gTop=x=>mLow(x)+2.2,gy0=gTop(100),gBot=Math.min(cy-3.4,gy0+5.6),gL=X(-5.2),gR=X(5.2);
+  const goat=`M${gL} ${P(gTop(gL))}`+[-2.6,0,2.6,5.2].map(d=>`L${X(d)} ${P(gTop(X(d)))}`).join('')+`C${X(6.2)} ${P(gTop(gR)+2.4)} ${X(5.4)} ${P(gBot-2)} ${X(3.4)} ${P(gBot-.4)}C${X(1.8)} ${P(gBot+.5)} ${X(-1.8)} ${P(gBot+.5)} ${X(-3.4)} ${P(gBot-.4)}C${X(-5.4)} ${P(gBot-2)} ${X(-6.2)} ${P(gTop(gL)+2.4)} ${gL} ${P(gTop(gL))}Z`;
+  const soul='';
+  // a cerchio: baffo e pizzetto uniti da due strisce sottili che girano attorno agli angoli della bocca
+  const rs=s=>{const xe=s<0?mxL:mxR,o=s*1.4,w=s*1.9,gx=X(s*4.6),gy=gTop(gx);return`M${P(xe+o)} ${P(mBot(xe)-.6)}C${P(xe+o+s*1.6)} ${P(mBot(xe)+5)} ${P(xe+o)} ${P(gy+2.6)} ${gx} ${P(gy+1)}L${gx} ${P(gy+2.8)}C${P(xe+o+w)} ${P(gy+4.2)} ${P(xe+o+w+s*1.6)} ${P(mBot(xe)+5)} ${P(xe+o+w)} ${P(mBot(xe)-.6)}Z`;};
+  const ring=rs(-1)+rs(1);
+  const strap=bOut(1)+`C${R-6} 96 ${R-7} 110 ${R-9} 118C${R-12} 128 ${X(f.jw-4)} ${cy-10} 100 ${cy-3}C${X(-f.jw+4)} ${cy-10} ${L+12} 128 ${L+9} 118C${L+7} 110 ${L+6} 96 ${L+1} 84Z`;
+  const burns=`M${L+1} 82L${L+7.5} 82C${L+8} 92 ${L+8.5} 102 ${L+7} 112L${L+1.5} 108ZM${R-1} 82L${R-7.5} 82C${R-8} 92 ${R-8.5} 102 ${R-7} 112L${R-1.5} 108Z`;
+  // dense = barba piena con trama; stub = solo pelo corto (puntini)
+  const dense=(d,op=1)=>`<g filter="url(#fur)" opacity="${op}"><path d="${d}" fill="url(#bgr)"/><path d="${d}" fill="url(#bsn)"/></g>`;
+  // pezzi piccoli (baffi, pizzetto): bordo morbido senza deformarli
+  const fine=(d,op=.9,fl="url(#bgr)")=>`<g filter="url(#fur2)" opacity="${op}"><path d="${d}" fill="${fl}"/><path d="${d}" fill="url(#bsn)"/></g>`;
+  defs+=`<linearGradient id="bgg" x1="0" y1="${P(gy0-1)}" x2="0" y2="${P(gBot)}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${bc}" stop-opacity=".35"/><stop offset=".45" stop-color="${bc}" stop-opacity=".9"/><stop offset="1" stop-color="${_lc(bc,18)}"/></linearGradient>`;
+  const stub=(d,op)=>`<path d="${d}" fill="${bc}" opacity="${op*.28}" filter="url(#bl1)"/><path d="${d}" fill="url(#bst)" opacity="${op}"/>`;
+  const chinSh=e=>`<path d="M${X(-f.jw+2)} ${cy-8+e}Q100 ${cy+6+e*1.1} ${X(f.jw-2)} ${cy-8+e}" stroke="#000" stroke-width="5" fill="none" opacity=".2" filter="url(#bl2)"/>`;
+  const bt=c.barba||'no';
+  const beard={no:'',
+    accenno:`<g mask="url(#bmk)">${stub(bFull(0),.75)}</g>`,
+    corta:`<g mask="url(#bmk)">${stub(bFull(0),.9)}${dense(bFull(1),.6)}</g>${fine(must,.85)}`,
+    incolta:`<g mask="url(#bmk)">${stub(bFull(1),1)}${dense(bFull(3),.75)}</g>${fine(must,.95)}`,
+    piena:`<g mask="url(#bmk)">${stub(bFull(1),1)}${dense(bFull(4))}${chinSh(4)}</g>${fine(must)}`,
+    lunga:`<g mask="url(#bmk)">${stub(bFull(2),1)}${dense(bFull(20))}${chinSh(20)}</g>${fine(must)}`,
+    pizzetto:fine(goat,.92,"url(#bgg)"),
+    cerchio:fine(must)+fine(ring,.8)+fine(goat,.92,"url(#bgg)"),
+    baffi:fine(must),
+    baffiPizzetto:fine(must)+fine(goat,.92,"url(#bgg)"),
+    mento:dense(strap),
+    basette:dense(burns,.95)}[bt]||'';
+  // ── occhiali: montatura sottile, lenti con riflesso, ombra sul viso ──
+  const gx1=+(100-ex).toFixed(2),gx2=+(100+ex).toFixed(2),arm=(dy=0)=>`M${gx1-10.5} ${E-2+dy}L${L+1} ${E-4}M${gx2+10.5} ${E-2+dy}L${R-1} ${E-4}`;
+  defs+=`<linearGradient id="lens" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".24"/><stop offset=".42" stop-color="#fff" stop-opacity=".04"/><stop offset=".5" stop-color="#fff" stop-opacity=".16"/><stop offset=".62" stop-color="#fff" stop-opacity=".02"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>`
+    +`<linearGradient id="dlens" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d0f12"/><stop offset="1" stop-color="#3b4048"/></linearGradient>`
+    +`<linearGradient id="tort" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7a4a26"/><stop offset=".5" stop-color="#3a2212"/><stop offset="1" stop-color="#8a5a30"/></linearGradient>`
+    +`<linearGradient id="slens" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1e3a8a"/><stop offset=".5" stop-color="#6d28d9"/><stop offset="1" stop-color="#ea580c"/></linearGradient>`;
+  const gSh=s=>`<g transform="translate(.8 2.4)" opacity=".22" filter="url(#bl1)">${s}</g>`;
+  const lensR=(x,w,h,r)=>`<rect x="${x-w/2}" y="${E-h/2-1}" width="${w}" height="${h}" rx="${r}"/>`;
+  const gl=c.occhiali||'no';
+  const glasses={no:'',
+    tondi:gSh(`<g fill="none" stroke="#000" stroke-width="2"><circle cx="${gx1}" cy="${E}" r="9.6"/><circle cx="${gx2}" cy="${E}" r="9.6"/></g>`)
+      +`<circle cx="${gx1}" cy="${E}" r="9.6" fill="url(#lens)"/><circle cx="${gx2}" cy="${E}" r="9.6" fill="url(#lens)"/><g fill="none" stroke="url(#tort)" stroke-width="2.1"><circle cx="${gx1}" cy="${E}" r="9.6"/><circle cx="${gx2}" cy="${E}" r="9.6"/><path d="M${gx1+9.6} ${E-1.6}Q100 ${E-5.5} ${gx2-9.6} ${E-1.6}${arm()}"/></g>`,
+    rett:gSh(`<g fill="none" stroke="#000" stroke-width="2.4">${lensR(gx1,21,14,3.5)}${lensR(gx2,21,14,3.5)}</g>`)
+      +`<g fill="url(#lens)">${lensR(gx1,21,14,3.5)}${lensR(gx2,21,14,3.5)}</g><g fill="none" stroke="#16181d" stroke-width="2.3">${lensR(gx1,21,14,3.5)}${lensR(gx2,21,14,3.5)}<path d="M${gx1+10.5} ${E-2.5}Q100 ${E-6} ${gx2-10.5} ${E-2.5}${arm()}"/></g><path d="M${gx1-8} ${E-6.6}H${gx1+3}M${gx2-8} ${E-6.6}H${gx2+3}" stroke="#fff" stroke-width=".6" opacity=".35"/>`,
+    meta:gSh(`<path d="M${gx1-10.5} ${E-6}Q${gx1} ${E-8.5} ${gx1+10.5} ${E-6}M${gx2-10.5} ${E-6}Q${gx2} ${E-8.5} ${gx2+10.5} ${E-6}" stroke="#000" stroke-width="3" fill="none"/>`)
+      +`<g fill="url(#lens)">${lensR(gx1,21,13,4)}${lensR(gx2,21,13,4)}</g><g fill="none" stroke="#9aa3ad" stroke-width=".7" opacity=".8"><path d="M${gx1-10.5} ${E-3}V${E+3}Q${gx1-10.5} ${E+5.5} ${gx1-7} ${E+5.5}H${gx1+7}Q${gx1+10.5} ${E+5.5} ${gx1+10.5} ${E+2}"/><path d="M${gx2-10.5} ${E-3}V${E+3}Q${gx2-10.5} ${E+5.5} ${gx2-7} ${E+5.5}H${gx2+7}Q${gx2+10.5} ${E+5.5} ${gx2+10.5} ${E+2}"/></g><path d="M${gx1-10.5} ${E-6}Q${gx1} ${E-8.5} ${gx1+10.5} ${E-6}M${gx2-10.5} ${E-6}Q${gx2} ${E-8.5} ${gx2+10.5} ${E-6}" stroke="#1a1410" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M${gx1+10.5} ${E-5}Q100 ${E-7.5} ${gx2-10.5} ${E-5}${arm(-3)}" stroke="#9aa3ad" stroke-width="1.1" fill="none"/>`,
+    sole:gSh(`<g fill="#000">${lensR(gx1,23,15,6)}${lensR(gx2,23,15,6)}</g>`)
+      +`<g fill="url(#dlens)">${lensR(gx1,23,15,6)}${lensR(gx2,23,15,6)}</g><g fill="none" stroke="#0b0b0b" stroke-width="2">${lensR(gx1,23,15,6)}${lensR(gx2,23,15,6)}<path d="M${gx1+11.5} ${E-3.5}Q100 ${E-7} ${gx2-11.5} ${E-3.5}${arm()}"/></g><path d="M${gx1-8} ${E-3}L${gx1-1} ${E-6.5}M${gx2-7} ${E-3}L${gx2} ${E-6.5}" stroke="#fff" stroke-width="1.3" opacity=".32" stroke-linecap="round"/>`,
+    aviator:gSh(`<g fill="#000"><path d="M${gx1-11} ${E-7}H${gx1+10}C${gx1+11} ${E+1} ${gx1+6} ${E+8} ${gx1-2} ${E+8}C${gx1-9} ${E+8} ${gx1-12} ${E+1} ${gx1-11} ${E-7}Z"/><path d="M${gx2+11} ${E-7}H${gx2-10}C${gx2-11} ${E+1} ${gx2-6} ${E+8} ${gx2+2} ${E+8}C${gx2+9} ${E+8} ${gx2+12} ${E+1} ${gx2+11} ${E-7}Z"/></g>`)
+      +`<g fill="url(#dlens)" stroke="#c9a54a" stroke-width="1.2"><path d="M${gx1-11} ${E-7}H${gx1+10}C${gx1+11} ${E+1} ${gx1+6} ${E+8} ${gx1-2} ${E+8}C${gx1-9} ${E+8} ${gx1-12} ${E+1} ${gx1-11} ${E-7}Z"/><path d="M${gx2+11} ${E-7}H${gx2-10}C${gx2-11} ${E+1} ${gx2-6} ${E+8} ${gx2+2} ${E+8}C${gx2+9} ${E+8} ${gx2+12} ${E+1} ${gx2+11} ${E-7}Z"/></g><path d="M${gx1+10} ${E-6}Q100 ${E-9} ${gx2-10} ${E-6}M${gx1+9} ${E-3}Q100 ${E-5} ${gx2-9} ${E-3}${arm(-4)}" stroke="#c9a54a" stroke-width="1.1" fill="none"/><path d="M${gx1-7} ${E-4}L${gx1} ${E-6}M${gx2-6} ${E-4}L${gx2+1} ${E-6}" stroke="#fff" stroke-width="1.2" opacity=".3" stroke-linecap="round"/>`,
+    sport:gSh(`<path d="M${L+2} ${E-4}C${gx1-6} ${E-11} ${gx2+6} ${E-11} ${R-2} ${E-4}L${R-4} ${E+4}C${gx2} ${E+9} ${X(4)} ${E+5} 100 ${E+1}C${X(-4)} ${E+5} ${gx1} ${E+9} ${L+4} ${E+4}Z" fill="#000"/>`)
+      +`<path d="M${L+2} ${E-4}C${gx1-6} ${E-11} ${gx2+6} ${E-11} ${R-2} ${E-4}L${R-4} ${E+4}C${gx2} ${E+9} ${X(4)} ${E+5} 100 ${E+1}C${X(-4)} ${E+5} ${gx1} ${E+9} ${L+4} ${E+4}Z" fill="url(#slens)" opacity=".93"/><path d="M${L+2} ${E-4}C${gx1-6} ${E-11} ${gx2+6} ${E-11} ${R-2} ${E-4}" stroke="#111" stroke-width="2.6" fill="none"/><path d="M${gx1-5} ${E-4}C${gx1} ${E-7} ${gx2} ${E-7} ${gx2+5} ${E-4}" stroke="#fff" stroke-width="1.1" fill="none" opacity=".4"/>`}[gl]||'';
+  // ── copricapi: seguono la testa, hanno volume e ombre, nascondono i capelli che ci stanno sotto ──
+  const tc=c.colTesta||'#ffffff',tdk=_lc(tc,45),tlt=_lc(tc,-38),tt=c.testa||'no';
+  defs+=`<linearGradient id="hatg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${tlt}"/><stop offset=".45" stop-color="${tc}"/><stop offset="1" stop-color="${tdk}"/></linearGradient>`
+    +`<linearGradient id="bandg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${tlt}"/><stop offset=".5" stop-color="${tc}"/><stop offset="1" stop-color="${tdk}"/></linearGradient>`
+    +`<linearGradient id="brg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${_lc(tc,-12)}"/><stop offset="1" stop-color="${_lc(tc,30)}"/></linearGradient>`;
+  const hatLine={cappello:79,rovescio:79,bandana:73,berretto:84,pescatore:80}[tt]||0;
+  if(hatLine)defs+=`<clipPath id="hcl"><rect x="0" y="${hatLine}" width="200" height="220"/></clipPath>`;
+  const crown=`M${L-3} 80C${L-5} 48 ${X(-20)} 30 100 29C${X(20)} 30 ${R+5} 48 ${R+3} 80C${R-12} 74 ${L+12} 74 ${L-3} 80Z`;
+  const crownDet=`<g stroke="${tdk}" stroke-width=".9" fill="none" opacity=".6"><path d="M100 30C${X(-12)} 42 ${X(-18)} 60 ${X(-20)} 76"/><path d="M100 30V74"/><path d="M100 30C${X(12)} 42 ${X(18)} 60 ${X(20)} 76"/></g><g stroke="${tlt}" stroke-width=".5" fill="none" opacity=".55" stroke-dasharray="1.2 1.3"><path d="M98.4 32C${X(-13.5)} 44 ${X(-19.5)} 60 ${X(-21.5)} 76"/><path d="M101.6 32C${X(13.5)} 44 ${X(19.5)} 60 ${X(21.5)} 76"/></g><circle cx="100" cy="30" r="2.8" fill="${tdk}"/><circle cx="99.3" cy="29.3" r="1" fill="${tlt}" opacity=".8"/><circle cx="${X(-11)}" cy="50" r=".9" fill="${tdk}"/><circle cx="${X(11)}" cy="50" r=".9" fill="${tdk}"/><path d="M${L-2} 79C${L+12} 73.5 ${R-12} 73.5 ${R+2} 79" stroke="#000" stroke-width="2.4" fill="none" opacity=".22" filter="url(#bl1)"/>`;
+  const logo=`<circle cx="100" cy="60" r="5.2" fill="${_lc(tc,-60)}" opacity=".85"/><path d="M96.6 60.4l2.4 2.2 4.2-4.6" stroke="${tdk}" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  const brim=`M${L-2} 79C${L+12} 73.5 ${R-12} 73.5 ${R+2} 79C${R+8} 83 ${R+9} 89 ${R+5} 92C${R-14} 85.5 ${L+14} 85.5 ${L-5} 92C${L-9} 89 ${L-8} 83 ${L-2} 79Z`;
+  const brimDet=`<path d="${brim}" fill="url(#brg)"/><path d="M${L-5} 92C${L+14} 85.5 ${R-14} 85.5 ${R+5} 92" stroke="${_lc(tc,70)}" stroke-width="1.6" fill="none"/><path d="M${L+1} 82.5C${L+14} 78 ${R-14} 78 ${R-1} 82.5" stroke="${tlt}" stroke-width=".55" fill="none" opacity=".6" stroke-dasharray="1.2 1.3"/>`;
+  // ombre che il copricapo proietta sul viso
+  const faceSh={cappello:`<ellipse cx="100" cy="90" rx="${f.w+6}" ry="8" fill="#1a0e08" opacity=".38" filter="url(#bl4)"/>`,visiera:`<ellipse cx="100" cy="90" rx="${f.w+6}" ry="8" fill="#1a0e08" opacity=".38" filter="url(#bl4)"/>`,pescatore:`<ellipse cx="100" cy="84" rx="${f.w+8}" ry="7" fill="#1a0e08" opacity=".32" filter="url(#bl4)"/>`,
+    rovescio:`<ellipse cx="100" cy="80" rx="${f.w}" ry="3.5" fill="#1a0e08" opacity=".25" filter="url(#bl2)"/>`,berretto:`<ellipse cx="100" cy="86" rx="${f.w}" ry="3.5" fill="#1a0e08" opacity=".25" filter="url(#bl2)"/>`,bandana:`<ellipse cx="100" cy="75" rx="${f.w}" ry="3" fill="#1a0e08" opacity=".22" filter="url(#bl2)"/>`,
+    fascia:`<path d="M${L} 79C${L+10} 72 ${R-10} 72 ${R} 79" stroke="#1a0e08" stroke-width="4" fill="none" opacity=".28" filter="url(#bl2)"/>`,fasciaLarga:`<path d="M${L} 81C${L+10} 74 ${R-10} 74 ${R} 81" stroke="#1a0e08" stroke-width="4" fill="none" opacity=".28" filter="url(#bl2)"/>`}[tt]||'';
+  const ribs=(x0,x1,y0,y1,n,col,op)=>`<g stroke="${col}" stroke-width=".6" opacity="${op}">${Array.from({length:n},(_,i)=>`<path d="M${(x0+(x1-x0)*i/(n-1)).toFixed(1)} ${y0}V${y1}"/>`).join('')}</g>`;
+  let head='';
+  if(tt==='cappello')head=`<path d="${crown}" fill="url(#hatg)"/>${crownDet}${logo}${brimDet}`;
+  else if(tt==='rovescio')head=`<path d="${crown}" fill="url(#hatg)"/>${crownDet}<path d="M89 80C89.5 69 110.5 69 111 80Z" fill="url(#hg)"/><path d="M89 80C89.5 69 110.5 69 111 80" stroke="${tdk}" stroke-width="1.4" fill="none"/><path d="M87 77.5H113V81H87Z" fill="${tdk}"/><rect x="97" y="76.6" width="6" height="5.2" rx="1" fill="#cfcfcf"/><rect x="98.3" y="77.8" width="3.4" height="2.8" rx=".5" fill="${tdk}"/>`;
+  else if(tt==='visiera'){const band=`M${L-2} 72C${L+10} 63 ${R-10} 63 ${R+2} 72L${R+2} 80C${R-10} 72 ${L+10} 72 ${L-2} 80Z`;defs+=`<clipPath id="vcl"><path d="${band}"/></clipPath>`;
+    head=`<path d="${band}" fill="url(#bandg)"/><g clip-path="url(#vcl)">${ribs(L-2,R+2,60,82,30,tdk,.25)}</g>${brimDet}`;}
+  else if(tt==='fascia'||tt==='fasciaLarga'){const t0=tt==='fascia'?61:54,b0=tt==='fascia'?72:73;const band=`M${L-2} ${t0+9}C${L+10} ${t0} ${R-10} ${t0} ${R+2} ${t0+9}L${R+2} ${b0+8}C${R-10} ${b0} ${L+10} ${b0} ${L-2} ${b0+8}Z`;
+    defs+=`<clipPath id="bndc"><path d="${band}"/></clipPath>`;
+    head=`<path d="${band}" fill="url(#bandg)"/><g clip-path="url(#bndc)">${ribs(L-2,R+2,t0-2,b0+10,34,tdk,.28)}${tt==='fasciaLarga'?`<rect x="93" y="${t0+4}" width="14" height="${b0-t0-3}" rx="2" fill="${_lc(tc,-60)}" opacity=".7"/>`:''}</g><path d="M${L-2} ${t0+9}C${L+10} ${t0} ${R-10} ${t0} ${R+2} ${t0+9}" stroke="${tlt}" stroke-width="1" fill="none" opacity=".7"/><path d="M${L-2} ${b0+8}C${L+10} ${b0} ${R-10} ${b0} ${R+2} ${b0+8}" stroke="${tdk}" stroke-width="1.1" fill="none" opacity=".8"/>`;}
+  else if(tt==='bandana'){const cap=`M${L-2} 75C${L-4} 46 ${X(-20)} 30 100 30C${X(20)} 30 ${R+4} 46 ${R+2} 75C${R-12} 69 ${L+12} 69 ${L-2} 75Z`;defs+=`<clipPath id="bdc"><path d="${cap}"/></clipPath>`;
+    head=`<path d="M${R} 66C${R+8} 66 ${R+14} 70 ${R+12} 78L${R+18} 92L${R+10} 90L${R+6} 80Z" fill="${tdk}"/><path d="M${R+2} 70C${R+12} 74 ${R+18} 84 ${R+16} 96L${R+9} 92Z" fill="${_lc(tc,25)}"/><path d="${cap}" fill="url(#hatg)"/><g clip-path="url(#bdc)" fill="none" stroke="${_lc(tc,-70)}" stroke-width="1" opacity=".7">${[[78,44],[96,38],[114,42],[86,58],[104,52],[122,58],[72,62],[128,66],[96,66]].map(([x,y])=>`<path d="M${x} ${y}c2.5-3 6-1 4.5 2c-1.5 2.5-5 2-4.5-2zM${x+5} ${y+3}l2 2"/>`).join('')}</g><path d="M${L-2} 75C${L+12} 69 ${R-12} 69 ${R+2} 75" stroke="${tdk}" stroke-width="1.6" fill="none"/><circle cx="${R+3}" cy="70" r="4" fill="${tdk}"/>`;}
+  else if(tt==='berretto'){const dome=`M${L-4} 86C${L-8} 46 ${X(-22)} 22 100 22C${X(22)} 22 ${R+8} 46 ${R+4} 86Z`,cuff=`M${L-5} 70C${L+10} 62 ${R-10} 62 ${R+5} 70L${R+5} 88C${R-10} 80 ${L+10} 80 ${L-5} 88Z`;defs+=`<clipPath id="dmc"><path d="${dome}"/></clipPath><clipPath id="cfc"><path d="${cuff}"/></clipPath>`;
+    head=`<path d="${dome}" fill="url(#hatg)"/><g clip-path="url(#dmc)" stroke="${tdk}" stroke-width=".9" fill="none" opacity=".3">${Array.from({length:7},(_,j)=>`<path d="${Array.from({length:18},(_,i)=>`M${L-6+i*((R-L+12)/17)} ${30+j*6.5}l2 2.4l2-2.4`).join('')}"/>`).join('')}</g><path d="${cuff}" fill="url(#bandg)"/><g clip-path="url(#cfc)">${ribs(L-5,R+5,58,92,32,tdk,.45)}</g><circle cx="100" cy="21" r="9" fill="${tlt}" filter="url(#fur)"/><circle cx="98" cy="19" r="4" fill="#fff" opacity=".18"/>`;}
+  else if(tt==='pescatore'){const cr=`M${L-1} 78C${L-2} 48 ${X(-18)} 32 100 32C${X(18)} 32 ${R+2} 48 ${R+1} 78Z`,bb=`M${L-12} 90C${L-7} 74 ${R+7} 74 ${R+12} 90C${R-4} 83 ${L+4} 83 ${L-12} 90Z`;
+    head=`<path d="${cr}" fill="url(#hatg)"/><path d="M${L} 70C${L+10} 65 ${R-10} 65 ${R} 70" stroke="${tdk}" stroke-width="2.4" fill="none" opacity=".5"/><path d="${bb}" fill="url(#brg)"/><path d="M${L-12} 90C${L+4} 83 ${R-4} 83 ${R+12} 90" stroke="${_lc(tc,70)}" stroke-width="1.4" fill="none"/><path d="M${L-8} 86C${L+6} 79 ${R-6} 79 ${R+8} 86" stroke="${tlt}" stroke-width=".55" fill="none" opacity=".6" stroke-dasharray="1.2 1.3"/>`;}
+  // dettagli del viso
+  const extra=(c.guance?`<ellipse cx="${100-ex-2}" cy="110" rx="7" ry="4.5" fill="#ff7b7b" opacity=".25"/><ellipse cx="${100+ex+2}" cy="110" rx="7" ry="4.5" fill="#ff7b7b" opacity=".25"/>`:'')
+    +(c.lentiggini?[[-22,106],[-17,109],[-24,111],[-14,104],[22,106],[17,109],[24,111],[14,104],[-3,104],[4,105]].map(([dx,y])=>`<circle cx="${100+dx}" cy="${y}" r="1.1" fill="#a0603a" opacity=".55"/>`).join(''):'')
+    +(c.rughe?`<path d="M84 66Q100 62 116 66M86 71Q100 67 114 71" stroke="${_lc(sk,30)}" stroke-width="1.1" fill="none" opacity=".55"/><path d="M90 116Q86 124 89 130M110 116Q114 124 111 130" stroke="${_lc(sk,32)}" stroke-width="1.3" fill="none" opacity=".55"/><path d="M${100-ex-10} ${E+1}l-4 -2M${100-ex-10} ${E+3}l-4 1M${100+ex+10} ${E+1}l4 -2M${100+ex+10} ${E+3}l4 1" stroke="${_lc(sk,32)}" stroke-width="1" opacity=".6"/>`:'')
+    +(c.neo?`<circle cx="${100+ex+6}" cy="116" r="1.6" fill="#5a3a24"/>`:'');
+  const shine=hs.shine?`<ellipse cx="88" cy="58" rx="12" ry="6" fill="#fff" opacity=".18" transform="rotate(-20 88 58)"/>`:'';
+  const cfg=`<desc>LAV:${encodeURIComponent(JSON.stringify(c))}</desc>`;
+  return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="18 16 164 164">${cfg}<defs>${defs}</defs><rect x="0" y="0" width="200" height="200" fill="url(#bg)"/>`
+    +sx(hairBack)+neck+`<g transform="translate(0 -7)">${under}${shirt}</g>`+ears+`<path d="${face}" fill="url(#sk)"/>`+shine+extra+noseSh+beard+nose+mouth+eyes+brows+(faceSh?`<g clip-path="url(#fcl)">${faceSh}</g>`:'')+(hatLine?`<g clip-path="url(#hcl)">${sx(hairFront+hairOver)}</g>`:sx(hairFront+hairOver))+glasses+head+`</svg>`;
+}
+
+</script>
+<script>
+// ============================================================
+//  RITRATTI DISEGNATI (stile Laurera) per leader, ministri e per te
+// ============================================================
+const AV_BASE = { viso: 'ovale', pelle: '#f6d0b6', capelli: 'corti', colCap: '#3d2b20', sfum: 'no', barba: 'no', colBarba: '', sopr: 'normali', occhi: 'mandorla', colOcchi: '#3b2618',
+  naso: 'medio', bocca: 'sorriso', occhiali: 'no', testa: 'no', colTesta: '#ffffff', maglia: 'scolloV', colMaglia: '#1f2a44', colDett: '#f4f4f5', sfondo: 'auto', orecchini: false, lentiggini: false, guance: false, rughe: false, neo: false };
+// aspetto dei personaggi più noti (stilizzato)
+const AV_KNOWN = {
+  'Giorgia Meloni': { capelli: 'lunghi', colCap: '#d8b06c', colOcchi: '#3c7fbf', orecchini: true, guance: true, colMaglia: '#1e3a8a', bocca: 'aperto' },
+  'Elly Schlein': { capelli: 'caschetto', colCap: '#5a3a24', occhi: 'tondi', colOcchi: '#6b4a2a', colMaglia: '#be123c', bocca: 'mezzo' },
+  'Giuseppe Conte': { capelli: 'indietro', colCap: '#2a1d16', sfum: 'tempie', viso: 'allungato', colMaglia: '#1f2937', bocca: 'mezzo' },
+  'Antonio Tajani': { capelli: 'stempiato', colCap: '#9a9a9a', viso: 'tondo', colMaglia: '#1e3a8a', rughe: true },
+  'Matteo Salvini': { capelli: 'corti', colCap: '#5a5048', sfum: 'brizzolato', barba: 'corta', colBarba: '#6b6b6b', colMaglia: '#15803d', maglia: 'felpa', bocca: 'aperto' },
+  'Roberto Vannacci': { capelli: 'rasato', colCap: '#9a9a9a', viso: 'squadrato', sopr: 'dritte', bocca: 'serio', colMaglia: '#4d5a3a', maglia: 'girocollo', rughe: true },
+  'Nicola Fratoianni e Angelo Bonelli': { capelli: 'stempiato', colCap: '#6b6b6b', barba: 'corta', colBarba: '#7a7a7a', occhiali: 'rett', colMaglia: '#15803d' },
+  'Carlo Calenda': { capelli: 'corti', colCap: '#3d2b20', viso: 'tondo', colMaglia: '#0e7490', bocca: 'mezzo' },
+  'Matteo Renzi': { capelli: 'corti', colCap: '#2a1d16', viso: 'tondo', bocca: 'aperto', colMaglia: '#be185d' },
+  'Riccardo Magi': { capelli: 'corti', colCap: '#5a3a24', barba: 'accenno', occhiali: 'rett', colMaglia: '#7c3aed' },
+  'Cateno De Luca': { capelli: 'chierica', colCap: '#6b6b6b', barba: 'corta', colBarba: '#6b6b6b', viso: 'tondo', colMaglia: '#c2410c' },
+  'Maurizio Lupi': { capelli: 'stempiato', colCap: '#9a9a9a', occhiali: 'rett', colMaglia: '#0369a1' },
+  'Sergio Mattarella': { capelli: 'stempiato', colCap: '#f2f2f2', viso: 'allungato', bocca: 'serio', rughe: true, colMaglia: '#111827' },
+  'Giancarlo Giorgetti': { capelli: 'stempiato', colCap: '#cfcfcf', occhiali: 'rett', bocca: 'serio', colMaglia: '#14532d' },
+  'Guido Crosetto': { capelli: 'pelato', colCap: '#9a9a9a', barba: 'corta', colBarba: '#9a9a9a', viso: 'tondo', colMaglia: '#1f2937' },
+};
+// personaggi femminili tra quelli noti (per il disegno del ritratto)
+const AV_F = new Set(['Giorgia Meloni', 'Elly Schlein', 'Arianna Meloni', 'Eugenia Roccella', 'Daniela Santanchè', 'Isabella Rauti', 'Augusta Montaruli', 'Alessandra Locatelli', 'Vannia Gava', 'Anna Maria Bernini', 'Licia Ronzulli', 'Stefania Craxi', 'Maria Elisabetta Alberti Casellati', 'Letizia Moratti', 'Deborah Bergamini', 'Mariastella Gelmini', 'Mara Carfagna', 'Laura Ravetto', 'Chiara Braga', 'Debora Serracchiani', 'Pina Picierno', 'Chiara Appendino', 'Alessandra Todde', 'Paola Taverna', 'Mariolina Castellone', 'Barbara Floridia', 'Ilaria Salis', 'Ilaria Cucchi', 'Elisabetta Piccolotti', 'Giulia Pastorella', 'Elena Bonetti', 'Maria Elena Boschi', 'Raffaella Paita', 'Emma Bonino', 'Laura Castelli', 'Marina Elvira Calderone', 'Lucrezia Reichlin', 'Elsa Fornero', 'Paola Severino', 'Marta Cartabia', 'Luciana Lamorgese', 'Elisabetta Belloni', 'Maria Cristina Messa', 'Ilaria Capua', 'Stefania Proietti', 'Christine Lagarde', 'Ursula von der Leyen', 'Daniela Fumarola']);
+function hashStr(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function seeded(seed) { let x = seed || 1; return () => { x ^= x << 13; x ^= x >>> 17; x ^= x << 5; return ((x >>> 0) % 10000) / 10000; }; }
+function avatarConfig(name, female, party) {
+  if (G && G.player && name === G.player.name && G.player.av) return G.player.av;
+  const r = seeded(hashStr(name)), pk = a => a[Math.floor(r() * a.length)];
+  const F = female !== undefined ? female : AV_F.has(name);
+  if (AV_KNOWN[name]) return Object.assign({}, AV_BASE, { guance: F, colMaglia: party && G && G.parties && G.parties[party] ? G.parties[party].color : AV_BASE.colMaglia }, AV_KNOWN[name]);
+  const c = Object.assign({}, AV_BASE, {
+    viso: pk(['ovale', 'tondo', 'squadrato', 'allungato']), pelle: pk(LAV.pelle.slice(0, 6)),
+    capelli: F ? pk(['pixie', 'caschetto', 'lunghi', 'lunghiMossi', 'coda', 'chignon']) : pk(['corti', 'riga', 'indietro', 'stempiato', 'corti', 'spazzola', 'mossi', 'pelato']),
+    colCap: pk(['#0f0d0c', '#2a1d16', '#3d2b20', '#5a3a24', '#7a5232', '#6b6b6b', '#9a9a9a', '#cfcfcf', '#d8b06c']),
+    barba: F ? 'no' : pk(['no', 'no', 'no', 'accenno', 'corta', 'pizzetto']), occhiali: pk(['no', 'no', 'no', 'rett', 'tondi', 'meta']),
+    bocca: pk(['sorriso', 'mezzo', 'serio', 'sorriso']), occhi: pk(['mandorla', 'tondi', 'piccoli']), colOcchi: pk(LAV.colOcchi),
+    colMaglia: party && G && G.parties && G.parties[party] ? G.parties[party].color : pk(['#1f2937', '#1e3a8a', '#374151', '#111827']),
+    orecchini: F && r() < 0.6, guance: F,
+  });
+  return Object.assign(c, AV_KNOWN[name] || {});
+}
+const AV_CACHE = {};
+function portraitURI(name, female, party) {
+  const key = name + '|' + (female ? 1 : 0) + '|' + (party || '') + '|' + (G && G.player && name === G.player.name && G.player.av ? JSON.stringify(G.player.av) : '');
+  if (!AV_CACHE[key]) { try { AV_CACHE[key] = 'data:image/svg+xml,' + encodeURIComponent(lavSvg(avatarConfig(name, female, party))); } catch (e) { AV_CACHE[key] = ''; } }
+  return AV_CACHE[key];
+}
+function portrait(name, size, opts) {
+  opts = opts || {};
+  const isMe = G && G.player && name === G.player.name;
+  const uri = portraitURI(name, isMe ? G.player.art === 'la' : opts.female, opts.party);
+  const ring = opts.ring || (opts.party && G.parties[opts.party] ? G.parties[opts.party].color : 'rgba(255,255,255,.2)');
+  return `<span class="portrait" style="width:${size}px;height:${size}px;--ring:${ring}">${uri ? `<img src="${uri}" alt="">` : ''}</span>`;
+}
+function leaderPortrait(pid, size) { const n = leaderName(pid); return portrait(n, size, { party: pid }); }
+// aspetto del giocatore: casuale ma stabile, si può cambiare dal profilo
+function rerollPlayerAvatar() {
+  const p = G.player, F = p.art === 'la';
+  const r = Math.random, pk = a => a[Math.floor(r() * a.length)];
+  p.av = Object.assign({}, AV_BASE, {
+    viso: pk(['ovale', 'tondo', 'squadrato', 'allungato', 'cuore']), pelle: pk(LAV.pelle.slice(0, 7)),
+    capelli: F ? pk(['pixie', 'caschetto', 'lunghi', 'lunghiMossi', 'coda', 'codaAlta', 'chignon', 'ricci']) : pk(['corti', 'riga', 'indietro', 'ciuffo', 'spazzola', 'mossi', 'ricciCorti', 'stempiato', 'rasato']),
+    colCap: pk(LAV.colCap.slice(0, 13)), barba: F ? 'no' : pk(['no', 'no', 'accenno', 'corta', 'pizzetto', 'baffi']), colBarba: '',
+    occhiali: pk(['no', 'no', 'no', 'rett', 'tondi']), bocca: pk(['sorriso', 'aperto', 'mezzo']), occhi: pk(['mandorla', 'tondi']), colOcchi: pk(LAV.colOcchi),
+    colMaglia: myParty() ? myParty().color : '#1e3a8a', orecchini: F && r() < 0.6, guance: F,
+  });
 }
 
 </script>
@@ -3809,6 +4172,7 @@ function setupNext() {
   if (SETUP.mode === 'fondatore') cfg.party = Object.assign({}, SETUP.party, { name: SETUP.party.name.trim(), short: SETUP.party.short.trim().toUpperCase() });
   else cfg.join = SETUP.join;
   newGame(cfg);
+  rerollPlayerAvatar();
   UI.tab = 'home';
   renderGame();
   saveGame('auto');
@@ -3896,7 +4260,7 @@ function homeTab() {
   let h = '';
   // eroe
   h += tipsHTML();
-  h += `<div class="card hero" style="--pc:${mp.color}"><div class="row">${sym(myPid(), true)}<div class="grow"><div class="small gold" style="font-weight:700">${esc(roleLabel())}</div><h2 class="ellipsis">${esc(p.name)}</h2><div class="small muted">${esc(mp.name)} · ${fmt1(mp.poll)}% · ${mp.seatsC} dep. · ${mp.seatsS} sen.</div></div></div>
+  h += `<div class="card hero" style="--pc:${mp.color}"><div class="row"><span class="av-badge" onclick="openProfile()">${portrait(p.name, 68, { party: myPid() })}<span class="pbadge" style="--c:${mp.color}">${esc(mp.symbol && mp.mine ? mp.symbol : mp.short)}</span></span><div class="grow"><div class="small gold" style="font-weight:700">${esc(roleLabel())}</div><h2 class="ellipsis">${esc(p.name)}</h2><div class="small muted">${esc(mp.name)} · ${fmt1(mp.poll)}% · ${mp.seatsC} dep. · ${mp.seatsS} sen.</div></div></div>
     <div class="grid2 mt"><div><div class="tiny muted">Notorietà del partito</div><b>${fmt0(partyNoto(myPid()))}%</b> <span class="tiny muted">degli italiani lo conosce</span>${barH(partyNoto(myPid()), 100, '#22d3ee', true)}</div>
     ${isLeader() ? `<div><div class="tiny muted">La tua fama personale</div><b>${fmt0(p.fama)}</b><span class="tiny muted">/100</span>${barH(p.fama, 100, '#a78bfa', true)}</div>` : `<div><div class="tiny muted">Rapporto con ${esc(myParty().leader)}</div><b style="color:${relColor(p.rap)}">${p.rap > 0 ? '+' : ''}${fmt0(p.rap)} · ${relLabel(p.rap)}</b>${barH(p.rap + 100, 200, relColor(p.rap), true)}</div>`}</div>`;
   if (g) {
@@ -3922,7 +4286,7 @@ function homeTab() {
   h += `<div class="sec"><h4>Prossime scadenze</h4></div><div class="card tight"><div class="list">${dl.slice(0, 4).map(x => `<div class="li"><div class="grow"><b class="small">${x.t}</b><div class="tiny muted">${x.s}</div></div><span class="tag ${x.w - G.week < 6 ? 'w' : ''}">${weeksLeft(x.w)}</span></div>`).join('')}</div></div>`;
   // agenda
   const acts = availableActions();
-  h += `<div class="sec"><h4>Agenda della settimana</h4><span class="small muted">⚡ ${G.pc} disponibili</span></div><div class="tiny muted" style="margin:-4px 2px 8px">Ogni azione si può fare una volta a settimana.</div><div class="actions">${acts.map(a => `<button class="act ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''}" style="--ac:${a.ac}" onclick="openAction('${a.id}')"><span class="c">${a.cost ? '⚡' + a.cost : ''}</span><span class="i">${a.ico}</span>${esc(a.n)}</button>`).join('')}</div>`;
+  h += `<div class="sec"><h4>Agenda della settimana</h4><button class="btn sm gold" onclick="autoPlan()">🗓 Pianifica</button></div><div class="tiny muted" style="margin:-4px 2px 8px">Ogni azione si può fare una volta a settimana.</div><div class="actions">${acts.map(a => `<button class="act ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''}" style="--ac:${a.ac}" onclick="openAction('${a.id}')"><span class="c">${a.cost ? '⚡' + a.cost : ''}</span><span class="i">${a.ico}</span>${esc(a.n)}</button>`).join('')}</div>`;
   // alleati (premier)
   if (isPremier() && g.parties.length > 1) {
     h += `<div class="sec"><h4>Umore degli alleati</h4></div><div class="card">${g.parties.filter(x => x !== myPid()).map(x => `<div class="row" style="margin:6px 0">${partyChip(x)}<span class="small grow ellipsis">${esc(P(x).leader)}</span><div style="width:110px">${barH(g.sat[x], 100, pctColor(g.sat[x]))}</div><b class="small" style="width:34px;text-align:right">${fmt0(g.sat[x])}</b></div>`).join('')}</div>`;
@@ -4211,7 +4575,7 @@ function partitiTab() {
       const p = P(id), me = id === myPid();
       const c = me ? 100 : compat(id, myPid()), r = me ? 0 : rel(id, myPid());
       const coal = coalitionOf(id);
-      h += `<div class="card tight click mt" onclick="openParty('${id}')"><div class="row">${sym(id)}<div class="grow"><div class="row between"><b class="ellipsis">${esc(p.name)}</b><b>${fmt1(p.poll)}%</b></div><div class="small muted ellipsis">${esc(leaderName(id))} · ${p.seatsC} dep. · ${p.seatsS} sen.${coal ? ' · ' + esc(coal.name) : ''}${inGov(id) ? ' · al governo' : ''}</div>
+      h += `<div class="card tight click mt" onclick="openParty('${id}')"><div class="row">${leaderPortrait(id, 48)}<div class="grow"><div class="row between"><b class="ellipsis">${esc(p.name)}</b><b>${fmt1(p.poll)}%</b></div><div class="small muted ellipsis">${esc(leaderName(id))} · ${p.seatsC} dep. · ${p.seatsS} sen.${coal ? ' · ' + esc(coal.name) : ''}${inGov(id) ? ' · al governo' : ''}</div>
         ${me ? '<div class="tiny gold mt">Il tuo partito</div>' : `<div class="row mt" style="gap:6px"><span class="tiny muted" style="width:56px">Affinità</span><div class="grow">${barH(c, 100, pctColor(c), true)}</div><span class="tiny muted" style="width:56px">Rapporto</span><div class="grow">${barH(r + 100, 200, relColor(r), true)}</div></div>`}</div></div></div>`;
     });
   }
@@ -4220,7 +4584,7 @@ function partitiTab() {
 }
 function openParty(id) {
   const p = P(id), me = id === myPid();
-  let h = `<div class="row">${sym(id, true)}<div class="grow"><h2>${esc(p.name)}</h2><div class="muted small">${esc(p.area)} · ${esc(p.family)} · leader ${esc(leaderName(id))}</div></div><button class="xbtn" onclick="closeSheet()">✕</button></div>`;
+  let h = `<div class="row">${leaderPortrait(id, 68)}<div class="grow"><h2>${esc(p.name)}</h2><div class="muted small">${esc(p.area)} · ${esc(p.family)} · leader ${esc(leaderName(id))}</div></div><button class="xbtn" onclick="closeSheet()">✕</button></div>`;
   h += `<div class="grid3 mt"><div class="kpi"><div class="l">Sondaggi</div><div class="v">${fmt1(p.poll)}%</div></div><div class="kpi"><div class="l">Deputati</div><div class="v">${p.seatsC}</div></div><div class="kpi"><div class="l">Senatori</div><div class="v">${p.seatsS}</div></div></div>`;
   if (!me) {
     const c = compat(id, myPid()), r = rel(id, myPid());
@@ -4316,7 +4680,7 @@ function openMenu() {
     ${item('🏛', 'Il governo', G.gov ? esc(G.gov.name) : '', 'closeSheet();openGovernment()')}
     ${item('👤', 'Il mio profilo e la carriera', esc(G.player.name), 'closeSheet();openProfile()')}
     ${isLeader() ? item('📋', 'Programma elettorale', G.program ? 'annunciato' : 'da presentare', 'closeSheet();openProgram()') : ''}
-    ${item('📰', 'Archivio notizie', G.news.length + ' notizie', 'closeSheet();openNews()')}
+    ${item('📖', 'La tua storia', 'La linea del tempo della tua carriera', 'closeSheet();openTimeline()')}${item('🏅', 'Traguardi', Object.keys(G.ach || {}).length + ' su ' + ACHIEVEMENTS.length, 'closeSheet();openAchievements()')}${item('📰', 'Archivio notizie', G.news.length + ' notizie', 'closeSheet();openNews()')}
     ${item('🏛', 'Istituzioni', 'Quirinale, Camere, Corte, UE, parti sociali', 'closeSheet();openInstitutions()')}
     </div></div><div class="card tight"><div class="list">
     ${item('💾', 'Salva partita', 'Tre slot sul telefono', 'closeSheet();openSave()')}
@@ -4353,10 +4717,11 @@ function openGovernment() {
 function openProfile() {
   const p = G.player, bg = BACKGROUNDS.find(b => b.id === p.bg);
   const st = (l, v, max, c) => `<div class="row" style="margin:6px 0"><span class="small" style="width:96px">${l}</span><div class="grow">${barH(v, max, c)}</div><b class="small" style="width:40px;text-align:right">${fmt0(v)}</b></div>`;
-  let h = `<div class="row">${sym(myPid(), true)}<div class="grow"><h2>${esc(p.name)}</h2><div class="small muted">${p.age} anni · ${esc(bg.n)} · ${regionName(p.region)}</div><div class="small gold">${esc(roleLabel())}</div></div><button class="xbtn" onclick="closeSheet()">✕</button></div>`;
+  let h = `<div class="row">${portrait(p.name, 72, { party: myPid() })}<div class="grow"><h2>${esc(p.name)}</h2><div class="small muted">${p.age} anni · ${esc(bg.n)} · ${regionName(p.region)}</div><div class="small gold">${esc(roleLabel())}</div></div><button class="xbtn" onclick="closeSheet()">✕</button></div>`;
   h += `<div class="card mt">${st('Carisma', p.car, 10, 'var(--oro)')}${st('Competenza', p.comp, 10, 'var(--blu)')}${st('Integrità', p.integ, 10, 'var(--verde)')}${st('Fama', p.fama, 100, '#c77dff')}${st('Salute', p.salute, 100, pctColor(p.salute))}${st('Stress', p.stress, 100, p.stress > 70 ? 'var(--bad)' : 'var(--warn)')}</div>`;
   if (isLeader()) h += `<div class="card">${st('Organizzazione', G.org, 100, 'var(--blu)')}${st('Credibilità', G.cred, 100, 'var(--verde)')}<div class="small mt">Fondi del partito: <b>${euro(G.funds)}</b></div></div>`;
   else h += `<div class="card">${st('Seguito interno', p.seguito, 100, 'var(--blu)')}<div class="row" style="margin:6px 0"><span class="small" style="width:96px">Col leader</span><div class="grow">${barH(p.rap + 100, 200, relColor(p.rap))}</div><b class="small" style="width:40px;text-align:right">${fmt0(p.rap)}</b></div></div>`;
+  h += `<button class="btn sm block mt" onclick="rerollPlayerAvatar();closeSheet();openProfile();renderGame()">🎲 Cambia aspetto</button>`;
   h += `<h4 class="mt2">Carriera</h4><div class="card tight"><div class="list">${RANKS.map((r, i) => `<div class="li"><span style="width:22px">${i < p.rank ? '✅' : i === p.rank ? '📍' : '▫️'}</span><div class="grow"><b class="small ${i === p.rank ? 'gold' : i > p.rank ? 'dim' : ''}">${r.n}</b><div class="tiny muted">${r.d}</div></div></div>`).join('')}</div></div>`;
   h += `<h4 class="mt2">Bilancio</h4><div class="grid2 mt">${[['Leggi approvate', G.stats.laws], ['Decreti', G.stats.decreti], ['Fiducie', G.stats.fiducie], ['Settimane da premier', G.stats.weeksPremier]].map(([a, b]) => `<div class="kpi"><div class="l">${a}</div><div class="v">${b}</div></div>`).join('')}</div>`;
   if (G.careerLog.length) h += `<h4 class="mt2">Momenti chiave</h4><div class="card tight"><div class="list">${G.careerLog.slice().reverse().map(x => `<div class="news-item"><span class="w">${fmtDate(x.w, true)}</span><span>${esc(x.t)}</span></div>`).join('')}</div></div>`;
@@ -4576,39 +4941,55 @@ function startInterview(show, debate) {
   if (usedThisWeek(aid)) return toast('Hai già fatto un’intervista questa settimana', 'bad');
   if (!spendPC(cost)) return toast('Capitale politico insufficiente', 'bad');
   markUsed(aid);
+  G.stats.tv = (G.stats.tv || 0) + 1;
   const topics = interviewTopics(3);
-  TVS = { show, debate, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll };
+  // nel confronto TV c'è un avversario in studio: il leader del primo partito rivale
+  const opp = debate ? PIDS().filter(p => p !== myPid() && !(coalitionOf(p) && coalitionOf(p) === coalitionOf(myPid()))).sort((a, b) => P(b).poll - P(a).poll)[0] : null;
+  TVS = { show, debate, opp, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll, app: 50, secs: debate ? 10 : 15 };
   G.player.stress = clamp(G.player.stress + 3, 0, 100);
   openSheet('', { full: true, locked: true });
   renderInterview();
 }
+function gaugeHTML(v) { return `<div class="gauge"><div class="row between tiny"><span>👎</span><b>Gradimento del pubblico ${Math.round(v)}%</b><span>👍</span></div><div class="bar"><i style="width:${v}%;--c:${v >= 55 ? '#2ecc71' : v >= 40 ? '#ffb547' : '#ff5c5c'}"></i></div></div>`; }
 function renderInterview() {
   const s = TVS, qq = s.qs[s.i];
+  clearTimeout(s.timer);
   if (!qq) return finishInterview();
   replaceSheet(`<div class="row between"><span class="tag o">${esc(s.show.n)} · ${esc(s.show.ch)}</span><span class="small muted">Domanda ${s.i + 1}/${s.qs.length}</span></div>
-    <div class="mic mt2 pop">🎙</div><div class="small muted center">${s.debate ? 'Il moderatore' : 'Il conduttore'} chiede:</div>
+    ${gaugeHTML(s.app)}
+    <div class="row mt" style="justify-content:center;gap:22px">${portrait(G.player.name, 62, { party: myPid() })}${s.opp ? `<b class="gold" style="align-self:center">VS</b>${leaderPortrait(s.opp, 62)}` : '<span style="font-size:44px">🎙</span>'}</div>
+    <div class="small muted center mt">${s.debate ? 'Il moderatore' : 'Il conduttore'} chiede:</div>
     <div class="big-q center mt">${esc(qq.q)}</div>
+    <div class="timer mt"><i style="animation-duration:${s.secs}s"></i></div><div class="tiny muted center">Hai ${s.secs} secondi per rispondere</div>
     <div class="qcard mt">${qq.explain || ''}</div>
-    <div class="mt2">${qq.answers.map((a, i) => `<button class="choice" style="animation-delay:${i * 70}ms" onclick="pickAnswer(${i})"><div class="t">${esc(a.t)}</div><div class="fx">${a.pre.pro.map(x => `<span class="p">▲ ${esc(x.t)}</span>`).join('')}${a.pre.contro.map(x => `<span class="c">▼ ${esc(x.t)}</span>`).join('')}</div></button>`).join('')}</div>`);
+    <div class="mt">${qq.answers.map((a, i) => `<button class="choice" style="animation-delay:${i * 70}ms" onclick="pickAnswer(${i})"><div class="t">${esc(a.t)}</div><div class="fx">${a.pre.pro.map(x => `<span class="p">▲ ${esc(x.t)}</span>`).join('')}${a.pre.contro.map(x => `<span class="c">▼ ${esc(x.t)}</span>`).join('')}</div></button>`).join('')}</div>`);
+  s.timer = setTimeout(() => { if (TVS === s && s.qs[s.i] === qq) pickAnswer(-1); }, s.secs * 1000);
 }
 function pickAnswer(i) {
-  const s = TVS, qq = s.qs[s.i], a = qq.answers[i];
+  const s = TVS, qq = s.qs[s.i];
+  clearTimeout(s.timer);
   const show = Object.assign({}, s.show, { reach: s.debate ? 4 : s.show.reach });
-  const r = a.apply(show);
-  s.log.push({ q: qq.q, a: a.t, r });
+  let r, at;
+  if (i < 0) { applyFx({ my: -0.5, fama: 1, cred: -1 }); r = { good: false, lines: ['Silenzio imbarazzante: il tempo è scaduto e il conduttore passa oltre.'] }; at = '(nessuna risposta)'; }
+  else { const a = qq.answers[i]; r = a.apply(show); at = a.t; }
+  s.app = clamp(s.app + (r.good ? rnd(8, 15) : -rnd(7, 13)), 5, 95);
+  s.log.push({ q: qq.q, a: at, r });
   vib(20);
-  replaceSheet(`<div class="center mt2"><div style="font-size:50px" class="pop">${r.good ? '👏' : '😬'}</div><h3 class="mt">${r.good ? 'Risposta efficace' : 'Risposta che divide'}</h3></div>
-    <div class="card mt">${r.lines.map(x => `<div class="small" style="padding:4px 0">• ${esc(x)}</div>`).join('') || '<div class="small muted">Il pubblico prende nota.</div>'}</div>
+  const reply = s.opp ? `<div class="card tight mt"><div class="row">${leaderPortrait(s.opp, 40)}<div class="small grow"><b>${esc(P(s.opp).leader)}</b>: «${esc(pick(r.good ? ['Belle parole, ma i fatti dicono altro.', 'Facile parlare dall’opposizione.', 'Gli italiani non ci cascano.'] : ['Ecco, lo vedete? Nessuna risposta concreta.', 'Confusione totale, come sempre.', 'Il pubblico ha capito benissimo.']))}»</div></div></div>` : '';
+  replaceSheet(`${gaugeHTML(s.app)}<div class="center mt2"><div style="font-size:50px" class="pop">${r.good ? '👏' : '😬'}</div><h3 class="mt">${r.good ? 'Risposta efficace' : 'Risposta che divide'}</h3></div>
+    <div class="card mt">${r.lines.map(x => `<div class="small" style="padding:4px 0">• ${esc(x)}</div>`).join('') || '<div class="small muted">Il pubblico prende nota.</div>'}</div>${reply}
     <button class="btn pri block mt2" onclick="TVS.i++;renderInterview()">${s.i + 1 < s.qs.length ? 'Prossima domanda ›' : 'Fine intervista'}</button>`);
 }
 function finishInterview() {
   const s = TVS;
   const good = s.log.filter(x => x.r.good).length;
-  if (s.debate) { myParty().spinta += (good - 1.5) * 1.2; G.player.fama = clamp(G.player.fama + 5, 0, 100); }
-  addNews(`${G.player.name} ospite di ${s.show.n} (${s.show.ch}): ${good >= 2 ? 'prova convincente' : good === 1 ? 'luci e ombre' : 'serata difficile'}.`, good >= 2 ? 'mio' : 'info');
-  replaceSheet(`<div class="center mt2"><div style="font-size:56px" class="pop">${good >= 2 ? '🌟' : good === 1 ? '🙂' : '😓'}</div><h2 class="mt">${good >= 2 ? 'Promosso dal pubblico' : good === 1 ? 'Così così' : 'Serata da dimenticare'}</h2><p class="muted">${good} risposte su ${s.log.length} hanno convinto.</p></div>
-    <div class="card tight">${s.log.map(x => `<div class="small" style="padding:6px 0;border-bottom:1px solid var(--line)"><div class="muted">${esc(x.q)}</div><b>${esc(x.a)}</b> ${x.r.good ? '<span class="good">✓</span>' : '<span class="bad">✗</span>'}</div>`).join('')}</div>
+  const win = s.app >= 55;
+  if (s.debate) { myParty().spinta += (s.app - 50) / 10; G.player.fama = clamp(G.player.fama + 5, 0, 100); if (s.opp) P(s.opp).spinta -= (s.app - 50) / 20; }
+  addNews(s.debate && s.opp ? `Confronto TV: ${G.player.name} contro ${P(s.opp).leader}. Gradimento ${Math.round(s.app)}% per ${G.player.name}.` : `${G.player.name} ospite di ${s.show.n} (${s.show.ch}): ${win ? 'prova convincente' : good === 1 ? 'luci e ombre' : 'serata difficile'}.`, win ? 'mio' : 'info');
+  replaceSheet(`<div class="center mt2"><div style="font-size:56px" class="pop">${win ? '🌟' : s.app >= 40 ? '🙂' : '😓'}</div><h2 class="mt">${s.debate ? (win ? 'Hai vinto il confronto' : 'Confronto perso') : (win ? 'Promosso dal pubblico' : s.app >= 40 ? 'Così così' : 'Serata da dimenticare')}</h2></div>${gaugeHTML(s.app)}
+    <div class="card tight mt">${s.log.map(x => `<div class="small" style="padding:6px 0;border-bottom:1px solid var(--line)"><div class="muted">${esc(x.q)}</div><b>${esc(x.a)}</b> ${x.r.good ? '<span class="good">✓</span>' : '<span class="bad">✗</span>'}</div>`).join('')}</div>
     <button class="btn pri block mt2" onclick="closeSheet();renderGame()">Chiudi</button>`);
+  if (win) confetti();
   TVS = null;
 }
 
@@ -4628,6 +5009,7 @@ function nextWeek() {
   renderGame();
   vib(12);
   showWeekSummary(s, before);
+  if (s.ach && s.ach.length) setTimeout(() => celebrate(s.ach), 600);
 }
 function showWeekSummary(s, before) {
   const dPoll = myParty().poll - before.poll, dSp = G.econ.spread - before.spread;
@@ -4658,8 +5040,16 @@ function showEvent(item) {
   let v;
   try { v = eventView(item); } catch (e) { console.error(e); G.queue.shift(); renderGame(); return; }
   window._ev = { item, v };
-  openSheet(`<div class="evcard"><div class="img">${v.img}</div><h2>${esc(v.title)}</h2><div class="txt">${esc(v.text)}</div>
-    <div class="mt">${v.choices.map((c, i) => `<button class="choice" style="animation-delay:${200 + i * 80}ms" onclick="chooseEvent(${i})"><div class="t">${esc(c.t)}</div>${fxChips(c.fx, c.run && !c.fx ? '<span class="n">• esito incerto</span>' : '')}</button>`).join('')}</div></div>`, { locked: true });
+  // chi è coinvolto: ritratto del leader o del ministro al posto dell'icona
+  const c = item.ctx || {};
+  let face = '';
+  if (c.p && G.parties[c.p]) face = leaderPortrait(c.p, 76);
+  else if (c.n && person(c.n)) face = portrait(c.n, 76, { party: person(c.n).party });
+  const n = v.choices.length, last = v.choices[n - 1];
+  const sheet = openSheet(`<div class="evcard" id="evc"><div class="img">${face || v.img}</div><h2>${esc(v.title)}</h2><div class="txt">${esc(v.text)}</div>
+    ${n >= 2 ? `<div class="swipe-hint">⬅️ ${esc(last.t.slice(0, 28))}${last.t.length > 28 ? '…' : ''} · ${esc(v.choices[0].t.slice(0, 28))}${v.choices[0].t.length > 28 ? '…' : ''} ➡️</div>` : ''}
+    <div class="mt">${v.choices.map((ch, i) => `<button class="choice" style="animation-delay:${200 + i * 80}ms" onclick="chooseEvent(${i})"><div class="t">${i === 0 && n >= 2 ? '➡️ ' : i === n - 1 && n >= 2 ? '⬅️ ' : ''}${esc(ch.t)}</div>${fxChips(ch.fx, ch.run && !ch.fx ? '<span class="n">• esito incerto</span>' : '')}</button>`).join('')}</div></div>`, { locked: true });
+  if (n >= 2) makeSwipe(sheet.querySelector('#evc'), { right: { label: '✓ ' + v.choices[0].t.slice(0, 22), cb: () => chooseEvent(0) }, left: { label: '✗ ' + last.t.slice(0, 22), cb: () => chooseEvent(n - 1) } });
 }
 function chooseEvent(i) {
   const { item, v } = window._ev; const c = v.choices[i];
@@ -5013,7 +5403,7 @@ function openFormation() {
 }
 function renderFormation() {
   const f = G.formation;
-  if (f.step === 'risultati') return renderResults();
+  if (f.step === 'risultati') return f.liveDone ? renderResults() : renderElectionNight();
   if (f.step === 'consultazioni') return renderConsultazioni();
   if (f.step === 'ministri') return renderCabinet();
   if (f.step === 'giuramento') return renderGiuramento();
@@ -5287,7 +5677,7 @@ function finishGovernment() {
   const f = G.formation;
   startPlayerGovernment(f.set, f.ministers, f.vice);
   if (Object.values(f.ministers).includes(G.player.name)) G.gov.interim = Object.keys(f.ministers).find(k => f.ministers[k] === G.player.name);
-  closeSheet(true); renderGame(); saveGame('auto');
+  closeSheet(true); renderGame(); saveGame('auto'); setTimeout(() => celebrate(checkAchievements()), 2500);
   setTimeout(() => openSheet(`<div class="center"><div style="font-size:60px" class="pop">🏛</div><h2 class="mt">Benvenut${G.player.art === 'la' ? 'a' : 'o'} a Palazzo Chigi</h2><p class="muted">Il passaggio della campanella è fatto. Ora: leggi, decreti, la manovra d’autunno e una coalizione da tenere unita.</p></div><button class="btn gold block mt" onclick="closeSheet()">Al lavoro, ${esc(G.player.art === 'la' ? 'Presidente' : 'Presidente')}</button>`), 350);
 }
 
@@ -5351,7 +5741,7 @@ function quirVote(i) {
 function endGame(why) {
   G.phase = 'fine'; saveGame('auto'); closeSheet(true);
   const p = G.player;
-  openSheet(`<div class="center"><div style="font-size:60px">🏛</div><h2>La carriera di ${esc(p.name)}</h2></div><div class="grid2 mt">${[['Leggi approvate', G.stats.laws], ['Governi', G.stats.govs], ['Settimane da premier', G.stats.weeksPremier], ['Fama finale', Math.round(p.fama)]].map(([a, b]) => `<div class="kpi"><div class="l">${a}</div><div class="v">${b}</div></div>`).join('')}</div><div class="card tight mt"><div class="list">${G.careerLog.map(x => `<div class="news-item"><span class="w">${fmtDate(x.w, true)}</span><span>${esc(x.t)}</span></div>`).join('')}</div></div><button class="btn pri block mt" onclick="closeSheet();showSplash()">Menu iniziale</button>`, { locked: true });
+  openSheet(`<div class="center"><div style="font-size:60px">🏛</div><h2>La carriera di ${esc(p.name)}</h2></div><div class="grid2 mt">${[['Leggi approvate', G.stats.laws], ['Governi', G.stats.govs], ['Settimane da premier', G.stats.weeksPremier], ['Fama finale', Math.round(p.fama)]].map(([a, b]) => `<div class="kpi"><div class="l">${a}</div><div class="v">${b}</div></div>`).join('')}</div><div class="card tight mt"><div class="list">${G.careerLog.map(x => `<div class="news-item"><span class="w">${fmtDate(x.w, true)}</span><span>${esc(x.t)}</span></div>`).join('')}</div></div><button class="btn gold block mt" onclick="openTimeline()">📖 La tua storia</button><button class="btn block mt" onclick="openAchievements()">🏅 Traguardi</button><button class="btn pri block mt" onclick="closeSheet(true);showSplash()">Menu iniziale</button>`, { locked: true });
 }
 function afterLoad() { if (G.phase === 'formazione') setTimeout(openFormation, 300); }
 
@@ -5369,7 +5759,8 @@ function openVotes(ids, direct) {
   VOTI = { bills: bills.map(b => b.id), sel: {}, direct };
   bills.forEach(b => { const h = b.stages[b.stage].h; const line = isPremier() && b.proposer === 'GOV' ? 'yes' : (G.myVotes[b.id] || partyLine(b, h)); VOTI.sel[b.id] = { group: line, me: line, fid: !!b.fiducia, line }; });
   openSheet('', { full: true, locked: true });
-  renderVotes();
+  const govOwn = bills.some(b => isPremier() && b.proposer === 'GOV');
+  if (govOwn) renderVotes(); else renderSwipeVotes();
 }
 function billChangeText(b) {
   if (b.type === 'manovra') { const c = budgetSum('c', b.measures); return `Manovra con ${b.measures.length} misure, saldo ${c > 0 ? '+' : ''}${fmt1(c)} miliardi di deficit.`; }
@@ -5378,6 +5769,7 @@ function billChangeText(b) {
 function renderVotes() {
   const seg = (id, field, val) => `<div class="seg mt">${['yes', 'abst', 'no'].map(v => `<button class="${val === v ? 'on' : ''}" onclick="VOTI.sel[${id}].${field}='${v}';${field === 'group' ? `VOTI.sel[${id}].me='${v}';` : ''}renderVotes()">${VLAB[v]}</button>`).join('')}</div>`;
   let h = `<div class="center"><div style="font-size:44px" class="pop">🗳</div><div class="tiny gold" style="font-weight:800">AULA · SETTIMANA DEL ${fmtDate(G.week + 1, true).toUpperCase()}</div><h2 class="mt">Votazioni in arrivo</h2><p class="small muted">Decidi come votare. Il voto si tiene nei prossimi giorni: lo vedrai nella rassegna della settimana.</p></div>`;
+  if (!VOTI.bills.some(id => isPremier() && G.bills.find(x => x.id === id).proposer === 'GOV')) h += '<button class="btn block mt" onclick="VOTI.done={};renderSwipeVotes()">👆 Vota a scorrimento</button>';
   VOTI.bills.forEach(id => {
     const b = G.bills.find(x => x.id === id), s = b.stages[b.stage], H = s.h === 'C' ? 'Camera' : 'Senato';
     const st = VOTI.sel[id];
@@ -5550,7 +5942,7 @@ function openMinisterProposal(sp) {
   const pp = person(sp.name), party = pp && G.parties[pp.party] ? pp.party : null;
   const effs = effectsOf(l, cur, sp.opt), imp = impactOf(l, cur, sp.opt);
   window._mp = sp;
-  openSheet(`<div class="evcard"><div class="img">🗂</div><div class="tiny gold center" style="font-weight:800">PROPOSTA DAL MINISTERO · ${esc(MIN_BY_ID[sp.min].n.toUpperCase())}</div>
+  openSheet(`<div class="evcard"><div class="img">${portrait(sp.name, 76, { party: party || undefined })}</div><div class="tiny gold center" style="font-weight:800">PROPOSTA DAL MINISTERO · ${esc(MIN_BY_ID[sp.min].n.toUpperCase())}</div>
     <h2>${esc(o.t)}</h2>
     <div class="txt center small">${esc(sp.name)}${party ? ` (${esc(P(party).short)})` : ''}: «Presidente, per migliorare ${m.ico} <b>${m.n.toLowerCase()}</b> propongo questa riforma.»</div>
     <div class="qcard small mt"><b>Oggi:</b> ${esc(l.opts[cur].t)}<br><b>Diventerebbe:</b> ${esc(o.d)}</div>
@@ -5665,6 +6057,199 @@ function flyResult(ico, title, chips, text) {
   document.body.appendChild(el);
   vib(15);
   setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 400); }, 3200);
+}
+
+</script>
+<script>
+// ============================================================
+//  PIÙ DECISIONI, MENO LETTURA: scorrimento, notte elettorale,
+//  traguardi, pianificazione della settimana, la tua storia
+// ============================================================
+
+// ---------- 1. carte da far scorrere ----------
+// el: la carta; opts: { right:{label,cb}, left:{label,cb}, up:{label,cb} }
+function makeSwipe(el, opts) {
+  if (!el) return;
+  let sx = 0, sy = 0, dx = 0, dy = 0, drag = false;
+  const lab = document.createElement('div'); lab.className = 'swipe-lab'; el.appendChild(lab);
+  el.addEventListener('pointerdown', e => {
+    if (e.target.closest('button') && e.pointerType === 'mouse') return;
+    sx = e.clientX; sy = e.clientY; dx = dy = 0; drag = true; el.style.transition = 'none';
+  });
+  el.addEventListener('pointermove', e => {
+    if (!drag) return; dx = e.clientX - sx; dy = e.clientY - sy;
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+    if (!el.hasPointerCapture(e.pointerId)) { try { el.setPointerCapture(e.pointerId); } catch (er) { } }
+    el.style.transform = `translate(${dx}px, ${Math.min(0, dy) * 0.6}px) rotate(${dx / 18}deg)`;
+    const side = dy < -70 && Math.abs(dx) < 60 && opts.up ? 'up' : dx > 40 ? 'right' : dx < -40 ? 'left' : null;
+    lab.className = 'swipe-lab ' + (side || '');
+    lab.textContent = side && opts[side] ? opts[side].label : '';
+    lab.style.opacity = side ? Math.min(1, (Math.max(Math.abs(dx), -dy) - 40) / 60) : 0;
+  });
+  const end = () => {
+    if (!drag) return; drag = false; el.style.transition = 'transform .3s ease, opacity .3s';
+    const side = dy < -90 && Math.abs(dx) < 70 && opts.up ? 'up' : dx > 100 ? 'right' : dx < -100 ? 'left' : null;
+    if (side && opts[side]) {
+      el.style.transform = side === 'up' ? 'translateY(-130%)' : `translateX(${side === 'right' ? 140 : -140}%) rotate(${side === 'right' ? 25 : -25}deg)`;
+      el.style.opacity = 0; vib(25);
+      setTimeout(() => opts[side].cb(), 260);
+    } else { el.style.transform = ''; lab.style.opacity = 0; }
+  };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+}
+
+// votazioni a scorrimento: una carta per provvedimento
+function renderSwipeVotes() {
+  const pending = VOTI.bills.filter(id => !VOTI.done || !VOTI.done[id]);
+  VOTI.done = VOTI.done || {};
+  if (!pending.length) return confirmVotes();
+  const id = pending[0], b = G.bills.find(x => x.id === id), s = b.stages[b.stage], st = VOTI.sel[id];
+  const pr = predictVote(b);
+  const groupHere = isLeader() && seatsOf(myPid(), s.h) > 0;
+  const effs = b.lawId ? effChipsHTML(effectsOf(getLaw(b.lawId), b.from, b.opt), lawGain(myPid(), getLaw(b.lawId), b.from, b.opt)) : '';
+  replaceSheet(`<div class="row between"><span class="tag o">🗳 Voto ${VOTI.bills.length - pending.length + 1} di ${VOTI.bills.length}</span><button class="btn sm" onclick="VOTI.list=true;renderVotes()">Vista elenco</button></div>
+    <div class="swipe-hint">⬅️ No · ⬆️ Astensione · Sì ➡️</div>
+    <div class="swipe-card" id="swc" style="--vc:${b.proposer === 'GOV' ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa'}">
+      <div class="row between"><span class="tag">${billTypeName(b)} · ${s.h === 'C' ? 'Camera' : 'Senato'}</span>${proposerLabel(b)}</div>
+      <h2 style="margin-top:10px">${esc(billName(b))}</h2>
+      <div class="qcard small mt">${billChangeText(b)}</div>${effs}
+      <div class="row between small mt"><span>Linea del partito: <b>${VLAB[st.line]}</b></span><span>Previsione: <b class="${pr.passed ? 'good' : 'bad'}">${pr.passed ? 'passa' : 'bocciata'}</b></span></div>
+      ${groupHere ? `<div class="tiny muted mt">Voti tu e il tuo gruppo (${seatsOf(myPid(), s.h)} seggi).</div>` : '<div class="tiny muted mt">È il tuo voto personale: contro la linea è dissenso.</div>'}
+      <button class="btn sm mt" onclick="openBill(${id})">⚖️ Pro e contro</button>
+    </div>
+    <div class="row mt2" style="justify-content:center;gap:18px"><button class="swbtn no" onclick="swipeVote('no')">✗</button><button class="swbtn ab" onclick="swipeVote('abst')">–</button><button class="swbtn si" onclick="swipeVote('yes')">✓</button></div>`);
+  makeSwipe(document.getElementById('swc'), { right: { label: 'SÌ', cb: () => swipeVote('yes') }, left: { label: 'NO', cb: () => swipeVote('no') }, up: { label: 'ASTENSIONE', cb: () => swipeVote('abst') } });
+}
+function swipeVote(v) {
+  const pending = VOTI.bills.filter(id => !VOTI.done[id]); const id = pending[0]; if (id === undefined) return;
+  const st = VOTI.sel[id]; st.group = v; st.me = v; VOTI.done[id] = true; vib(15);
+  renderSwipeVotes();
+}
+
+// ---------- 3. notte elettorale in diretta ----------
+let EN = null;
+function renderElectionNight() {
+  const E = G.lastElection;
+  if (!EN || EN.w !== E.w) EN = { w: E.w, ph: 0 };
+  const phases = [
+    { t: 'Ore 23:00 · Exit poll', cov: 0, noise: 2.2, range: true },
+    { t: 'Prima proiezione', cov: 18, noise: 1.2 },
+    { t: 'Seconda proiezione', cov: 46, noise: 0.6 },
+    { t: 'Terza proiezione', cov: 79, noise: 0.25 },
+  ];
+  const ph = phases[EN.ph];
+  if (!ph) { G.formation.liveDone = true; return renderResults(); }
+  const r = seeded(E.w * 31 + EN.ph * 7);
+  const ids = Object.keys(E.votes).sort((a, b) => E.votes[b] - E.votes[a]);
+  const val = id => clamp(E.votes[id] + (r() - 0.5) * 2 * ph.noise, 0, 70);
+  const max = Math.max(...ids.map(val));
+  const mine = val(myPid());
+  replaceSheet(`<div class="center"><div class="live"><i></i>DIRETTA · ELEZIONI POLITICHE</div><h2 class="mt">${ph.t}</h2><div class="small muted">${ph.range ? 'Forchette dei principali istituti' : `Sezioni scrutinate: ${ph.cov}%`}</div></div>
+    <div class="card hero center mt" style="--pc:${myParty().color}">${leaderPortrait(myPid(), 64)}<div class="small muted mt">${esc(myParty().name)}</div><div class="bignum">${ph.range ? `${fmt1(Math.max(0, mine - 2))}–${fmt1(mine + 2)}` : fmt1(mine)}%</div></div>
+    <div class="card">${ids.slice(0, 10).map(id => `<div class="res-row">${partyChip(id)}<div class="bar"><i style="width:${val(id) / max * 100}%;--c:${P(id).color}"></i></div><span class="pct small">${ph.range ? `${fmt0(Math.max(0, val(id) - 2))}–${fmt0(val(id) + 2)}` : fmt1(val(id))}%</span></div>`).join('')}</div>
+    <div class="row mt"><button class="btn grow" onclick="EN.ph=99;renderElectionNight()">Salta ai risultati</button><button class="btn gold grow" onclick="EN.ph++;renderElectionNight()">Avanti ›</button></div>`);
+  clearTimeout(EN.t);
+  EN.t = setTimeout(() => { if (G.phase === 'formazione' && G.formation && G.formation.step === 'risultati' && !G.formation.liveDone && EN.ph < 99) { EN.ph++; renderElectionNight(); } }, 3200);
+}
+
+// ---------- 5. traguardi ----------
+const ACHIEVEMENTS = [
+  { id: 'soglia', ico: '🎯', n: 'Sopra la soglia', d: 'Il tuo partito supera il 3% nei sondaggi', c: () => myParty().poll >= 3 },
+  { id: 'dieci', ico: '📊', n: 'Doppia cifra', d: 'Il tuo partito supera il 10%', c: () => myParty().poll >= 10 },
+  { id: 'venti', ico: '🚀', n: 'Partito di massa', d: 'Il tuo partito supera il 20%', c: () => myParty().poll >= 20 },
+  { id: 'primo', ico: '🥇', n: 'Primo partito', d: 'Il tuo partito è il più votato nei sondaggi', c: () => PIDS().every(id => id === myPid() || P(id).poll < myParty().poll) },
+  { id: 'notorieta', ico: '📣', n: 'Lo conoscono tutti', d: 'Notorietà del partito oltre il 75%', c: () => partyNoto(myPid()) >= 75 },
+  { id: 'parlamento', ico: '🏛', n: 'In Parlamento', d: 'Entri in Parlamento', c: () => !!G.player.parl },
+  { id: 'coalizione', ico: '🤝', n: 'Candidato premier', d: 'Sei il candidato premier di una coalizione', c: () => G.coalitions.some(c => c.cand === 'PLAYER') },
+  { id: 'ministro', ico: '💼', n: 'Al governo', d: 'Diventi ministro', c: () => !!G.player.minister },
+  { id: 'premier', ico: '👑', n: 'Palazzo Chigi', d: 'Diventi Presidente del Consiglio', c: () => isPremier() },
+  { id: 'anno', ico: '🗓', n: 'Un anno a Palazzo Chigi', d: '52 settimane da premier', c: () => G.stats.weeksPremier >= 52 },
+  { id: 'longevo', ico: '🏆', n: 'Governo longevo', d: 'Più di 3 anni da premier', c: () => G.stats.weeksPremier >= 156 },
+  { id: 'leggi5', ico: '📜', n: 'Legislatore', d: '5 tue leggi approvate', c: () => G.stats.laws >= 5 },
+  { id: 'leggi20', ico: '📚', n: 'Riformatore', d: '20 tue leggi approvate', c: () => G.stats.laws >= 20 },
+  { id: 'manovra', ico: '💶', n: 'La prima manovra', d: 'Approvata una tua legge di bilancio', c: () => !!G.flags.playerManovra },
+  { id: 'spread', ico: '📉', n: 'Mercati tranquilli', d: 'Da premier porti lo spread sotto 100', c: () => isPremier() && G.econ.spread < 100 && G.stats.weeksPremier > 10 },
+  { id: 'conti', ico: '✅', n: 'Conti in ordine', d: 'Da premier porti il deficit sotto il 3%', c: () => isPremier() && G.econ.deficit < 3 && G.stats.weeksPremier > 20 },
+  { id: 'crescita', ico: '📈', n: 'Boom economico', d: 'Da premier la crescita supera l’1,2%', c: () => isPremier() && G.econ.pil > 1.2 },
+  { id: 'lavoro', ico: '👷', n: 'Piena occupazione', d: 'Da premier la disoccupazione scende sotto il 5,5%', c: () => isPremier() && G.econ.dis < 5.5 },
+  { id: 'regione', ico: '🗺', n: 'Una regione tua', d: 'Un presidente di Regione del tuo partito', c: () => Object.values(G.regions).some(r => r.gp === myPid()) },
+  { id: 'fama', ico: '🌟', n: 'Celebrità', d: 'Fama oltre 90', c: () => G.player.fama >= 90 },
+  { id: 'tv', ico: '📺', n: 'Volto televisivo', d: '10 interviste in TV', c: () => (G.stats.tv || 0) >= 10 },
+  { id: 'dissidente', ico: '✋', n: 'Spirito libero', d: 'Voti in dissenso dal tuo gruppo', c: () => G.careerLog.some(x => x.dissent) || G.news.some(n => /vota in dissenso/.test(n.t) && n.t.includes(G.player.name)) },
+  { id: 'congresso', ico: '⚔️', n: 'Scalata riuscita', d: 'Vinci il congresso del tuo partito', c: () => G.careerLog.some(x => /Vinci il congresso/.test(x.t)) },
+  { id: 'scissione', ico: '🪓', n: 'Strada tua', d: 'Fondi un partito con una scissione', c: () => G.careerLog.some(x => /Scissione/.test(x.t)) },
+  { id: 'referendum', ico: '✍️', n: 'Democrazia diretta', d: 'Vinci un referendum che hai promosso', c: () => G.referendums.some(r => r.by === 'PLAYER' && r.res && r.res.won) },
+  { id: 'quirinale', ico: '🇮🇹', n: 'Capo dello Stato', d: 'Vieni eletto Presidente della Repubblica', c: () => G.careerLog.some(x => /Presidente della Repubblica/.test(x.t)) },
+];
+function checkAchievements() {
+  G.ach = G.ach || {};
+  const fresh = [];
+  ACHIEVEMENTS.forEach(a => { if (G.ach[a.id]) return; let ok = false; try { ok = a.c(); } catch (e) { } if (ok) { G.ach[a.id] = G.week; fresh.push(a); G.careerLog.push({ w: G.week, t: `Traguardo: ${a.n}`, ach: a.ico }); } });
+  return fresh;
+}
+function openAchievements() {
+  G.ach = G.ach || {};
+  const n = Object.keys(G.ach).length;
+  openSheet(`${head('🏅 Traguardi', `${n} su ${ACHIEVEMENTS.length} sbloccati`)}<div class="ach-grid">${ACHIEVEMENTS.map(a => `<div class="ach ${G.ach[a.id] ? 'on' : ''}"><div class="ai">${G.ach[a.id] ? a.ico : '🔒'}</div><b>${esc(a.n)}</b><div class="tiny muted">${esc(a.d)}</div>${G.ach[a.id] ? `<div class="tiny gold">${fmtDate(G.ach[a.id], true)}</div>` : ''}</div>`).join('')}</div>`);
+}
+function celebrate(list) {
+  if (!list || !list.length) return;
+  confetti(['#ffd60a', '#fb923c', '#a78bfa', '#22c55e']);
+  list.forEach((a, i) => setTimeout(() => flyResult(a.ico, `Traguardo: ${a.n}`, [], a.d), i * 1600));
+}
+
+// ---------- 6. pianifica la settimana ----------
+function autoPlan() {
+  if (G.phase !== 'normale') return;
+  const before = snap(); const done = [];
+  for (let k = 0; k < 6; k++) {
+    const recs = recommendedActions().filter(r => r.id !== 'tv' && r.id !== 'dibattito' && r.id !== 'riposo');
+    const r = recs[0]; if (!r) break;
+    const a = ACTIONS.find(x => x.id === r.id);
+    if (r.id === 'comizio') { if (G.funds < 20 || G.pc < 1) break; doComizioQuiet(r.param); done.push('📣'); continue; }
+    if (a.custom || !a.run) { markUsed(r.id); continue; }
+    if (!spendPC(actionCost(a))) break;
+    markUsed(r.id); if (a.funds) G.funds -= a.funds;
+    try { a.run(); } catch (e) { }
+    done.push(a.ico);
+  }
+  renderGame();
+  if (!done.length) return toast('Niente da pianificare: capitale politico o fondi esauriti');
+  flyResult('🗓', `Settimana pianificata: ${done.join(' ')}`, diffChips(before, snap()), `${done.length} azioni fatte in automatico`);
+}
+function doComizioQuiet(rid) {
+  if (usedThisWeek('comizio') || G.funds < 20 || !spendPC(1)) return;
+  G.funds -= 20; markUsed('comizio');
+  const r = REGIONS_DEF.find(x => x.id === rid);
+  const k = (inCampaign() ? 2 : 1) * (0.6 + G.player.car / 15);
+  G.myReg[rid] = (G.myReg[rid] || 1) + 0.12 * k;
+  myParty().spinta += 0.15 * k * Math.sqrt(r.el) * (isLeader() ? 1 : 0.3);
+  G.player.fama = clamp(G.player.fama + 1, 0, 100);
+  addNews(`${G.player.name} in ${r.n}: ${pick(['piazza piena', 'sala gremita', 'incontro con i lavoratori', 'tour nei mercati rionali'])}.`, 'mio');
+}
+
+// ---------- 7. la tua storia ----------
+function timelineItems() {
+  const items = [];
+  G.careerLog.forEach(x => items.push({ w: x.w, ico: x.ach || (/premier|Presidente del Consiglio/i.test(x.t) ? '👑' : /Elezioni/.test(x.t) ? '🗳' : /Fine del tuo governo/.test(x.t) ? '💥' : /Scissione/.test(x.t) ? '🪓' : /ministr|Ministro/i.test(x.t) ? '💼' : /Elett/.test(x.t) ? '🏛' : '⭐'), t: x.t, k: x.ach ? 'ach' : 'car' }));
+  G.enacted.filter(e => e.by === 'player' || e.by === 'playerparl').forEach(e => { const l = getLaw(e.id); if (l) items.push({ w: e.w, ico: '📜', t: `Legge: ${l.opts[e.to].t}`, k: 'law' }); });
+  (G.electHist || []).forEach(e => items.push({ w: e.w, ico: '🗳', t: `Politiche: ${e.party} ${fmt1(e.vote)}% (${e.seatsC} deputati)`, k: 'vote' }));
+  const seen = new Set();
+  return items.filter(x => { const key = x.w + x.t; if (seen.has(key)) return false; seen.add(key); return true; }).sort((a, b) => a.w - b.w);
+}
+function openTimeline() {
+  const items = timelineItems();
+  let h = head('📖 La tua storia', `${esc(G.player.name)} · ${fmtDate(0, true)} → ${fmtDate(G.week, true)}`);
+  if (!items.length) h += '<div class="muted center mt2">La tua storia è appena cominciata.</div>';
+  let year = null;
+  h += '<div class="tl">';
+  items.forEach(x => {
+    const y = yearOf(x.w);
+    if (y !== year) { year = y; h += `<div class="tl-year">${y}</div>`; }
+    h += `<div class="tl-item ${x.k}"><span class="tl-dot">${x.ico}</span><div><div class="tiny muted">${fmtDate(x.w, true)}</div><div class="small">${esc(x.t)}</div></div></div>`;
+  });
+  h += '</div>';
+  openSheet(h);
 }
 
 </script>

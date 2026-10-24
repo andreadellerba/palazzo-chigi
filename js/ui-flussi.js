@@ -209,39 +209,55 @@ function startInterview(show, debate) {
   if (usedThisWeek(aid)) return toast('Hai già fatto un’intervista questa settimana', 'bad');
   if (!spendPC(cost)) return toast('Capitale politico insufficiente', 'bad');
   markUsed(aid);
+  G.stats.tv = (G.stats.tv || 0) + 1;
   const topics = interviewTopics(3);
-  TVS = { show, debate, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll };
+  // nel confronto TV c'è un avversario in studio: il leader del primo partito rivale
+  const opp = debate ? PIDS().filter(p => p !== myPid() && !(coalitionOf(p) && coalitionOf(p) === coalitionOf(myPid()))).sort((a, b) => P(b).poll - P(a).poll)[0] : null;
+  TVS = { show, debate, opp, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll, app: 50, secs: debate ? 10 : 15 };
   G.player.stress = clamp(G.player.stress + 3, 0, 100);
   openSheet('', { full: true, locked: true });
   renderInterview();
 }
+function gaugeHTML(v) { return `<div class="gauge"><div class="row between tiny"><span>👎</span><b>Gradimento del pubblico ${Math.round(v)}%</b><span>👍</span></div><div class="bar"><i style="width:${v}%;--c:${v >= 55 ? '#2ecc71' : v >= 40 ? '#ffb547' : '#ff5c5c'}"></i></div></div>`; }
 function renderInterview() {
   const s = TVS, qq = s.qs[s.i];
+  clearTimeout(s.timer);
   if (!qq) return finishInterview();
   replaceSheet(`<div class="row between"><span class="tag o">${esc(s.show.n)} · ${esc(s.show.ch)}</span><span class="small muted">Domanda ${s.i + 1}/${s.qs.length}</span></div>
-    <div class="mic mt2 pop">🎙</div><div class="small muted center">${s.debate ? 'Il moderatore' : 'Il conduttore'} chiede:</div>
+    ${gaugeHTML(s.app)}
+    <div class="row mt" style="justify-content:center;gap:22px">${portrait(G.player.name, 62, { party: myPid() })}${s.opp ? `<b class="gold" style="align-self:center">VS</b>${leaderPortrait(s.opp, 62)}` : '<span style="font-size:44px">🎙</span>'}</div>
+    <div class="small muted center mt">${s.debate ? 'Il moderatore' : 'Il conduttore'} chiede:</div>
     <div class="big-q center mt">${esc(qq.q)}</div>
+    <div class="timer mt"><i style="animation-duration:${s.secs}s"></i></div><div class="tiny muted center">Hai ${s.secs} secondi per rispondere</div>
     <div class="qcard mt">${qq.explain || ''}</div>
-    <div class="mt2">${qq.answers.map((a, i) => `<button class="choice" style="animation-delay:${i * 70}ms" onclick="pickAnswer(${i})"><div class="t">${esc(a.t)}</div><div class="fx">${a.pre.pro.map(x => `<span class="p">▲ ${esc(x.t)}</span>`).join('')}${a.pre.contro.map(x => `<span class="c">▼ ${esc(x.t)}</span>`).join('')}</div></button>`).join('')}</div>`);
+    <div class="mt">${qq.answers.map((a, i) => `<button class="choice" style="animation-delay:${i * 70}ms" onclick="pickAnswer(${i})"><div class="t">${esc(a.t)}</div><div class="fx">${a.pre.pro.map(x => `<span class="p">▲ ${esc(x.t)}</span>`).join('')}${a.pre.contro.map(x => `<span class="c">▼ ${esc(x.t)}</span>`).join('')}</div></button>`).join('')}</div>`);
+  s.timer = setTimeout(() => { if (TVS === s && s.qs[s.i] === qq) pickAnswer(-1); }, s.secs * 1000);
 }
 function pickAnswer(i) {
-  const s = TVS, qq = s.qs[s.i], a = qq.answers[i];
+  const s = TVS, qq = s.qs[s.i];
+  clearTimeout(s.timer);
   const show = Object.assign({}, s.show, { reach: s.debate ? 4 : s.show.reach });
-  const r = a.apply(show);
-  s.log.push({ q: qq.q, a: a.t, r });
+  let r, at;
+  if (i < 0) { applyFx({ my: -0.5, fama: 1, cred: -1 }); r = { good: false, lines: ['Silenzio imbarazzante: il tempo è scaduto e il conduttore passa oltre.'] }; at = '(nessuna risposta)'; }
+  else { const a = qq.answers[i]; r = a.apply(show); at = a.t; }
+  s.app = clamp(s.app + (r.good ? rnd(8, 15) : -rnd(7, 13)), 5, 95);
+  s.log.push({ q: qq.q, a: at, r });
   vib(20);
-  replaceSheet(`<div class="center mt2"><div style="font-size:50px" class="pop">${r.good ? '👏' : '😬'}</div><h3 class="mt">${r.good ? 'Risposta efficace' : 'Risposta che divide'}</h3></div>
-    <div class="card mt">${r.lines.map(x => `<div class="small" style="padding:4px 0">• ${esc(x)}</div>`).join('') || '<div class="small muted">Il pubblico prende nota.</div>'}</div>
+  const reply = s.opp ? `<div class="card tight mt"><div class="row">${leaderPortrait(s.opp, 40)}<div class="small grow"><b>${esc(P(s.opp).leader)}</b>: «${esc(pick(r.good ? ['Belle parole, ma i fatti dicono altro.', 'Facile parlare dall’opposizione.', 'Gli italiani non ci cascano.'] : ['Ecco, lo vedete? Nessuna risposta concreta.', 'Confusione totale, come sempre.', 'Il pubblico ha capito benissimo.']))}»</div></div></div>` : '';
+  replaceSheet(`${gaugeHTML(s.app)}<div class="center mt2"><div style="font-size:50px" class="pop">${r.good ? '👏' : '😬'}</div><h3 class="mt">${r.good ? 'Risposta efficace' : 'Risposta che divide'}</h3></div>
+    <div class="card mt">${r.lines.map(x => `<div class="small" style="padding:4px 0">• ${esc(x)}</div>`).join('') || '<div class="small muted">Il pubblico prende nota.</div>'}</div>${reply}
     <button class="btn pri block mt2" onclick="TVS.i++;renderInterview()">${s.i + 1 < s.qs.length ? 'Prossima domanda ›' : 'Fine intervista'}</button>`);
 }
 function finishInterview() {
   const s = TVS;
   const good = s.log.filter(x => x.r.good).length;
-  if (s.debate) { myParty().spinta += (good - 1.5) * 1.2; G.player.fama = clamp(G.player.fama + 5, 0, 100); }
-  addNews(`${G.player.name} ospite di ${s.show.n} (${s.show.ch}): ${good >= 2 ? 'prova convincente' : good === 1 ? 'luci e ombre' : 'serata difficile'}.`, good >= 2 ? 'mio' : 'info');
-  replaceSheet(`<div class="center mt2"><div style="font-size:56px" class="pop">${good >= 2 ? '🌟' : good === 1 ? '🙂' : '😓'}</div><h2 class="mt">${good >= 2 ? 'Promosso dal pubblico' : good === 1 ? 'Così così' : 'Serata da dimenticare'}</h2><p class="muted">${good} risposte su ${s.log.length} hanno convinto.</p></div>
-    <div class="card tight">${s.log.map(x => `<div class="small" style="padding:6px 0;border-bottom:1px solid var(--line)"><div class="muted">${esc(x.q)}</div><b>${esc(x.a)}</b> ${x.r.good ? '<span class="good">✓</span>' : '<span class="bad">✗</span>'}</div>`).join('')}</div>
+  const win = s.app >= 55;
+  if (s.debate) { myParty().spinta += (s.app - 50) / 10; G.player.fama = clamp(G.player.fama + 5, 0, 100); if (s.opp) P(s.opp).spinta -= (s.app - 50) / 20; }
+  addNews(s.debate && s.opp ? `Confronto TV: ${G.player.name} contro ${P(s.opp).leader}. Gradimento ${Math.round(s.app)}% per ${G.player.name}.` : `${G.player.name} ospite di ${s.show.n} (${s.show.ch}): ${win ? 'prova convincente' : good === 1 ? 'luci e ombre' : 'serata difficile'}.`, win ? 'mio' : 'info');
+  replaceSheet(`<div class="center mt2"><div style="font-size:56px" class="pop">${win ? '🌟' : s.app >= 40 ? '🙂' : '😓'}</div><h2 class="mt">${s.debate ? (win ? 'Hai vinto il confronto' : 'Confronto perso') : (win ? 'Promosso dal pubblico' : s.app >= 40 ? 'Così così' : 'Serata da dimenticare')}</h2></div>${gaugeHTML(s.app)}
+    <div class="card tight mt">${s.log.map(x => `<div class="small" style="padding:6px 0;border-bottom:1px solid var(--line)"><div class="muted">${esc(x.q)}</div><b>${esc(x.a)}</b> ${x.r.good ? '<span class="good">✓</span>' : '<span class="bad">✗</span>'}</div>`).join('')}</div>
     <button class="btn pri block mt2" onclick="closeSheet();renderGame()">Chiudi</button>`);
+  if (win) confetti();
   TVS = null;
 }
 
@@ -261,6 +277,7 @@ function nextWeek() {
   renderGame();
   vib(12);
   showWeekSummary(s, before);
+  if (s.ach && s.ach.length) setTimeout(() => celebrate(s.ach), 600);
 }
 function showWeekSummary(s, before) {
   const dPoll = myParty().poll - before.poll, dSp = G.econ.spread - before.spread;
@@ -291,8 +308,16 @@ function showEvent(item) {
   let v;
   try { v = eventView(item); } catch (e) { console.error(e); G.queue.shift(); renderGame(); return; }
   window._ev = { item, v };
-  openSheet(`<div class="evcard"><div class="img">${v.img}</div><h2>${esc(v.title)}</h2><div class="txt">${esc(v.text)}</div>
-    <div class="mt">${v.choices.map((c, i) => `<button class="choice" style="animation-delay:${200 + i * 80}ms" onclick="chooseEvent(${i})"><div class="t">${esc(c.t)}</div>${fxChips(c.fx, c.run && !c.fx ? '<span class="n">• esito incerto</span>' : '')}</button>`).join('')}</div></div>`, { locked: true });
+  // chi è coinvolto: ritratto del leader o del ministro al posto dell'icona
+  const c = item.ctx || {};
+  let face = '';
+  if (c.p && G.parties[c.p]) face = leaderPortrait(c.p, 76);
+  else if (c.n && person(c.n)) face = portrait(c.n, 76, { party: person(c.n).party });
+  const n = v.choices.length, last = v.choices[n - 1];
+  const sheet = openSheet(`<div class="evcard" id="evc"><div class="img">${face || v.img}</div><h2>${esc(v.title)}</h2><div class="txt">${esc(v.text)}</div>
+    ${n >= 2 ? `<div class="swipe-hint">⬅️ ${esc(last.t.slice(0, 28))}${last.t.length > 28 ? '…' : ''} · ${esc(v.choices[0].t.slice(0, 28))}${v.choices[0].t.length > 28 ? '…' : ''} ➡️</div>` : ''}
+    <div class="mt">${v.choices.map((ch, i) => `<button class="choice" style="animation-delay:${200 + i * 80}ms" onclick="chooseEvent(${i})"><div class="t">${i === 0 && n >= 2 ? '➡️ ' : i === n - 1 && n >= 2 ? '⬅️ ' : ''}${esc(ch.t)}</div>${fxChips(ch.fx, ch.run && !ch.fx ? '<span class="n">• esito incerto</span>' : '')}</button>`).join('')}</div></div>`, { locked: true });
+  if (n >= 2) makeSwipe(sheet.querySelector('#evc'), { right: { label: '✓ ' + v.choices[0].t.slice(0, 22), cb: () => chooseEvent(0) }, left: { label: '✗ ' + last.t.slice(0, 22), cb: () => chooseEvent(n - 1) } });
 }
 function chooseEvent(i) {
   const { item, v } = window._ev; const c = v.choices[i];
@@ -646,7 +671,7 @@ function openFormation() {
 }
 function renderFormation() {
   const f = G.formation;
-  if (f.step === 'risultati') return renderResults();
+  if (f.step === 'risultati') return f.liveDone ? renderResults() : renderElectionNight();
   if (f.step === 'consultazioni') return renderConsultazioni();
   if (f.step === 'ministri') return renderCabinet();
   if (f.step === 'giuramento') return renderGiuramento();
@@ -920,7 +945,7 @@ function finishGovernment() {
   const f = G.formation;
   startPlayerGovernment(f.set, f.ministers, f.vice);
   if (Object.values(f.ministers).includes(G.player.name)) G.gov.interim = Object.keys(f.ministers).find(k => f.ministers[k] === G.player.name);
-  closeSheet(true); renderGame(); saveGame('auto');
+  closeSheet(true); renderGame(); saveGame('auto'); setTimeout(() => celebrate(checkAchievements()), 2500);
   setTimeout(() => openSheet(`<div class="center"><div style="font-size:60px" class="pop">🏛</div><h2 class="mt">Benvenut${G.player.art === 'la' ? 'a' : 'o'} a Palazzo Chigi</h2><p class="muted">Il passaggio della campanella è fatto. Ora: leggi, decreti, la manovra d’autunno e una coalizione da tenere unita.</p></div><button class="btn gold block mt" onclick="closeSheet()">Al lavoro, ${esc(G.player.art === 'la' ? 'Presidente' : 'Presidente')}</button>`), 350);
 }
 
@@ -984,7 +1009,7 @@ function quirVote(i) {
 function endGame(why) {
   G.phase = 'fine'; saveGame('auto'); closeSheet(true);
   const p = G.player;
-  openSheet(`<div class="center"><div style="font-size:60px">🏛</div><h2>La carriera di ${esc(p.name)}</h2></div><div class="grid2 mt">${[['Leggi approvate', G.stats.laws], ['Governi', G.stats.govs], ['Settimane da premier', G.stats.weeksPremier], ['Fama finale', Math.round(p.fama)]].map(([a, b]) => `<div class="kpi"><div class="l">${a}</div><div class="v">${b}</div></div>`).join('')}</div><div class="card tight mt"><div class="list">${G.careerLog.map(x => `<div class="news-item"><span class="w">${fmtDate(x.w, true)}</span><span>${esc(x.t)}</span></div>`).join('')}</div></div><button class="btn pri block mt" onclick="closeSheet();showSplash()">Menu iniziale</button>`, { locked: true });
+  openSheet(`<div class="center"><div style="font-size:60px">🏛</div><h2>La carriera di ${esc(p.name)}</h2></div><div class="grid2 mt">${[['Leggi approvate', G.stats.laws], ['Governi', G.stats.govs], ['Settimane da premier', G.stats.weeksPremier], ['Fama finale', Math.round(p.fama)]].map(([a, b]) => `<div class="kpi"><div class="l">${a}</div><div class="v">${b}</div></div>`).join('')}</div><div class="card tight mt"><div class="list">${G.careerLog.map(x => `<div class="news-item"><span class="w">${fmtDate(x.w, true)}</span><span>${esc(x.t)}</span></div>`).join('')}</div></div><button class="btn gold block mt" onclick="openTimeline()">📖 La tua storia</button><button class="btn block mt" onclick="openAchievements()">🏅 Traguardi</button><button class="btn pri block mt" onclick="closeSheet(true);showSplash()">Menu iniziale</button>`, { locked: true });
 }
 function afterLoad() { if (G.phase === 'formazione') setTimeout(openFormation, 300); }
 
@@ -1002,7 +1027,8 @@ function openVotes(ids, direct) {
   VOTI = { bills: bills.map(b => b.id), sel: {}, direct };
   bills.forEach(b => { const h = b.stages[b.stage].h; const line = isPremier() && b.proposer === 'GOV' ? 'yes' : (G.myVotes[b.id] || partyLine(b, h)); VOTI.sel[b.id] = { group: line, me: line, fid: !!b.fiducia, line }; });
   openSheet('', { full: true, locked: true });
-  renderVotes();
+  const govOwn = bills.some(b => isPremier() && b.proposer === 'GOV');
+  if (govOwn) renderVotes(); else renderSwipeVotes();
 }
 function billChangeText(b) {
   if (b.type === 'manovra') { const c = budgetSum('c', b.measures); return `Manovra con ${b.measures.length} misure, saldo ${c > 0 ? '+' : ''}${fmt1(c)} miliardi di deficit.`; }
@@ -1011,6 +1037,7 @@ function billChangeText(b) {
 function renderVotes() {
   const seg = (id, field, val) => `<div class="seg mt">${['yes', 'abst', 'no'].map(v => `<button class="${val === v ? 'on' : ''}" onclick="VOTI.sel[${id}].${field}='${v}';${field === 'group' ? `VOTI.sel[${id}].me='${v}';` : ''}renderVotes()">${VLAB[v]}</button>`).join('')}</div>`;
   let h = `<div class="center"><div style="font-size:44px" class="pop">🗳</div><div class="tiny gold" style="font-weight:800">AULA · SETTIMANA DEL ${fmtDate(G.week + 1, true).toUpperCase()}</div><h2 class="mt">Votazioni in arrivo</h2><p class="small muted">Decidi come votare. Il voto si tiene nei prossimi giorni: lo vedrai nella rassegna della settimana.</p></div>`;
+  if (!VOTI.bills.some(id => isPremier() && G.bills.find(x => x.id === id).proposer === 'GOV')) h += '<button class="btn block mt" onclick="VOTI.done={};renderSwipeVotes()">👆 Vota a scorrimento</button>';
   VOTI.bills.forEach(id => {
     const b = G.bills.find(x => x.id === id), s = b.stages[b.stage], H = s.h === 'C' ? 'Camera' : 'Senato';
     const st = VOTI.sel[id];

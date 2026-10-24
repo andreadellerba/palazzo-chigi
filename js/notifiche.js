@@ -37,7 +37,7 @@ function openMinisterProposal(sp) {
   const pp = person(sp.name), party = pp && G.parties[pp.party] ? pp.party : null;
   const effs = effectsOf(l, cur, sp.opt), imp = impactOf(l, cur, sp.opt);
   window._mp = sp;
-  openSheet(`<div class="evcard"><div class="img">🗂</div><div class="tiny gold center" style="font-weight:800">PROPOSTA DAL MINISTERO · ${esc(MIN_BY_ID[sp.min].n.toUpperCase())}</div>
+  openSheet(`<div class="evcard"><div class="img">${portrait(sp.name, 76, { party: party || undefined })}</div><div class="tiny gold center" style="font-weight:800">PROPOSTA DAL MINISTERO · ${esc(MIN_BY_ID[sp.min].n.toUpperCase())}</div>
     <h2>${esc(o.t)}</h2>
     <div class="txt center small">${esc(sp.name)}${party ? ` (${esc(P(party).short)})` : ''}: «Presidente, per migliorare ${m.ico} <b>${m.n.toLowerCase()}</b> propongo questa riforma.»</div>
     <div class="qcard small mt"><b>Oggi:</b> ${esc(l.opts[cur].t)}<br><b>Diventerebbe:</b> ${esc(o.d)}</div>
