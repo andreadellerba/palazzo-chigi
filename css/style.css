@@ -580,3 +580,29 @@ canvas.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 200;
 .pat { display: flex; gap: 4px; margin-top: 10px; align-items: center; font-size: 11.5px; color: var(--muted); }
 .pat i { width: 18px; height: 6px; border-radius: 3px; background: var(--good); } .pat i.x { background: rgba(255,255,255,.1); }
 .react { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 12px; font-weight: 700; }
+
+/* V4: riepilogo come telegiornale */
+.tgw { position: relative; height: 272px; border-radius: 18px; overflow: hidden; background: radial-gradient(120% 90% at 50% 0%, #2b3d72, #0a1024 75%); border: 1px solid var(--line2); }
+.tgw .live { position: absolute; top: 10px; left: 12px; font-size: 11px; font-weight: 900; letter-spacing: .1em; display: flex; gap: 6px; align-items: center; color: #fff; }
+.tgw .live i { width: 8px; height: 8px; border-radius: 50%; background: #ff3b3b; animation: pulseBar 1s infinite; }
+.tgw .dt { position: absolute; top: 10px; right: 12px; font-size: 10px; color: var(--muted); font-weight: 800; }
+.tgw .face { position: absolute; left: 50%; top: 34px; transform: translateX(-50%); }
+.tgw .who { position: absolute; left: 0; right: 0; top: 118px; text-align: center; font-size: 11px; color: var(--muted); }
+.tgw .lt { position: absolute; left: 0; right: 0; bottom: 30px; }
+.tgw .lt .a { display: inline-block; background: var(--oro); color: #1a1405; font-weight: 900; font-size: 11px; letter-spacing: .12em; padding: 4px 10px; }
+.tgw .lt .b { background: rgba(255,255,255,.96); color: #111; font-weight: 800; font-size: 15px; padding: 8px 12px; line-height: 1.25; max-height: 64px; overflow: hidden; }
+.tgw .crawl { position: absolute; left: 0; right: 0; bottom: 0; background: #0a1024; color: var(--cream); font-weight: 700; font-size: 12px; white-space: nowrap; overflow: hidden; padding: 6px 0; border-top: 1px solid var(--line2); }
+.tgw .crawl span { display: inline-block; padding-left: 100%; animation: tick 30s linear infinite; }
+/* V1: lo sfondo cambia con le stagioni e le crisi */
+#app { transition: background .8s; }
+#app[data-season="primavera"] { background: radial-gradient(120% 55% at 50% -5%, #1f4060 0%, transparent 62%); }
+#app[data-season="estate"] { background: radial-gradient(120% 55% at 50% -5%, #2d4f86 0%, transparent 62%), radial-gradient(80% 40% at 90% 0%, rgba(255,190,90,.14), transparent 70%); }
+#app[data-season="autunno"] { background: radial-gradient(120% 55% at 50% -5%, #3b2c24 0%, transparent 62%); }
+#app[data-season="natale"] { background: radial-gradient(120% 55% at 50% -5%, #1d2d5c 0%, transparent 62%), radial-gradient(70% 35% at 15% 0%, rgba(229,72,77,.16), transparent 70%), radial-gradient(70% 35% at 85% 0%, rgba(31,164,99,.14), transparent 70%); }
+#app[data-season="crisi"] { background: radial-gradient(120% 55% at 50% -5%, #4a1520 0%, transparent 62%); }
+/* V3: icone degli eventi sulla mappa */
+.map .pin { cursor: pointer; }
+.map .pin circle { fill: #0a1024; stroke: var(--oro); stroke-width: 1.2; }
+.map .pin path, .map .pin rect, .map .pin circle.ic { fill: none; stroke: var(--oro2); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.map .pin { animation: pinBob 2.2s ease-in-out infinite; transform-box: fill-box; }
+@keyframes pinBob { 50% { transform: translateY(-2px); } }

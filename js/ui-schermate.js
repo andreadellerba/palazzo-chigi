@@ -17,6 +17,7 @@ function sec(title, extra) { return `<div class="sec"><h4>${title}</h4>${extra |
 function renderGame() {
   const c = $('.content'); if (c) UI.scroll[UI.tab] = c.scrollTop;
   $('#app').dataset.tab = UI.tab;
+  $('#app').dataset.season = typeof seasonOf === 'function' ? seasonOf() : '';
   $('#app').innerHTML = `${topbar()}<div class="tricolore"></div>${tickerHTML()}<div class="content" id="content">${tabContent()}</div>${fabHTML()}${navHTML()}`;
   const n = $('.content'); if (n) n.scrollTop = UI.scroll[UI.tab] || 0;
   postRender();
@@ -324,6 +325,7 @@ function italiaTab() {
   h += `<div class="card mt map"><svg viewBox="0 0 360 470">`;
   REGIONS_DEF.forEach(r => { h += `<path d="${REGION_PATHS[r.id].d}" fill="${regionColor(r.id)}" onclick="openRegion('${r.id}')"/>`; });
   REGIONS_DEF.forEach(r => { h += `<text x="${r.lab[0]}" y="${r.lab[1]}" text-anchor="middle">${r.id}</text>`; });
+  h += typeof mapPinsSVG === "function" ? mapPinsSVG() : "";
   h += `</svg><div class="legend mt">${mapLegend()}</div></div>`;
   h += sec('Regioni') + `<div class="card tight"><div class="list">${REGIONS_DEF.map(r => { const st = G.regions[r.id]; const s = regionShares(r.id); return `<div class="li click" onclick="openRegion('${r.id}')"><span class="dot" style="--c:${regionColor(r.id)}"></span><div class="grow"><b class="small">${r.n}</b><div class="tiny muted">${esc(st.gov)} · regionali ${fmtDate(st.next, true)}</div></div><span class="small">${esc(myParty().short)} <b>${fmt1(s[myPid()])}%</b></span></div>`; }).join('')}</div></div>`;
   return h;

@@ -112,6 +112,7 @@ function doComizio(rid) {
   G.player.fama = clamp(G.player.fama + 1, 0, 100);
   if (!isLeader()) G.player.seguito = clamp(G.player.seguito + 1, 0, 100);
   addNews(`${G.player.name} in ${r.n}: ${pick(['piazza piena', 'sala gremita', 'incontro con i lavoratori', 'tour nei mercati rionali', 'confronto con gli studenti'])}.`, 'mio');
+  if (typeof addPin === 'function') addPin(rid, 'mega', 'Comizio');
   renderGame(); flyResult('mega', `Comizio in ${r.n}`, [{ t: 'Radicamento locale ▲', g: true }, { t: 'Fama +1', g: true }, { t: 'Fondi −20k€', g: false }]);
 }
 function doVisita(rid) {
@@ -295,8 +296,11 @@ function showWeekSummary(s, before, auto) {
   // M2: ogni voto chiuso con un timbro · M5: l'emiciclo del primo voto si accende seggio per seggio
   const votes = s.votes.map(({ bill, v }, i) => `<div class="vrow" style="animation-delay:${300 + i * 250}ms"><span class="stamp-s ${v.passed ? 'good' : 'bad'}" style="animation-delay:${400 + i * 250}ms">${v.passed ? 'APPROVATA' : 'RESPINTA'}</span><div class="grow"><b class="small">${esc(billName(bill))}</b><div class="tiny muted">${v.h === 'C' ? 'Camera' : 'Senato'} · sì ${v.yes} · no ${v.no}${G.myPersonal[bill.id] && G.player.parl === v.h ? ` · tu: ${VLAB[G.myPersonal[bill.id]]}` : ''}</div></div></div>`).join('');
   const v0 = s.votes.find(x => x.v && x.v.by);
-  openSheet(`<div class="paper"><div class="mast">IL QUOTIDIANO DI ROMA</div><div class="tiny center muted">${fmtDate(G.week).toUpperCase()} · SETTIMANA ${G.week}</div>
-    ${top ? `<div class="headline nk-${top.k}">${esc(top.t)}</div>` : '<div class="headline">Settimana tranquilla nei palazzi della politica</div>'}</div>
+  // V4: il riepilogo come telegiornale delle 20
+  const j = typeof anchor === 'function' ? anchor() : null;
+  openSheet(`<div class="tgw"><div class="live"><i></i>TG PALAZZO · ORE 20</div><div class="dt">${fmtDate(G.week).toUpperCase()} · SETTIMANA ${G.week}</div>${j ? `<div class="face">${jPortrait(j, 78)}</div><div class="who">${esc(j.n)}</div>` : ''}
+    <div class="lt"><span class="a">${top && top.k === 'bad' ? 'ULTIM’ORA' : 'IN APERTURA'}</span><div class="b">${top ? esc(top.t) : 'Settimana tranquilla nei palazzi della politica'}</div></div>
+    <div class="crawl"><span>${rest.length ? rest.slice(0, 6).map(n => esc(n.t)).join(' · ') + ' ·' : 'Nessun’altra notizia dai palazzi della politica ·'}</span></div></div>
     <div class="grid3 mt">${kpi(esc(myParty().short), fmt1(myParty().poll) + '%', (dPoll >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dPoll)), dPoll >= 0, myParty().color)}
     ${dA !== null ? kpi('Governo', fmt0(G.gov.approval) + '%', (dA >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dA)), dA >= 0, '#ffd60a') : kpi('Fama', fmt0(G.player.fama), null, true, '#a78bfa')}
     ${kpi('Spread', fmt0(G.econ.spread), (dSp >= 0 ? '▲ ' : '▼ ') + fmt0(Math.abs(dSp)), dSp <= 0, '#f472b6')}</div>
@@ -333,6 +337,7 @@ function chooseEvent(i) {
   if (c.run) { try { c.run(); } catch (e) { console.error(e); } }
   // conseguenze che tornano dopo qualche settimana
   if (c.later) { G.chains = G.chains || []; G.chains.push({ w: G.week + c.later.w, id: c.later.id, ctx: item.ctx || {} }); }
+  if (item.ctx && item.ctx.r && item.ctx.r.id && typeof addPin === "function") addPin(item.ctx.r.id, v.img, v.title);
   vib(20);
   replaceSheet(`<div class="evcard"><div class="img">${medal(v.img, 70)}</div><h2>${esc(v.title)}</h2><div class="center mt"><span class="stamp gold">DECISO</span></div><div class="card mt">${window._ev.staff ? '<div class="tiny warn" style="font-weight:800">Tempo scaduto: ha deciso il tuo staff</div>' : ''}<b>${esc(c.t)}</b><div class="small muted mt">${esc(c.r || '')}</div>${c.later ? '<div class="tiny warn mt">Questa scelta potrebbe avere conseguenze nelle prossime settimane.</div>' : ''}</div><button class="btn pri block mt" onclick="closeSheet();doneQueue()">Continua</button></div>`);
 }

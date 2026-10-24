@@ -342,7 +342,7 @@ function tourStop(rid) {
   if (usedThisWeek('tour')) return toast('Il pullman riparte la settimana prossima', 'bad');
   if (G.funds < 30) return toast('Fondi insufficienti', 'bad');
   if (!spendPC(1)) return toast('Capitale politico insufficiente', 'bad');
-  ensureStory(); G.funds -= 30; markUsed('tour'); G.tour.push(rid);
+  ensureStory(); G.funds -= 30; markUsed('tour'); G.tour.push(rid); addPin(rid, 'bus', 'Tappa del tour');
   const r = REGIONS_DEF.find(x => x.id === rid);
   G.myReg[rid] = (G.myReg[rid] || 1) + 0.2; myParty().spinta += 0.25 * Math.sqrt(r.el);
   const ev = pick(TOUR_EV); window._tour = { ev, r };
@@ -493,3 +493,21 @@ function fixCoalitions() {
   });
   G.coalitions = G.coalitions.filter(c => c.members.length > 1 || (c.mine && c.members.length));
 }
+
+// ---------- V1: stagioni e crisi nello sfondo ----------
+function seasonOf() {
+  if (!G) return 'inverno';
+  if (G.shock || (isPremier() && G.gov && G.gov.approval < 30) || G.econ.spread > 260) return 'crisi';
+  const m = monthOf(G.week);
+  return m === 11 ? 'natale' : m <= 1 ? 'inverno' : m <= 4 ? 'primavera' : m <= 7 ? 'estate' : 'autunno';
+}
+// ---------- V3: icone degli eventi sulla mappa ----------
+function addPin(rid, i, t) { if (!rid) return; G.pins = (G.pins || []).filter(p => G.week - p.w < 12).concat([{ rid, i, t, w: G.week }]).slice(-14); }
+function mapPinsSVG() {
+  const pins = (G.pins || []).filter(p => G.week - p.w < 12);
+  Object.entries(G.regions || {}).forEach(([rid, st]) => { const d = st.next - G.week; if (d >= 0 && d <= 8) pins.push({ rid, i: 'vote', t: `Regionali tra ${d} settimane`, w: G.week }); });
+  window._pins = pins;
+  const used = {};
+  return pins.map((p, k) => { const r = REGIONS_DEF.find(x => x.id === p.rid); if (!r) return ''; const n = used[p.rid] = (used[p.rid] || 0) + 1; const x = r.lab[0] + (n - 1) * 15, y = r.lab[1] - 13; return `<g transform="translate(${x} ${y})"><g class="pin" onclick="pinInfo(${k})" style="animation-delay:${k * 0.2}s"><circle r="7.5"/><g transform="translate(-5.2 -5.2) scale(.43)">${ICON_PATHS[p.i] || ICON_PATHS.alert}</g></g></g>`; }).join('');
+}
+function pinInfo(k) { const p = (window._pins || [])[k]; if (!p) return; toast(`${esc(regionName(p.rid))}: ${esc(p.t)}`); }
