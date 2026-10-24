@@ -6,6 +6,7 @@
 // ---------- 1. carte da far scorrere ----------
 // el: la carta; opts: { right:{label,cb}, left:{label,cb}, up:{label,cb} }
 function makeSwipe(el, opts) {
+  return; // scorrimento disattivato: si sceglie solo con i bottoni (lo swipe si confondeva con lo scroll)
   if (!el) return;
   let sx = 0, sy = 0, dx = 0, dy = 0, drag = false;
   const lab = document.createElement('div'); lab.className = 'swipe-lab'; el.appendChild(lab);
@@ -45,7 +46,7 @@ function renderSwipeVotes() {
   const groupHere = isLeader() && seatsOf(myPid(), s.h) > 0;
   const effs = b.lawId ? effChipsHTML(effectsOf(getLaw(b.lawId), b.from, b.opt), lawGain(myPid(), getLaw(b.lawId), b.from, b.opt)) : '';
   replaceSheet(`<div class="row between"><span class="tag o">${icon('vote')} Voto ${VOTI.bills.length - pending.length + 1} di ${VOTI.bills.length}</span><button class="btn sm" onclick="VOTI.list=true;renderVotes()">Vista elenco</button></div>
-    <div class="swipe-hint">← No · ↑ Astensione · Sì →</div>
+    
     <div class="swipe-card" id="swc" style="--vc:${b.proposer === 'GOV' ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa'}">
       ${voteHeadHTML(b)}
       <div class="decide"><div class="small">Il tuo partito vota: <b>${VLAB[st.line]}</b></div>${groupHere ? `<div class="tiny muted mt">Voti tu e il tuo gruppo (${seatsOf(myPid(), s.h)} ${s.h === 'C' ? 'deputati' : 'senatori'}).</div>` : '<div class="tiny muted mt">È il tuo voto personale: contro la linea del partito è dissenso.</div>'}</div>
@@ -123,7 +124,7 @@ function checkAchievements() {
 function openAchievements() {
   G.ach = G.ach || {};
   const n = Object.keys(G.ach).length;
-  openSheet(`${head('Traguardi', `${n} su ${ACHIEVEMENTS.length} sbloccati`)}<div class="ach-grid">${ACHIEVEMENTS.map(a => `<div class="ach ${G.ach[a.id] ? 'on' : ''}"><div class="ai">${medal(G.ach[a.id] ? a.ico : 'lock', 54, G.ach[a.id] ? '' : '#6b6764')}</div><b>${esc(a.n)}</b><div class="tiny muted">${esc(a.d)}</div>${G.ach[a.id] ? `<div class="tiny gold">${fmtDate(G.ach[a.id], true)}</div>` : ''}</div>`).join('')}</div>`);
+  openSheet(`${head('Traguardi', `${n} su ${ACHIEVEMENTS.length} sbloccati`)}<div class="ach-grid">${ACHIEVEMENTS.map(a => `<div class="ach ${G.ach[a.id] ? 'on' : ''}"><div class="ai">${medal(G.ach[a.id] ? a.ico : 'lock', 54, G.ach[a.id] ? '' : '#66729a')}</div><b>${esc(a.n)}</b><div class="tiny muted">${esc(a.d)}</div>${G.ach[a.id] ? `<div class="tiny gold">${fmtDate(G.ach[a.id], true)}</div>` : ''}</div>`).join('')}</div>`);
 }
 function celebrate(list) {
   if (!list || !list.length) return;

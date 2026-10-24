@@ -9,6 +9,7 @@
 // party:{PARTITO: spinta}, rap, seguito, cred, org
 function applyFx(fx) {
   if (!fx) return;
+  if (typeof softenFx === 'function') fx = softenFx(fx);
   const p = G.player, g = G.gov;
   if (fx.appr && g) g.popBank += fx.appr;
   if (fx.my) myParty().spinta += fx.my * (isLeader() ? 1 : 0.3);
@@ -392,6 +393,7 @@ function eventFits(e) {
   if (e.for === 'nogov' && r === 'premier') return false;
   if (e.for === 'leader' && !isLeader()) return false;
   if (e.for === 'member' && isLeader()) return false;
+  if (e.chain) return false;
   if (e.once && G.seenEvents[e.id]) return false;
   if (G.evCool[e.id] && G.week < G.evCool[e.id]) return false;
   try { if (e.cond && !e.cond()) return false; } catch (err) { return false; }

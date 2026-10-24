@@ -20,7 +20,7 @@ const ACTIONS = [
   { id: 'dimissioni', n: 'Dimissioni', ico: 'door', cost: 0, show: () => isPremier(), d: 'Sali al Quirinale e rassegni le dimissioni. Si aprono le consultazioni: potresti anche ricevere un nuovo incarico.', risk: 'Puoi perdere Palazzo Chigi', custom: () => confirmSheet('Rassegnare le dimissioni?', '<p class="muted">Il governo cade e si aprono le consultazioni.</p>', 'Dimettiti', () => { openCrisis('dimissioni'); renderGame(); openFormation(); }, 'red') },
   // --- leader ---
   { id: 'tv', n: 'Intervista TV', ico: 'tv', cost: 1, show: () => true, d: 'Scegli un talk show e rispondi alle domande sui temi caldi. Ogni risposta ha pro e contro.', custom: () => openTV() },
-  { id: 'social', n: 'Campagna social', ico: 'phone', cost: 1, funds: 10, show: () => true, fx: { fama: 2, my: 0.6 }, risk: '15% di rischio gaffe', d: 'Video, dirette e meme per farti conoscere.', run: () => { if (chance(0.15)) { applyFx({ fama: 2, my: -0.5 }); return 'Un post sbagliato scatena una shitstorm. Comunque se ne parla…'; } applyFx({ fama: 2, my: 0.6 }); return 'Buona risposta online, soprattutto tra i giovani.'; } },
+  { id: 'social', n: 'Campagna social', ico: 'phone', cost: 1, funds: 10, show: () => true, fx: { fama: 2, my: 0.6 }, risk: '15% di rischio gaffe', d: 'Video, dirette e meme per farti conoscere.', run: () => { if (chance(0.15 - staffLiv('portavoce') * 0.025)) { applyFx({ fama: 2, my: -0.5 }); return 'Un post sbagliato scatena una shitstorm. Comunque se ne parla…'; } applyFx({ fama: 2, my: 0.6 }); return 'Buona risposta online, soprattutto tra i giovani.'; } },
   { id: 'comizio', n: 'Comizio in regione', ico: 'mega', cost: 1, funds: 20, show: () => true, d: 'Scegli una regione: cresce il radicamento locale e la notorietà.', custom: () => pickRegion(r => doComizio(r)) },
   { id: 'visita', n: 'Visita in regione', ico: 'map', cost: 2, show: () => isPremier(), d: 'Visita istituzionale con annunci per il territorio.', custom: () => pickRegion(r => doVisita(r)) },
   { id: 'incontro', n: 'Incontro con un leader', ico: 'cup', cost: 1, show: () => isLeader(), d: 'Migliora i rapporti con un altro partito.', custom: () => pickParty(id => doIncontro(id)) },
@@ -213,7 +213,8 @@ function startInterview(show, debate) {
   const topics = interviewTopics(3);
   // nel confronto TV c'è un avversario in studio: il leader del primo partito rivale
   const opp = debate ? PIDS().filter(p => p !== myPid() && !(coalitionOf(p) && coalitionOf(p) === coalitionOf(myPid()))).sort((a, b) => P(b).poll - P(a).poll)[0] : null;
-  TVS = { show, debate, opp, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll, app: 50, secs: debate ? 20 : 30, read: 4 };
+  ensureStory(); const jj = journalistFor(show.lean);
+  TVS = { show, debate, opp, j: debate ? null : jj, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll, app: clamp(50 + staffLiv('portavoce') * 3 + (debate ? 0 : jj.rel / 6), 30, 70), secs: debate ? 20 : 30, read: 4 };
   G.player.stress = clamp(G.player.stress + 3, 0, 100);
   openSheet('', { full: true, locked: true });
   renderInterview();
@@ -225,8 +226,8 @@ function renderInterview() {
   if (!qq) return finishInterview();
   replaceSheet(`<div class="row between"><span class="tag o">${esc(s.show.n)} · ${esc(s.show.ch)}</span><span class="small muted">Domanda ${s.i + 1}/${s.qs.length}</span></div>
     ${gaugeHTML(s.app)}
-    <div class="row mt" style="justify-content:center;gap:22px">${portrait(G.player.name, 62, { party: myPid() })}${s.opp ? `<b class="gold" style="align-self:center">VS</b>${leaderPortrait(s.opp, 62)}` : medal('mic', 62)}</div>
-    <div class="small muted center mt">${s.debate ? 'Il moderatore' : 'Il conduttore'} chiede:</div>
+    <div class="row mt" style="justify-content:center;gap:22px">${portrait(G.player.name, 62, { party: myPid() })}${s.opp ? `<b class="gold" style="align-self:center">VS</b>${leaderPortrait(s.opp, 62)}` : TVS.j ? `<span class="center">${jPortrait(TVS.j, 62)}<div class="tiny muted" style="margin-top:4px">${esc(TVS.j.n)}</div></span>` : medal('mic', 62)}</div>
+    <div class="small muted center mt">${s.debate ? 'Il moderatore chiede:' : s.j ? esc(s.j.n) + ' (' + esc(s.j.t) + ') chiede:' : 'Il conduttore chiede:'}</div>
     <div class="big-q center mt">${esc(qq.q)}</div>
     <div class="timer mt"><i style="animation-duration:${s.secs}s;--delay:${s.read}s"></i></div><div class="tiny muted center">Hai ${s.secs} secondi per rispondere (il tempo parte tra ${s.read} secondi)</div>
     <div class="qcard mt">${qq.explain || ''}</div>
@@ -252,6 +253,7 @@ function finishInterview() {
   const s = TVS;
   const good = s.log.filter(x => x.r.good).length;
   const win = s.app >= 55;
+  if (s.j) s.j.rel = clamp(s.j.rel + (win ? 5 : -3), -100, 100);
   if (s.debate) { myParty().spinta += (s.app - 50) / 10; G.player.fama = clamp(G.player.fama + 5, 0, 100); if (s.opp) P(s.opp).spinta -= (s.app - 50) / 20; }
   addNews(s.debate && s.opp ? `Confronto TV: ${G.player.name} contro ${P(s.opp).leader}. Gradimento ${Math.round(s.app)}% per ${G.player.name}.` : `${G.player.name} ospite di ${s.show.n} (${s.show.ch}): ${win ? 'prova convincente' : good === 1 ? 'luci e ombre' : 'serata difficile'}.`, win ? 'mio' : 'info');
   replaceSheet(`<div class="center mt2">${medal(win ? 'trophy' : s.app >= 40 ? 'smile' : 'frown', 84)}<h2 class="mt">${s.debate ? (win ? 'Hai vinto il confronto' : 'Confronto perso') : (win ? 'Promosso dal pubblico' : s.app >= 40 ? 'Così così' : 'Serata da dimenticare')}</h2></div>${gaugeHTML(s.app)}
@@ -308,23 +310,19 @@ function showEvent(item) {
   let v;
   try { v = eventView(item); } catch (e) { console.error(e); G.queue.shift(); renderGame(); return; }
   window._ev = { item, v };
-  // chi è coinvolto: ritratto del leader o del ministro al posto dell'icona
-  const c = item.ctx || {};
-  let face = '';
-  if (c.p && G.parties[c.p]) face = leaderPortrait(c.p, 76);
-  else if (c.n && person(c.n)) face = portrait(c.n, 76, { party: person(c.n).party });
-  const n = v.choices.length, last = v.choices[n - 1];
-  const sheet = openSheet(`<div class="evcard" id="evc"><div class="img">${face || medal(v.img, 84)}</div><h2>${esc(v.title)}</h2><div class="txt">${esc(v.text)}</div>
-    ${n >= 2 ? `<div class="swipe-hint">← ${esc(last.t.slice(0, 28))}${last.t.length > 28 ? '…' : ''} · ${esc(v.choices[0].t.slice(0, 28))}${v.choices[0].t.length > 28 ? '…' : ''} →</div>` : ''}
-    <div class="mt">${v.choices.map((ch, i) => `<button class="choice" style="animation-delay:${200 + i * 80}ms" onclick="chooseEvent(${i})"><div class="t">${i === 0 && n >= 2 ? '→ ' : i === n - 1 && n >= 2 ? '← ' : ''}${esc(ch.t)}</div>${fxChips(ch.fx, ch.run && !ch.fx ? '<span class="n">• esito incerto</span>' : '')}</button>`).join('')}</div></div>`, { locked: true });
-  if (n >= 2) makeSwipe(sheet.querySelector('#evc'), { right: { label: '✓ ' + v.choices[0].t.slice(0, 22), cb: () => chooseEvent(0) }, left: { label: '✗ ' + last.t.slice(0, 22), cb: () => chooseEvent(n - 1) } });
+  const ev = EVENT_BY_ID[item.id] || {};
+  openSheet(`<div class="evcard">${eventTopHTML(ev, item, v)}
+    <div class="mt">${v.choices.map((ch, i) => `<button class="choice" style="animation-delay:${200 + i * 80}ms" onclick="chooseEvent(${i})"><div class="t">${esc(ch.t)}</div>${fxChips(ch.fx, ch.run && !ch.fx ? '<span class="n">• esito incerto</span>' : '')}</button>`).join('')}</div></div>`, { locked: true });
+  setTimeout(() => { if (typeof animCounters === 'function') animCounters(); }, 250);
 }
 function chooseEvent(i) {
   const { item, v } = window._ev; const c = v.choices[i];
   applyFx(c.fx);
   if (c.run) { try { c.run(); } catch (e) { console.error(e); } }
+  // conseguenze che tornano dopo qualche settimana
+  if (c.later) { G.chains = G.chains || []; G.chains.push({ w: G.week + c.later.w, id: c.later.id, ctx: item.ctx || {} }); }
   vib(20);
-  replaceSheet(`<div class="evcard"><div class="img">${medal(v.img, 70)}</div><h2>${esc(v.title)}</h2><div class="center mt"><span class="stamp gold">DECISO</span></div><div class="card mt"><b>${esc(c.t)}</b><div class="small muted mt">${esc(c.r || '')}</div></div><button class="btn pri block mt" onclick="closeSheet();doneQueue()">Continua</button></div>`);
+  replaceSheet(`<div class="evcard"><div class="img">${medal(v.img, 70)}</div><h2>${esc(v.title)}</h2><div class="center mt"><span class="stamp gold">DECISO</span></div><div class="card mt"><b>${esc(c.t)}</b><div class="small muted mt">${esc(c.r || '')}</div>${c.later ? '<div class="tiny warn mt">Questa scelta potrebbe avere conseguenze nelle prossime settimane.</div>' : ''}</div><button class="btn pri block mt" onclick="closeSheet();doneQueue()">Continua</button></div>`);
 }
 
 // ============================================================
@@ -345,6 +343,9 @@ function handleSpecial(sp) {
   }
   if (k === 'voti') return openVotes(sp.ids);
   if (k === 'minprop') return openMinisterProposal(sp);
+  if (k === 'call') return openCall(sp);
+  if (k === 'cdm') return openCdM();
+  if (k === 'vertice') return openSummit(sp);
   if (k === 'primarie') return openPrimarie();
   if (k === 'candidatura') return openCandidatura();
   if (k === 'promozione') { const t = promote(sp.rank); return specialCard('trend', 'Promozione!', t); }
@@ -655,7 +656,7 @@ function submitManovra() {
   MAN = null;
   closeSheet();
   if (G.queue.length && G.queue[0].sp && G.queue[0].sp.k === 'manovra') G.queue.shift();
-  confetti(['#1fa463', '#ff2d3d', '#ffffff']);
+  confetti(['#1fa463', '#d6b25e', '#ffffff']);
   renderGame();
   resultSheet('euro', 'Manovra varata', 'Ora tocca al Parlamento. La fiducia è già prevista per tutte le votazioni. Bruxelles darà il suo parere a fine novembre.');
   if (G.queue.length) setTimeout(processQueue, 900);

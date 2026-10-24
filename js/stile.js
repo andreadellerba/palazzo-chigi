@@ -165,6 +165,8 @@ function stat4(label, value, key, color) {
   const h = histOf(key, 10).filter(v => v !== null && v !== undefined);
   const d = h.length > 1 ? h[h.length - 1] - h[0] : 0;
   const up = d > 0, good = BAD_UP[key] ? !up : up;
+  // verde se migliora, rosso se peggiora, neutro se fermo
+  color = Math.abs(d) > 0.05 ? (good ? "#34d399" : "#ff6b6b") : "#f3e6c4";
   return `<div class="st4"><div class="st4-v" style="color:${color}">${value}</div><div class="st4-l">${label}${Math.abs(d) > 0.05 ? ` <span class="${good ? 'good' : 'bad'}">${up ? '▲' : '▼'}</span>` : ''}</div>${spark(h, color, 70, 24)}</div>`;
 }
 

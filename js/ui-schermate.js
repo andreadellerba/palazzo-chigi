@@ -22,6 +22,20 @@ function renderGame() {
   postRender();
 }
 function refresh() { renderGame(); }
+// terzo riquadro in alto: l'informazione più utile per il tuo ruolo
+function topbarThird() {
+  const col = v => `color:${v ? 'var(--good)' : 'var(--bad)'}`;
+  if (isPremier()) {
+    const al = G.gov.parties.filter(p => p !== myPid());
+    if (al.length) { const avg = al.reduce((s, p) => s + (G.gov.sat[p] || 50), 0) / al.length; return `<span class="stat" onclick="openGovernment()">Alleati<b style="${col(avg >= 45)}">${fmt0(avg)}%</b></span>`; }
+    const m = govSeats('C') - majority('C'); return `<span class="stat" onclick="goTab('aula')">Maggioranza<b style="${col(m >= 0)}">${m >= 0 ? '+' : ''}${m}</b></span>`;
+  }
+  if (!isLeader()) return `<span class="stat" onclick="openProfile()">Col leader<b style="${col(G.player.rap >= 0)}">${relNum(G.player.rap)}</b></span>`;
+  const left = G.cal.election - G.week, c = coalitionOf(myPid());
+  if (left > 0 && left <= 30) return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Al voto<b>${left} sett.</b></span>`;
+  if (c) { const s = c.members.reduce((t, m) => t + (G.parties[m] ? P(m).poll : 0), 0); return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Coalizione<b style="${col(s >= 42)}">${fmt1(s)}%</b></span>`; }
+  return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Soglia 3%<b style="${col(myParty().poll >= 3)}">${myParty().poll >= 3 ? 'sopra' : 'sotto'}</b></span>`;
+}
 function topbar() {
   const mp = myParty();
   const old = G.hist.polls.length > 5 ? G.hist.polls[G.hist.polls.length - 5].p[myPid()] : mp.poll;
@@ -29,7 +43,7 @@ function topbar() {
   const chips = [];
   chips.push(`<span class="stat" onclick="goTab('partiti')">${esc(mp.short)}<b>${fmt1(mp.poll)}% <span class="d ${d >= 0 ? 'good' : 'bad'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</span></b></span>`);
   if (G.gov) chips.push(`<span class="stat" onclick="openGovernment()">Governo<b style="color:${pctColor(G.gov.approval * 1.4)}">${fmt0(G.gov.approval)}%</b></span>`);
-  chips.push(`<span class="stat" onclick="goTab('conti')">Spread<b class="${G.econ.spread > 200 ? 'bad' : ''}">${fmt0(G.econ.spread)}</b></span>`);
+  chips.push(topbarThird());
   const n = urgentCount();
   return `<div class="topbar"><div class="row between"><div class="grow"><div class="date"><span class="flip" key="${G.week}">${fmtDate(G.week)}</span></div><div class="role ellipsis">${esc(roleLabel())}</div></div>
     <span class="pill pc" onclick="toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')">${icon('bolt')} ${G.pc}/${pcMax()}</span>
@@ -83,6 +97,9 @@ function homeTab() {
   h += sec('Azioni', `<button class="btn sm gold" onclick="autoPlan()">${icon('star')} Pianifica</button>`) +
     `<div class="acts">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="act-t ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${star ? 'rec' : ''}" style="--ac:${a.ac};animation-delay:${i * 25}ms" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai">${a.done ? icon('check') : icon(ACT_ICON[a.id] || a.ico || 'star')}</span><span class="an">${esc(a.n)}</span><span class="ac">${a.done ? 'fatta' : a.cost ? '⚡' + a.cost : 'gratis'}</span>${star ? '<span class="as">★</span>' : ''}</button>`; }).join('')}</div>
     <div class="tiny muted center mt">★ consigliate · ogni azione una volta a settimana</div>`;
+  // staff e social
+  h += sec('Il tuo staff') + staffHTML();
+  h += feedHomeHTML();
   // alleati (premier)
   if (isPremier() && g.parties.length > 1) h += sec('Alleati') + `<div class="scrollx">${g.parties.filter(x => x !== myPid()).map(x => `<div class="due center" onclick="openParty('${x}')">${leaderPortrait(x, 46)}<b>${esc(P(x).short)}</b><div class="bar thin" style="width:80px"><i style="width:${g.sat[x]}%;--c:${pctColor(g.sat[x])}"></i></div><span class="dw" style="color:${pctColor(g.sat[x])}">${g.sat[x] >= 60 ? 'Soddisfatto' : g.sat[x] >= 35 ? 'Inquieto' : 'Furioso'}</span></div>`).join('')}</div>`;
   // carriera
@@ -293,13 +310,13 @@ function regionColor(rid) {
   const st = G.regions[rid];
   if (UI.map === 'primo') { const s = regionShares(rid); const top = Object.keys(s).sort((a, b) => s[b] - s[a])[0]; return P(top).color; }
   if (UI.map === 'coal') { const s = regionShares(rid); const bl = {}; PIDS().forEach(id => { const c = coalitionOf(id); const k = c ? c.id : id; bl[k] = (bl[k] || 0) + s[id]; }); const top = Object.keys(bl).sort((a, b) => bl[b] - bl[a])[0]; const c = G.coalitions.find(x => x.id === top); return c ? (c.color || '#888') : (G.parties[top] ? P(top).color : '#888'); }
-  if (UI.map === 'mio') { const s = regionShares(rid)[myPid()]; const max = Math.max(...REGIONS_DEF.map(r => regionShares(r.id)[myPid()])); const k = clamp(s / max, 0.08, 1); return `color-mix(in srgb, ${myParty().color} ${Math.round(k * 100)}%, #1f1f22)`; }
+  if (UI.map === 'mio') { const s = regionShares(rid)[myPid()]; const max = Math.max(...REGIONS_DEF.map(r => regionShares(r.id)[myPid()])); const k = clamp(s / max, 0.08, 1); return `color-mix(in srgb, ${myParty().color} ${Math.round(k * 100)}%, #16224b)`; }
   if (UI.map === 'gov') { const gp = st.gp; if (G.parties[gp]) return P(gp).color; return { AUT: '#9aa0b4', CIVD: '#5b7fd1', CIVS: '#d05b62' }[gp] || '#777'; }
-  if (UI.map === 'elez') { const d = st.next - G.week; return d < 30 ? '#ff2d3d' : d < 80 ? '#8a3a40' : '#2a2a2e'; }
+  if (UI.map === 'elez') { const d = st.next - G.week; return d < 30 ? '#d6b25e' : d < 80 ? '#8a7a4a' : '#24305a'; }
   return '#555';
 }
 function italiaTab() {
-  let h = `<div class="scrollx">${MAPMODES.map(([k, n]) => `<button class="fchip ${UI.map === k ? 'on' : ''}" onclick="UI.map='${k}';renderGame()">${n}</button>`).join('')}</div>`;
+  let h = tourHTML() + `<div class="scrollx">${MAPMODES.map(([k, n]) => `<button class="fchip ${UI.map === k ? 'on' : ''}" onclick="UI.map='${k}';renderGame()">${n}</button>`).join('')}</div>`;
   h += `<div class="card mt map"><svg viewBox="0 0 360 470">`;
   REGIONS_DEF.forEach(r => { h += `<path d="${REGION_PATHS[r.id].d}" fill="${regionColor(r.id)}" onclick="openRegion('${r.id}')"/>`; });
   REGIONS_DEF.forEach(r => { h += `<text x="${r.lab[0]}" y="${r.lab[1]}" text-anchor="middle">${r.id}</text>`; });
@@ -312,7 +329,7 @@ function mapLegend() {
   if (UI.map === 'coal') return G.coalitions.map(c => `<span><i class="dot" style="--c:${c.color}"></i>${esc(c.name)}</span>`).join('') + '<span><i class="dot" style="--c:#888"></i>Liste singole</span>';
   if (UI.map === 'mio') return `<span>Più acceso = più forte per ${esc(myParty().short)}</span>`;
   if (UI.map === 'gov') return '<span>Colore del partito del presidente di Regione</span>';
-  return '<span><i class="dot" style="--c:#ff2d3d"></i>entro 30 settimane</span><span><i class="dot" style="--c:#8a3a40"></i>entro 80</span>';
+  return '<span><i class="dot" style="--c:#d6b25e"></i>entro 30 settimane</span><span><i class="dot" style="--c:#8a7a4a"></i>entro 80</span>';
 }
 function openRegion(rid) {
   const r = REGIONS_DEF.find(x => x.id === rid), st = G.regions[rid], s = regionShares(rid);
@@ -368,6 +385,7 @@ function openParty(id) {
       ${never(id, myPid()) ? '<div class="small bad mt">Veto: alleanza normalmente impossibile</div>' : ''}${G.gov && inGov(id) ? `<div class="small mt">Soddisfazione nel governo: <b>${fmt0(G.gov.sat[id] || 0)}</b></div>` : ''}
       <div class="tiny muted mt">Il rapporto sale con incontri, voti comuni, interviste concilianti e trattative riuscite; scende con attacchi e tradimenti.</div></div>`;
   }
+  if (!me) h += sec('Cosa ricorda di te') + memoryHTML(id);
   h += sec(me ? 'Le idee' : 'Idee a confronto') + `<div>${AXIS_KEYS.map(k => { const x = (p.ax[k] + 10) / 20 * 100, y = (myParty().ax[k] + 10) / 20 * 100; return `<div style="margin:10px 0"><div class="row between tiny muted"><span>${AXES[k].l}</span><b style="color:var(--cream)">${AXES[k].n}</b><span>${AXES[k].r}</span></div><div style="position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.08);margin-top:5px">${!me ? `<i style="position:absolute;left:${y}%;top:-4px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:${myParty().color};border:2px solid var(--cream);opacity:.8"></i>` : ''}<i style="position:absolute;left:${x}%;top:-5px;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:${p.color};border:2px solid var(--oro)"></i></div></div>`; }).join('')}</div>${!me ? `<div class="tiny dim">Pallino grande: ${esc(p.short)} · pallino piccolo: ${esc(myParty().short)}</div>` : ''}`;
   if (!me && isLeader()) {
     const myC = coalitionOf(myPid()), same = myC && myC.members.includes(id);
@@ -415,7 +433,7 @@ function alleanzeHTML() {
 // ============================================================
 function contiTab() {
   const e = G.econ;
-  const k = (l, v, cls, sub, m, hk) => `<div class="kpi ${m ? 'click' : ''}" ${m ? `onclick="openAdvice('${m}')"` : ''}><div class="l">${l}</div><div class="row between" style="align-items:flex-end"><div class="v ${cls || ''}">${v}</div>${spark(histOf(hk, 12), cls === 'bad' ? '#ff9c9c' : cls === 'good' ? '#7ee8b8' : '#ff2d3d', 58, 24)}</div>${sub ? `<div class="tiny muted">${sub}</div>` : ''}${m ? '<div class="tiny gold" style="font-weight:800;margin-top:3px">Come migliorarlo ›</div>' : ''}</div>`;
+  const k = (l, v, cls, sub, m, hk) => `<div class="kpi ${m ? 'click' : ''}" ${m ? `onclick="openAdvice('${m}')"` : ''}><div class="l">${l}</div><div class="row between" style="align-items:flex-end"><div class="v ${cls || ''}">${v}</div>${spark(histOf(hk, 12), cls === 'bad' ? '#ff9c9c' : cls === 'good' ? '#7ee8b8' : '#d6b25e', 58, 24)}</div>${sub ? `<div class="tiny muted">${sub}</div>` : ''}${m ? '<div class="tiny gold" style="font-weight:800;margin-top:3px">Come migliorarlo ›</div>' : ''}</div>`;
   const red = redMetrics();
   let h = '';
   if (red.length) h += `<div class="card hero" style="--pc:#ff6b6b"><h4>Indicatori in rosso</h4>${red.map(r => `<div class="li click" onclick="openAdvice('${r.k}')"><span class="nico u2">${icon(METRIC_ICON[r.k])}</span><div class="grow small"><b>${esc(r.t)}</b><div class="tiny muted">Le leggi che aiutano</div></div><span class="btn sm">Rimedi</span></div>`).join('')}</div>`;
@@ -450,6 +468,8 @@ function openMenu() {
     ${menuItem('book', 'La tua storia', 'La linea del tempo della carriera', 'closeSheet();openTimeline()')}
     ${menuItem('trophy', 'Traguardi', Object.keys(G.ach || {}).length + ' su ' + ACHIEVEMENTS.length, 'closeSheet();openAchievements()')}
     ${menuItem('news', 'Archivio notizie', G.news.length + ' notizie', 'closeSheet();openNews()')}
+    ${menuItem('mic', 'Giornalisti', 'Chi ti segue, chi ti attacca', 'closeSheet();openJournalists()')}
+    ${menuItem('chat', 'Sui social', 'Il feed e i tuoi follower', 'closeSheet();openFeed()')}
     ${menuItem('key', 'Istituzioni e poteri', 'Quirinale, Camere, UE, parti sociali', 'closeSheet();openInstitutions()')}
     </div></div><div class="card tight"><div class="list">
     ${menuItem('save', 'Salva partita', 'Tre slot sul telefono', 'closeSheet();openSave()')}

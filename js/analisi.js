@@ -89,6 +89,9 @@ function partiesProposeTick() {
   const pid = (opp.length && chance(0.75)) ? pick(opp) : pick(pool);
   if (!pid) return;
   const w = partyWish(pid); if (!w) return;
+  // niente riproposte a raffica: una legge bocciata torna solo dopo un anno
+  const lastW = x => x.votes && x.votes.length ? x.votes[x.votes.length - 1].w : 0;
+  if (G.bills.some(x => x.dead && x.lawId === w.l.id && x.opt === w.bo && G.week - lastW(x) < 52)) return;
   const b = makeBill({ type: 'ddl', proposer: pid, lawId: w.l.id, opt: w.bo, house: chance(0.5) ? 'C' : 'S' });
   G.bills.push(b);
   addNews(`${P(pid).short} deposita una proposta di legge: «${w.l.opts[w.bo].t}» (${w.l.nome}).`, 'parl');

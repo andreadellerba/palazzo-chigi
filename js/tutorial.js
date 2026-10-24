@@ -63,5 +63,5 @@ const TIPS = [
 function currentTip() { if (!G.tipsSeen) G.tipsSeen = {}; return TIPS.find(t => { if (G.tipsSeen[t.id]) return false; try { return t.c(); } catch (e) { return false; } }); }
 function tipsHTML() {
   const t = currentTip(); if (!t) return '';
-  return `<div class="tip">${icon('bulb')}<div class="grow"><b class="h">Consiglio</b><div class="small" style="margin-top:4px">${t.x}</div><div class="row mt" style="justify-content:flex-end"><button class="btn sm" onclick="G.tipsSeen['${t.id}']=G.week;renderGame()">Ho capito</button></div></div></div>`;
+  return `<div class="tip">${icon('bulb')}<div class="grow"><b class="h">Consiglio</b><div class="small" style="margin-top:4px">${t.x}</div><div class="row mt" style="justify-content:flex-end"><button class="btn sm" onclick="G.tipsSeen['${t.id}']=G.week+1;renderGame()">Ho capito</button></div></div></div>`;
 }

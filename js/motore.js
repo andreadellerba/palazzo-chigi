@@ -235,6 +235,7 @@ function pcIncome() {
   const p = G.player; let v = 3 + Math.floor(p.car / 2) + D().pc;
   if (p.leader) v += 2; if (isPremier()) v += 4; else if (p.minister) v += 2;
   if (p.stress > 80) v -= 2;
+  if (typeof staffPC === 'function') v += staffPC();
   return Math.max(2, v);
 }
 const pcMax = () => pcIncome() * 2;
@@ -454,7 +455,8 @@ function computeVote(b, h, opts) {
     const n = seatsOf(pid, h); if (!n) return;
     const { s, gain } = stance(pid, b, h);
     let vote;
-    if (pid === myPid() && isLeader() && G.myVotes[b.id] && !(fid && inGov(pid))) vote = G.myVotes[b.id];
+    if (G.forced && G.forced[b.id] && G.forced[b.id].includes(pid) && !(pid === myPid() && isLeader() && G.myVotes[b.id])) vote = 'yes';
+    else if (pid === myPid() && isLeader() && G.myVotes[b.id] && !(fid && inGov(pid))) vote = G.myVotes[b.id];
     else if (fid) vote = inGov(pid) ? ((G.gov.sat[pid] || 50) < 12 && gain < -0.4 ? 'no' : 'yes') : 'no';
     else vote = s > 0.15 ? 'yes' : s < -0.15 ? 'no' : 'abst';
     let y = 0, no = 0, a = 0;
@@ -1256,7 +1258,9 @@ function advanceWeek() {
   if (G.gov && isPremier()) { G.stats.weeksPremier++; partnerTick(); }
   if (typeof powersTick === 'function') powersTick();
   // votazioni della prossima settimana in cui conti tu
-  if (G.phase === 'normale') { const up = upcomingVotes(); if (up.length) G._wk.specials.push({ k: 'voti', ids: up }); const mp = ministerProposal(); if (mp) G._wk.specials.push(mp); }
+  if (G.phase === 'normale') { const up = upcomingVotes(); if (up.length) G._wk.specials.push({ k: 'voti', ids: up }); }
+  // staff, telefonate, Consiglio dei ministri, vertici, social, conseguenze
+  if (typeof storyTick === 'function') storyTick();
   // eventi casuali
   if (G.phase === 'normale') rollEvents();
   // presenza territoriale del tuo partito: lieve decadimento
