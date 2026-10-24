@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Proposte · terza serie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a1024; --card: #101a3a; --line: rgba(214,178,94,.18); --line2: rgba(214,178,94,.34); --cream: #f3e6c4; --oro: #d6b25e; --oro2: #ecd08a; --muted: #9aa6c4; --text: #eef1f8; font-variant-numeric: lining-nums; }
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; color: var(--text); font-family: "DM Sans", sans-serif; padding: max(env(safe-area-inset-top), 20px) 16px 70px; background: radial-gradient(120% 40% at 50% 0%, #1d2d5c, #0a1024 70%) fixed, var(--bg); }
+h1 { font-family: "Playfair Display"; font-weight: 900; font-size: 34px; text-align: center; margin: 14px 0 6px; color: var(--cream); }
+.lead { text-align: center; color: var(--muted); font-size: 14.5px; max-width: 520px; margin: 0 auto 6px; line-height: 1.5; }
+.lead b, .how b { color: var(--oro2); }
+.how { max-width: 420px; margin: 14px auto 0; padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line2); background: rgba(214,178,94,.08); font-size: 13.5px; line-height: 1.5; text-align: center; }
+h2 { display: flex; align-items: center; gap: 12px; max-width: 420px; margin: 46px auto 14px; font-family: "Playfair Display"; font-weight: 900; font-size: 26px; color: var(--cream); }
+h2::before, h2::after { content: ''; flex: 1; height: 1.5px; background: linear-gradient(90deg, transparent, var(--oro)); }
+h2::after { background: linear-gradient(90deg, var(--oro), transparent); }
+.wrap { max-width: 420px; margin: 0 auto; display: grid; gap: 14px; }
+.item { background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.012)), var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 14px; }
+.item .hd { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.code { flex: none; display: inline-grid; place-items: center; min-width: 40px; height: 30px; padding: 0 10px; border-radius: 999px; background: linear-gradient(135deg, #a8842f, #ecd08a); color: #1a1405; font-weight: 900; font-size: 14px; }
+.item .hd b { font-size: 16px; }
+.item p { margin: 10px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--oro2); border: 1px solid var(--line2); border-radius: 999px; padding: 3px 9px; margin-left: auto; }
+.lic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.demo { border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: #0b1226; padding: 14px; position: relative; }
+.mini { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+.ch { display: block; width: 100%; text-align: left; margin-top: 8px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); border-left: 3px solid var(--oro); background: rgba(255,255,255,.035); color: var(--cream); font: 700 13px "DM Sans"; }
+.g { color: #34d399; } .r { color: #ff6b6b; } .o { color: var(--oro2); }
+.tmr { height: 8px; border-radius: 4px; background: rgba(255,255,255,.08); overflow: hidden; margin: 10px 0 6px; }
+.tmr i { display: block; height: 100%; background: linear-gradient(90deg, #ff6b6b, #fbbf24, #34d399); transform-origin: left; animation: tmr 6s linear infinite; }
+@keyframes tmr { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+.bids { display: grid; gap: 6px; }
+.bid { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 12px; font-size: 12.5px; }
+.bid.me { background: rgba(214,178,94,.14); border: 1px solid var(--line2); margin-left: 30px; }
+.bid.th { background: #16224b; margin-right: 30px; }
+.pat { display: flex; gap: 4px; margin-top: 10px; align-items: center; font-size: 11px; color: var(--muted); }
+.pat i { width: 18px; height: 6px; border-radius: 3px; background: #34d399; } .pat i.x { background: rgba(255,255,255,.1); }
+.urna { display: flex; align-items: center; gap: 14px; padding-top: 12px; }
+.urna .box { width: 70px; height: 60px; border-radius: 8px; background: linear-gradient(#2b3d72, #16224b); border: 2px solid var(--oro); position: relative; flex: none; }
+.urna .box::before { content: ''; position: absolute; top: 8px; left: 18px; right: 18px; height: 4px; border-radius: 2px; background: #0a1024; }
+.urna .box::after { content: ''; position: absolute; top: -14px; left: 26px; width: 18px; height: 24px; background: #f3e6c4; border-radius: 2px; animation: drop 2s infinite; }
+@keyframes drop { 0% { transform: translateY(-10px); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(14px); opacity: 0; } }
+.biv { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.biv div { padding: 12px 10px; border-radius: 14px; background: #16224b; border: 1px solid var(--line); text-align: center; font-size: 12.5px; color: var(--muted); }
+.biv b { display: block; font-family: "Playfair Display"; font-size: 15px; color: var(--cream); margin-bottom: 4px; }
+.chap { display: flex; gap: 6px; }
+.chap span { flex: 1; padding: 8px 4px; border-radius: 10px; text-align: center; font-size: 11px; font-weight: 800; background: #16224b; color: var(--muted); border: 1px solid var(--line); }
+.chap span.d { background: rgba(214,178,94,.18); color: var(--oro2); border-color: var(--line2); }
+.chap span.n { border-color: var(--oro); color: var(--cream); box-shadow: 0 0 0 3px rgba(214,178,94,.15); }
+.dos { position: relative; margin-top: 10px; background: #a8844a; border-radius: 4px 12px 12px 12px; padding: 16px 14px; color: #2a1e06; box-shadow: 0 10px 22px rgba(0,0,0,.5); }
+.dos::before { content: 'RISERVATO'; position: absolute; top: 10px; right: 12px; transform: rotate(-8deg); border: 2px solid #8b1d1d; color: #8b1d1d; font-weight: 900; font-size: 11px; padding: 2px 6px; border-radius: 4px; letter-spacing: .1em; }
+.dos::after { content: ''; position: absolute; top: -10px; left: 0; width: 80px; height: 12px; background: #a8844a; border-radius: 6px 6px 0 0; }
+.dos b { font-family: "Playfair Display"; font-size: 17px; }
+.heads { display: grid; gap: 6px; }
+.heads div { background: #f3ecdc; color: #1b1712; border-radius: 6px; padding: 8px 10px; font-family: "Playfair Display"; font-weight: 900; font-size: 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.heads div span { font-family: "DM Sans"; font-size: 10px; font-weight: 800; color: #6b5f4b; white-space: nowrap; }
+.heads div.on { box-shadow: 0 0 0 3px var(--oro); }
+.sp { display: grid; gap: 6px; margin-top: 6px; }
+.sp div { padding: 9px 11px; border-radius: 12px; font-size: 12.5px; border: 1px solid var(--line); background: rgba(255,255,255,.03); }
+.sp div.on { border-color: var(--oro); background: rgba(214,178,94,.12); }
+.react { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 11.5px; }
+.riv { display: flex; gap: 10px; align-items: center; padding: 8px 0; }
+.riv + .riv { border-top: 1px solid var(--line); }
+.av { width: 40px; height: 40px; border-radius: 50%; flex: none; background: radial-gradient(circle at 50% 38%, #f6d0b6 0 30%, transparent 31%), radial-gradient(circle at 50% 120%, var(--c) 0 52%, transparent 53%), #24345f; box-shadow: 0 0 0 2px var(--c); }
+.grow { flex: 1; min-width: 0; }
+.riv .mis { font-size: 12px; color: var(--muted); }
+.riv .bar { height: 5px; border-radius: 3px; background: rgba(255,255,255,.08); margin-top: 4px; overflow: hidden; } .riv .bar i { display: block; height: 100%; background: var(--c); }
+.leg { display: grid; gap: 10px; }
+.leg div { display: flex; gap: 10px; align-items: center; font-size: 12.5px; }
+.ring { width: 40px; height: 40px; border-radius: 50%; flex: none; background: conic-gradient(var(--oro) calc(var(--p) * 1%), rgba(255,255,255,.08) 0); display: grid; place-items: center; }
+.ring::after { content: attr(data-p); width: 30px; height: 30px; border-radius: 50%; background: #0b1226; display: grid; place-items: center; font-size: 10px; font-weight: 800; color: var(--cream); }
+.mom { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.mom div { height: 70px; border-radius: 12px; display: flex; align-items: flex-end; padding: 6px; font-size: 10.5px; font-weight: 800; }
+.cab { height: 180px; }
+.cab .tab { position: absolute; left: 50%; top: 50%; width: 170px; height: 70px; margin: -35px 0 0 -85px; border-radius: 40px; background: linear-gradient(#5a3a1e, #3b2410); box-shadow: inset 0 2px 0 rgba(255,255,255,.15), 0 10px 20px rgba(0,0,0,.5); }
+.cab .s { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, #f6d0b6 0 30%, transparent 31%), radial-gradient(circle at 50% 120%, var(--c) 0 52%, transparent 53%), #24345f; box-shadow: 0 0 0 2px var(--c); }
+.cab .s::after { content: ''; position: absolute; right: -3px; top: -3px; width: 10px; height: 10px; border-radius: 50%; background: var(--m); box-shadow: 0 0 0 2px #0b1226; }
+.mapv { height: 190px; }
+.mapv svg.it { position: absolute; left: 50%; top: 8px; transform: translateX(-50%); height: 175px; }
+.pin { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: #0a1024; border: 2px solid var(--oro); display: grid; place-items: center; color: var(--oro2); animation: bob 2s infinite; }
+.pin .lic { width: 15px; height: 15px; }
+@keyframes bob { 50% { transform: translateY(-4px); } }
+.tg { height: 170px; padding: 0; background: radial-gradient(120% 90% at 50% 0%, #1d2d5c, #0a1024 75%); }
+.tg .an { position: absolute; left: 50%; top: 18px; width: 72px; height: 72px; margin-left: -36px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, #f6d0b6 0 32%, transparent 33%), radial-gradient(circle at 50% 120%, #1f2a44 0 52%, transparent 53%), #24345f; }
+.tg .crawl { position: absolute; left: 0; right: 0; bottom: 0; background: #fff; color: #111; font-weight: 800; font-size: 12px; white-space: nowrap; overflow: hidden; padding: 6px 0; }
+.tg .crawl span { display: inline-block; padding-left: 100%; animation: crawl 14s linear infinite; }
+@keyframes crawl { to { transform: translateX(-100%); } }
+.tg .lbl { position: absolute; left: 0; bottom: 28px; background: #d6b25e; color: #1a1405; font-weight: 900; font-size: 11px; padding: 4px 10px; letter-spacing: .1em; }
+.cv svg { width: 100%; height: 110px; display: block; }
+</style>
+</head>
+<body>
+<h1>Proposte · terza serie</h1>
+<div class="lead">Più decisioni vere, meno lettura. Scrivimi i codici che ti piacciono, per esempio <b>D3 D4 X11 G17 V2</b>.</div>
+<div class="how">Consigliati: <b>D3 · D4 · X11 · X13 · G17 · G19 · G20 · V2 · V4</b></div>
+
+<h2>Decisioni</h2>
+<div class="wrap">
+  <div class="item"><div class="hd"><span class="code">D1</span><b>Dilemmi a tempo reale</b></div>
+    <div class="demo"><b class="o">La Borsa apre tra 30 secondi</b><div class="tmr"><i></i></div><div class="mini">Lo spread vola: annunci un taglio del deficit o difendi la manovra?</div><button class="ch">Annunciare il taglio</button><button class="ch">Difendere la manovra</button></div>
+    <p>Un conto alla rovescia visibile: se non decidi, sceglie lo staff, e non sempre bene.</p></div>
+  <div class="item"><div class="hd"><span class="code">D2</span><b>Il prezzo nascosto</b></div>
+    <p>Dopo le decisioni importanti, una volta su tre si scopre una conseguenza che non era tra i pro e contro («il sindaco che hai aiutato era indagato»). Arriva settimane dopo, come una carta che si gira.</p></div>
+  <div class="item"><div class="hd"><span class="code">D3</span><b>Trattative a rilancio</b><span class="tag">consigliato</span></div>
+    <div class="demo"><div class="bids"><div class="bid me"><span>Tu: un ministero</span><b class="o">+10</b></div><div class="bid th"><span>Calenda: vogliamo l’Economia</span><b class="r">rilancia</b></div><div class="bid me"><span>Tu: Infrastrutture e una legge bandiera</span><b class="o">+17</b></div></div><div class="pat">Pazienza <i></i><i></i><i class="x"></i> · ultimo giro</div></div>
+    <p>Offri, loro rilanciano, tu accetti, rilanci o rompi. Massimo tre giri. Vale per alleati, sindacati, Bruxelles e Confindustria.</p></div>
+  <div class="item"><div class="hd"><span class="code">D4</span><b>Il voto segreto</b><span class="tag">consigliato</span></div>
+    <div class="demo"><div class="urna"><div class="box"></div><div class="mini"><b class="o">Scrutinio segreto</b><br>Franchi tiratori ×3. Puoi chiamare i capigruppo prima del voto per contare i tuoi.</div></div></div>
+    <p>Sui temi etici e sulla giustizia il voto è segreto: le sorprese aumentano, e telefonare prima ai capigruppo costa capitale politico ma ti dice i numeri veri.</p></div>
+  <div class="item"><div class="hd"><span class="code">D5</span><b>Bivi di carriera</b></div>
+    <div class="demo"><div class="biv"><div><b>Commissario europeo</b>Cinque anni a Bruxelles, fama internazionale</div><div><b>Sindaco di Roma</b>Consenso diretto, ma niente Palazzo Chigi per un po’</div></div></div>
+    <p>In certi momenti scegli una strada che chiude l’altra: tecnico o capo partito, Bruxelles o Roma.</p></div>
+  <div class="item"><div class="hd"><span class="code">D6</span><b>Ministri che litigano</b></div>
+    <p>Due ministri si attaccano in pubblico e devi dare ragione a uno: l’altro, e il suo partito, se lo segnano nella memoria.</p></div>
+</div>
+
+<h2>Imprevisti</h2>
+<div class="wrap">
+  <div class="item"><div class="hd"><span class="code">X11</span><b>Crisi a più tappe</b><span class="tag">consigliato</span></div>
+    <div class="demo"><div class="chap"><span class="d">1 · Conti in rosso</span><span class="d">2 · Corsa agli sportelli</span><span class="n">3 · Salvataggio?</span><span>4 · Esito</span></div><div class="mini" style="margin-top:8px">Banca regionale in crisi: ogni settimana un capitolo nuovo, che dipende da cosa hai scelto prima.</div></div>
+    <p>Imprevisti che durano un mese, a capitoli: le scelte di ogni capitolo cambiano quello dopo.</p></div>
+  <div class="item"><div class="hd"><span class="code">X12</span><b>Scandalo personale</b></div>
+    <p>Foto, intercettazioni, un parente in affari. Neghi, ti scusi, ti dimetti o contrattacchi: i giornalisti amici o nemici cambiano l’esito.</p></div>
+  <div class="item"><div class="hd"><span class="code">X13</span><b>Fughe di notizie</b><span class="tag">consigliato</span></div>
+    <div class="demo"><div class="dos"><b>Chi ha parlato?</b><div style="font-size:12.5px;margin-top:6px">Il tuo messaggio sulla manovra è sui giornali. Sospetti: il capo di gabinetto, un ministro di FI, il portavoce.</div></div></div>
+    <p>Indaghi con lo staff e decidi se punire, perdonare o usare la fuga a tuo vantaggio.</p></div>
+  <div class="item"><div class="hd"><span class="code">X14</span><b>Regioni ribelli</b></div>
+    <p>Un governatore si ribella su autonomia, sanità o rifiuti: commissariare o trattare.</p></div>
+  <div class="item"><div class="hd"><span class="code">X15</span><b>Il mondo cambia</b></div>
+    <p>Shock lunghi (recessione tedesca, guerra commerciale, pandemia) che cambiano le regole del gioco per mesi.</p></div>
+  <div class="item"><div class="hd"><span class="code">X16</span><b>Il Papa e il Quirinale</b></div>
+    <p>Appelli e moniti che chiedono una tua risposta pubblica, con effetti sull’elettorato cattolico e sui rapporti col Colle.</p></div>
+</div>
+
+<h2>Immersione</h2>
+<div class="wrap">
+  <div class="item"><div class="hd"><span class="code">G15</span><b>I giornali del lunedì</b></div>
+    <div class="demo"><div class="heads"><div class="on">«Il governo salva l’Ilva» <span>Corriere</span></div><div>«Spread di nuovo a 180» <span>Sole 24 Ore</span></div><div>«Lite Lega-FI sui balneari» <span>Repubblica</span></div></div><div class="mini" style="margin-top:8px">Scegli quale titolo cavalcare in conferenza stampa.</div></div>
+    <p>Tre titoli nati dalle tue azioni: cavalcarne uno ti dà consenso su quel tema.</p></div>
+  <div class="item"><div class="hd"><span class="code">G16</span><b>Sondaggi su misura</b></div>
+    <p>Il sondaggista testa una tua idea sugli elettori prima che tu la annunci: vedi chi la apprezza e chi no.</p></div>
+  <div class="item"><div class="hd"><span class="code">G17</span><b>Il discorso</b><span class="tag">consigliato</span></div>
+    <div class="demo"><div class="mini o" style="font-weight:800">Discorso per la fiducia · frase 2 di 3</div><div class="sp"><div class="on">«Questo governo non alzerà le tasse a chi lavora.»</div><div>«Chiederemo sacrifici a tutti, a partire da noi.»</div><div>«L’Europa deve cambiare, e la cambieremo.»</div></div><div class="react"><span class="g">▲ la maggioranza applaude</span><span class="r">▼ Bruxelles fredda</span><span class="o">♥ 12.000 sui social</span></div></div>
+    <p>Nei momenti chiave componi il discorso scegliendo tre frasi: aula e social reagiscono a ognuna.</p></div>
+  <div class="item"><div class="hd"><span class="code">G18</span><b>Regionali giocabili</b></div>
+    <p>Scegli il candidato presidente della coalizione in una regione e segui la serata elettorale con le proiezioni.</p></div>
+  <div class="item"><div class="hd"><span class="code">G19</span><b>Rivali con un piano</b><span class="tag">consigliato</span></div>
+    <div class="demo"><div class="riv"><span class="av" style="--c:#5b3a1e"></span><div class="grow"><b style="font-size:13px">Vannacci</b><div class="mis">Obiettivo: superare il 10% ed entrare nel centrodestra</div><div class="bar"><i style="width:62%"></i></div></div></div><div class="riv"><span class="av" style="--c:#f4c20d"></span><div class="grow"><b style="font-size:13px">Conte</b><div class="mis">Obiettivo: vincere le primarie del campo largo</div><div class="bar"><i style="width:40%"></i></div></div></div></div>
+    <p>Ogni leader ha un obiettivo segreto e agisce per raggiungerlo. Lo scopri con lo staff e puoi ostacolarlo o aiutarlo.</p></div>
+  <div class="item"><div class="hd"><span class="code">G20</span><b>L’eredità</b><span class="tag">consigliato</span></div>
+    <div class="demo"><div class="leg"><div><span class="ring" style="--p:72" data-p="72%"></span>Debito sotto il 130% del PIL</div><div><span class="ring" style="--p:100" data-p="✓"></span>Salario minimo per legge</div><div><span class="ring" style="--p:30" data-p="30%"></span>Premierato approvato</div></div></div>
+    <p>All’inizio scegli tre obiettivi storici: il finale della partita ti giudica su quelli.</p></div>
+</div>
+
+<h2>Grafica</h2>
+<div class="wrap">
+  <div class="item"><div class="hd"><span class="code">V1</span><b>Il tempo che passa</b></div>
+    <div class="mom"><div style="background:linear-gradient(#ffd8a8,#1d2d5c)">mattina</div><div style="background:linear-gradient(#1d2d5c,#0a1024)">notte</div><div style="background:linear-gradient(#8fd3ff,#1d2d5c)">estate</div><div style="background:linear-gradient(#5b1d1d,#0a1024)">crisi</div></div>
+    <p>Lo sfondo cambia con le stagioni e le feste, e si fa più cupo nelle crisi.</p></div>
+  <div class="item"><div class="hd"><span class="code">V2</span><b>La sala del Consiglio</b><span class="tag">consigliato</span></div>
+    <div class="demo cab"><div class="tab"></div>
+      <span class="s" style="left:46%;top:6px;--c:#d6b25e;--m:#34d399"></span><span class="s" style="left:22%;top:24px;--c:#2a9df4;--m:#34d399"></span><span class="s" style="left:70%;top:24px;--c:#0b7a3e;--m:#fbbf24"></span><span class="s" style="left:10%;top:74px;--c:#1f4fa8;--m:#34d399"></span><span class="s" style="left:82%;top:74px;--c:#5dc1e8;--m:#ff6b6b"></span><span class="s" style="left:22%;top:124px;--c:#1f4fa8;--m:#fbbf24"></span><span class="s" style="left:70%;top:124px;--c:#2a9df4;--m:#34d399"></span><span class="s" style="left:46%;top:142px;--c:#0b7a3e;--m:#ff6b6b"></span></div>
+    <p>I ministri seduti al tavolo, con il pallino dell’umore. Tocchi un ministro e vedi lealtà, competenza e richieste.</p></div>
+  <div class="item"><div class="hd"><span class="code">V3</span><b>Mappa viva</b></div>
+    <div class="demo mapv"><svg class="it" viewBox="0 0 120 150"><path d="M38 6 60 4 70 18 64 30 72 46 84 60 96 78 108 92 104 104 92 98 86 110 80 132 70 128 74 112 64 96 50 82 40 66 32 48 24 30 30 14Z" fill="#1d2d5c" stroke="#d6b25e" stroke-width="1.2"/></svg>
+      <span class="pin" style="left:40%;top:22%"><svg class="lic" viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9Z"/><path d="M9 20l1-2M13 20l1-2"/></svg></span>
+      <span class="pin" style="left:56%;top:58%"><svg class="lic" viewBox="0 0 24 24"><path d="M7 11V7.5a1.5 1.5 0 0 1 3 0V10M10 9V6.5a1.5 1.5 0 0 1 3 0V10M13 9.5V7a1.5 1.5 0 0 1 3 0v4"/><path d="M16 10a1.5 1.5 0 0 1 3 0v3a7 7 0 0 1-7 7h-1a6 6 0 0 1-6-6v-1a2 2 0 0 1 2-2h3"/></svg></span></div>
+    <p>Sull’Italia compaiono le icone degli eventi in corso (alluvione, sciopero, cantiere) da toccare.</p></div>
+  <div class="item"><div class="hd"><span class="code">V4</span><b>Il TG della settimana</b><span class="tag">consigliato</span></div>
+    <div class="demo tg"><div class="an"></div><div class="lbl">TG PALAZZO · ORE 20</div><div class="crawl"><span>Approvata la riforma delle pensioni · Spread a 104 · Sciopero dei treni venerdì · Il tuo partito sale al 12,4% ·</span></div></div>
+    <p>Il riepilogo diventa un telegiornale di 15 secondi con titoli che scorrono. Si salta con un tocco.</p></div>
+  <div class="item"><div class="hd"><span class="code">V5</span><b>La curva dei ricordi</b></div>
+    <div class="demo cv"><svg viewBox="0 0 300 110"><path d="M5 80 C40 70 60 85 90 60 S150 30 180 50 S240 20 295 25" fill="none" stroke="#c4a5ff" stroke-width="3"/><circle cx="90" cy="60" r="6" fill="#d6b25e"/><circle cx="180" cy="50" r="6" fill="#ff6b6b"/><circle cx="260" cy="24" r="6" fill="#34d399"/><text x="62" y="98" fill="#9aa6c4" font-size="10">fiducia posta</text><text x="160" y="80" fill="#9aa6c4" font-size="10">scandalo</text><text x="235" y="50" fill="#9aa6c4" font-size="10">manovra</text></svg></div>
+    <p>Sulla curva dei sondaggi i puntini dei momenti chiave: tocchi e rivedi cosa era successo.</p></div>
+  <div class="item"><div class="hd"><span class="code">V6</span><b>Dossier riservati</b></div>
+    <div class="demo"><div class="dos"><b>Relazione dei servizi</b><div style="font-size:12.5px;margin-top:6px">Tocca per aprire: le mosse di un leader rivale e un rischio scandalo nella maggioranza.</div></div></div>
+    <p>Le informazioni dello staff arrivano come cartelline con il timbro RISERVATO, da aprire con un tocco.</p></div>
+</div>
+</body>
+</html>
