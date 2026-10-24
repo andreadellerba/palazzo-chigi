@@ -72,7 +72,7 @@ function openAction(id) {
   if (a.funds) pc.contro.push({ k: 'per', t: `Costa ${euro(a.funds)}` });
   if (a.risk) pc.contro.push({ k: 'pol', t: a.risk });
   const enough = G.pc >= cost && G.funds >= (a.funds || 0);
-  openSheet(`${head(`${a.ico} ${esc(a.n)}`)}<p class="muted">${esc(a.d)}</p>${a.fx || a.risk || cost ? proConHTML({ pro: pc.pro, contro: pc.contro }, { noParties: true }) : ''}
+  openSheet(`${head(`${a.ico} ${esc(a.n)}`)}<p class="muted">${esc(a.d)}</p><div class="effs">${pc.pro.map(x => `<span class="eff g">▲ ${esc(x.t)}</span>`).join("")}${pc.contro.map(x => `<span class="eff b">▼ ${esc(x.t)}</span>`).join("")}</div>
     <button class="btn pri block mt2" ${enough ? '' : 'disabled'} onclick="runAction('${a.id}')">${enough ? 'Procedi' : (G.pc < cost ? 'Capitale politico insufficiente' : 'Fondi insufficienti')}</button>`);
 }
 function runAction(id) {
@@ -213,7 +213,7 @@ function startInterview(show, debate) {
   const topics = interviewTopics(3);
   // nel confronto TV c'è un avversario in studio: il leader del primo partito rivale
   const opp = debate ? PIDS().filter(p => p !== myPid() && !(coalitionOf(p) && coalitionOf(p) === coalitionOf(myPid()))).sort((a, b) => P(b).poll - P(a).poll)[0] : null;
-  TVS = { show, debate, opp, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll, app: 50, secs: debate ? 10 : 15 };
+  TVS = { show, debate, opp, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll, app: 50, secs: debate ? 20 : 30, read: 4 };
   G.player.stress = clamp(G.player.stress + 3, 0, 100);
   openSheet('', { full: true, locked: true });
   renderInterview();
@@ -228,10 +228,10 @@ function renderInterview() {
     <div class="row mt" style="justify-content:center;gap:22px">${portrait(G.player.name, 62, { party: myPid() })}${s.opp ? `<b class="gold" style="align-self:center">VS</b>${leaderPortrait(s.opp, 62)}` : '<span style="font-size:44px">🎙</span>'}</div>
     <div class="small muted center mt">${s.debate ? 'Il moderatore' : 'Il conduttore'} chiede:</div>
     <div class="big-q center mt">${esc(qq.q)}</div>
-    <div class="timer mt"><i style="animation-duration:${s.secs}s"></i></div><div class="tiny muted center">Hai ${s.secs} secondi per rispondere</div>
+    <div class="timer mt"><i style="animation-duration:${s.secs}s;--delay:${s.read}s"></i></div><div class="tiny muted center">Hai ${s.secs} secondi per rispondere (il tempo parte tra ${s.read} secondi)</div>
     <div class="qcard mt">${qq.explain || ''}</div>
     <div class="mt">${qq.answers.map((a, i) => `<button class="choice" style="animation-delay:${i * 70}ms" onclick="pickAnswer(${i})"><div class="t">${esc(a.t)}</div><div class="fx">${a.pre.pro.map(x => `<span class="p">▲ ${esc(x.t)}</span>`).join('')}${a.pre.contro.map(x => `<span class="c">▼ ${esc(x.t)}</span>`).join('')}</div></button>`).join('')}</div>`);
-  s.timer = setTimeout(() => { if (TVS === s && s.qs[s.i] === qq) pickAnswer(-1); }, s.secs * 1000);
+  s.timer = setTimeout(() => { if (TVS === s && s.qs[s.i] === qq) pickAnswer(-1); }, (s.secs + s.read) * 1000);
 }
 function pickAnswer(i) {
   const s = TVS, qq = s.qs[s.i];

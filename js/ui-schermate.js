@@ -28,13 +28,8 @@ function topbar() {
   const chips = [];
   const st = (c, html, on) => `<span class="stat" style="--sc:${c}" ${on ? `onclick="${on}"` : ''}>${html}</span>`;
   chips.push(st(mp.color, `${esc(mp.short)} <b>${fmt1(mp.poll)}%</b> <span class="${d >= 0 ? 'good' : 'bad'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</span>`));
-  if (!isLeader()) chips.push(st(relColorHex(p.rap), `Con ${esc(firstName(myParty().leader))} <b style="color:${relColor(p.rap)}">${p.rap > 0 ? '+' : ''}${fmt0(p.rap)}</b>`, "toast('Rapporto con il leader del tuo partito: da −100 a +100')"));
-  chips.push(st('#22d3ee', `Notorietà ${esc(mp.short)} <b>${fmt0(partyNoto(myPid()))}%</b>`, "toast('Percentuale di italiani che conosce il tuo partito')"));
   if (G.gov) chips.push(st('#ffd60a', `Governo <b style="color:${pctColor(G.gov.approval * 1.4)}">${fmt0(G.gov.approval)}%</b>`));
   chips.push(st('#f472b6', `Spread <b class="${G.econ.spread > 200 ? 'bad' : ''}">${fmt0(G.econ.spread)}</b>`));
-  chips.push(st('#a78bfa', `Fama <b>${fmt0(p.fama)}</b>`, "toast('La tua notorietà personale (0-100)')"));
-  chips.push(st('#22c55e', `Fondi <b>${euro(G.funds)}</b>`));
-  chips.push(st('#fb923c', `Stress <b class="${p.stress > 70 ? 'bad' : ''}">${fmt0(p.stress)}</b>`));
   return `<div class="topbar"><div class="row between"><div class="grow"><div class="date"><span class="flip" key="${G.week}">${fmtDate(G.week)}</span></div><div class="role ellipsis">${esc(roleLabel())}</div></div>
     <span class="pill pc" onclick="toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')">⚡ ${G.pc}/${pcMax()}</span>${(() => { const n = urgentCount(); return `<button class="iconbtn bell" onclick="openNotifications()">🔔${n ? `<span class="bdg">${n}</span>` : ""}</button>`; })()}<button class="iconbtn" onclick="openMenu()">☰</button></div>
     <div class="chips">${chips.join('')}</div></div>`;
@@ -67,50 +62,45 @@ function postRender() {
 // ============================================================
 //  PALAZZO (home)
 // ============================================================
+function ring(val, max, label, text, color) {
+  const p = clamp(val / max, 0, 1), r = 26, c = 2 * Math.PI * r;
+  return `<div class="ring"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="${r}" class="rb"/><circle cx="32" cy="32" r="${r}" class="rf" style="color:${color};stroke:${color};stroke-dasharray:${c.toFixed(1)};stroke-dashoffset:${(c * (1 - p)).toFixed(1)}"/></svg><b>${text}</b><span>${label}</span></div>`;
+}
 function homeTab() {
   const p = G.player, mp = myParty(), g = G.gov;
-  let h = '';
-  // eroe
-  h += tipsHTML();
-  h += `<div class="card hero" style="--pc:${mp.color}"><div class="row"><span class="av-badge" onclick="openProfile()">${portrait(p.name, 68, { party: myPid() })}<span class="pbadge" style="--c:${mp.color}">${esc(mp.symbol && mp.mine ? mp.symbol : mp.short)}</span></span><div class="grow"><div class="small gold" style="font-weight:700">${esc(roleLabel())}</div><h2 class="ellipsis">${esc(p.name)}</h2><div class="small muted">${esc(mp.name)} · ${fmt1(mp.poll)}% · ${mp.seatsC} dep. · ${mp.seatsS} sen.</div></div></div>
-    <div class="grid2 mt"><div><div class="tiny muted">Notorietà del partito</div><b>${fmt0(partyNoto(myPid()))}%</b> <span class="tiny muted">degli italiani lo conosce</span>${barH(partyNoto(myPid()), 100, '#22d3ee', true)}</div>
-    ${isLeader() ? `<div><div class="tiny muted">La tua fama personale</div><b>${fmt0(p.fama)}</b><span class="tiny muted">/100</span>${barH(p.fama, 100, '#a78bfa', true)}</div>` : `<div><div class="tiny muted">Rapporto con ${esc(myParty().leader)}</div><b style="color:${relColor(p.rap)}">${p.rap > 0 ? '+' : ''}${fmt0(p.rap)} · ${relLabel(p.rap)}</b>${barH(p.rap + 100, 200, relColor(p.rap), true)}</div>`}</div>`;
-  if (g) {
-    const gs = govSeats('C'), gss = govSeats('S');
-    h += `<div class="mt" style="border-top:1px solid var(--line);padding-top:10px"><div class="row between"><b>${esc(g.name)}${g.tecnico ? ' (tecnico)' : ''}</b><span class="small muted">dal ${fmtDate(g.start, true)}</span></div>
-      <div class="row wrap mt" style="gap:4px">${g.parties.map(partyChip).join('')}</div>
-      <div class="grid2 mt"><div><div class="tiny muted">Consenso del governo</div><b style="font-size:20px;color:${pctColor(g.approval * 1.4)}">${fmt0(g.approval)}%</b>${barH(g.approval, 100, pctColor(g.approval * 1.4), true)}</div>
-      <div><div class="tiny muted">Maggioranza</div><b>${gs}</b><span class="small muted">/${totalSeats('C')} Camera</span><br><b>${gss}</b><span class="small muted">/${totalSeats('S')} Senato</span></div></div></div>`;
-  }
-  h += `</div>`;
-  // da fare ora e azioni consigliate
-  h += todoHTML();
-  h += recHTML();
-  // scadenze
-  const dl = [];
-  if (G.cal.election > G.week) dl.push({ w: G.cal.election, t: '🗳 Elezioni politiche', s: fmtDate(G.cal.election) });
-  const nextReg = Object.entries(G.regions).sort((a, b) => a[1].next - b[1].next)[0];
-  if (nextReg) dl.push({ w: nextReg[1].next, t: `🗺 Regionali in ${regionName(nextReg[0])}`, s: fmtDate(nextReg[1].next) });
-  if (G.cal.quirinale > G.week) dl.push({ w: G.cal.quirinale, t: '🏛 Elezione del Presidente della Repubblica', s: fmtDate(G.cal.quirinale) });
-  const y = yearOf(G.week); const mw = weekOf(`${monthOf(G.week) > 9 ? y + 1 : y}-10-10`); dl.push({ w: mw, t: '💶 Manovra di bilancio', s: 'metà ottobre' });
-  G.referendums.filter(r => !r.done).forEach(r => dl.push({ w: r.w, t: `🗳 Referendum: ${getLaw(r.lawId).nome}`, s: fmtDate(r.w) }));
-  dl.sort((a, b) => a.w - b.w);
-  h += `<div class="sec"><h4>Prossime scadenze</h4></div><div class="card tight"><div class="list">${dl.slice(0, 4).map(x => `<div class="li"><div class="grow"><b class="small">${x.t}</b><div class="tiny muted">${x.s}</div></div><span class="tag ${x.w - G.week < 6 ? 'w' : ''}">${weeksLeft(x.w)}</span></div>`).join('')}</div></div>`;
-  // agenda
+  let h = tipsHTML();
+  // chi sei e i tuoi numeri, in anelli
+  const rings = [
+    ring(mp.poll, 35, 'Sondaggio', fmt1(mp.poll) + '%', mp.color),
+    ring(partyNoto(myPid()), 100, 'Notorietà', fmt0(partyNoto(myPid())) + '%', '#22d3ee'),
+    g ? ring(g.approval, 100, isPremier() ? 'Tuo governo' : 'Governo', fmt0(g.approval) + '%', pctColor(g.approval * 1.4)) : ring(p.fama, 100, 'Fama', fmt0(p.fama), '#a78bfa'),
+    isLeader() ? ring(p.fama, 100, 'Fama', fmt0(p.fama), '#a78bfa') : ring(p.rap + 100, 200, 'Col leader', (p.rap > 0 ? '+' : '') + fmt0(p.rap), relColor(p.rap)),
+  ];
+  h += `<div class="card hero" style="--pc:${mp.color}"><div class="row"><span class="av-badge" onclick="openProfile()">${portrait(p.name, 62, { party: myPid() })}<span class="pbadge" style="--c:${mp.color}">${esc(mp.symbol && mp.mine ? mp.symbol : mp.short)}</span></span>
+    <div class="grow"><div class="tiny gold" style="font-weight:800">${esc(roleLabel())}</div><h2 class="ellipsis">${esc(p.name)}</h2>
+    ${g ? `<div class="row wrap" style="gap:4px;margin-top:4px">${g.parties.map(partyChip).join('')}<span class="tiny muted">${esc(g.name)}</span></div>` : ''}</div></div>
+    <div class="rings">${rings.join('')}</div>
+    <div class="minirow"><span>💰 ${euro(G.funds)}</span><span>😮‍💨 Stress ${fmt0(p.stress)}</span>${!isLeader() ? `<span>🪜 ${esc(RANKS[p.rank].n)}</span>` : `<span>🏛 ${mp.seatsC + mp.seatsS} parlamentari</span>`}</div></div>`;
+  // da fare ora: massimo 3 righe
+  const todo = notifications().slice(0, 3);
+  if (todo.length) h += `<div class="sec"><h4>Da fare ora</h4>${notifications().length > 3 ? `<button class="btn sm" onclick="openNotifications()">Tutte</button>` : ''}</div><div class="todo">${todo.map((n, i) => `<button class="todo-i u${n.u}" style="animation-delay:${i * 60}ms" onclick="${n.on}"><span class="nico ${n.u >= 2 ? 'u2' : n.u ? 'u1' : ''}">${n.ico}</span><span class="grow ellipsis">${esc(n.t)}</span><span class="dim">›</span></button>`).join('')}</div>`;
+  // azioni: le consigliate hanno la stella
+  const rec = recommendedActions().map(r => r.id);
   const acts = availableActions();
-  h += `<div class="sec"><h4>Agenda della settimana</h4><button class="btn sm gold" onclick="autoPlan()">🗓 Pianifica</button></div><div class="tiny muted" style="margin:-4px 2px 8px">Ogni azione si può fare una volta a settimana.</div><div class="actions">${acts.map(a => `<button class="act ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''}" style="--ac:${a.ac}" onclick="openAction('${a.id}')"><span class="c">${a.cost ? '⚡' + a.cost : ''}</span><span class="i">${a.ico}</span>${esc(a.n)}</button>`).join('')}</div>`;
-  // alleati (premier)
-  if (isPremier() && g.parties.length > 1) {
-    h += `<div class="sec"><h4>Umore degli alleati</h4></div><div class="card">${g.parties.filter(x => x !== myPid()).map(x => `<div class="row" style="margin:6px 0">${partyChip(x)}<span class="small grow ellipsis">${esc(P(x).leader)}</span><div style="width:110px">${barH(g.sat[x], 100, pctColor(g.sat[x]))}</div><b class="small" style="width:34px;text-align:right">${fmt0(g.sat[x])}</b></div>`).join('')}</div>`;
-  }
-  // carriera
-  if (!isLeader()) {
-    h += `<div class="sec"><h4>La tua carriera</h4></div><div class="card"><div class="row between"><b>${RANKS[p.rank].n}</b><span class="tag o">${p.rank + 1}/8</span></div><div class="progress mt">${RANKS.map((r, i) => `<i class="${i < p.rank ? 'd' : i === p.rank ? 'c' : ''}"></i>`).join('')}</div>
-      <div class="grid3 mt"><div class="kpi"><div class="l">Fama</div><div class="v">${fmt0(p.fama)}</div></div><div class="kpi"><div class="l">Seguito</div><div class="v">${fmt0(p.seguito)}%</div></div><div class="kpi"><div class="l">Col leader</div><div class="v" style="color:${relColor(p.rap)}">${p.rap > 0 ? '+' : ''}${fmt0(p.rap)}</div></div></div>
-      <div class="small muted mt">${careerHint()}</div></div>`;
-  }
-  // notizie
-  h += `<div class="sec"><h4>Notizie</h4><button class="small gold" onclick="openNews()">Tutte ›</button></div><div class="card tight"><div class="list">${G.news.slice(0, 6).map(newsRow).join('')}</div></div>`;
+  h += `<div class="sec"><h4>Azioni</h4><button class="btn sm gold" onclick="autoPlan()">🗓 Pianifica</button></div><div class="actions">${acts.map(a => `<button class="act ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''}" style="--ac:${a.ac}" onclick="${a.id === 'comizio' && rec.includes('comizio') ? `quickAction('comizio','${(recommendedActions().find(r => r.id === 'comizio') || {}).param || ''}')` : `openAction('${a.id}')`}">${rec.includes(a.id) && !a.done ? '<span class="star">⭐</span>' : ''}<span class="c">${a.cost ? '⚡' + a.cost : ''}</span><span class="i">${a.ico}</span>${esc(a.n)}</button>`).join('')}</div>`;
+  // alleati (premier): solo i volti e l'umore
+  if (isPremier() && g.parties.length > 1) h += `<div class="sec"><h4>Alleati</h4></div><div class="scrollx">${g.parties.filter(x => x !== myPid()).map(x => `<div class="due center" onclick="openParty('${x}')">${leaderPortrait(x, 44)}<b>${esc(P(x).short)}</b><span class="dw" style="color:${pctColor(g.sat[x])}">${g.sat[x] >= 60 ? '😊' : g.sat[x] >= 35 ? '😐' : '😠'} ${fmt0(g.sat[x])}</span></div>`).join('')}</div>`;
+  // carriera (non leader): barra dei gradi
+  if (!isLeader()) h += `<div class="sec"><h4>Carriera</h4></div><div class="card tight"><div class="progress">${RANKS.map((r, i) => `<i class="${i < p.rank ? 'd' : i === p.rank ? 'c' : ''}"></i>`).join('')}</div><div class="row between tiny mt"><b>${esc(RANKS[p.rank].n)}</b><span class="muted">seguito ${fmt0(p.seguito)}%</span></div></div>`;
+  // in arrivo: fila scorrevole
+  const dl = [];
+  if (G.cal.election > G.week) dl.push({ w: G.cal.election, i: '🗳', t: 'Elezioni politiche' });
+  const y = yearOf(G.week); dl.push({ w: weekOf(`${monthOf(G.week) > 9 ? y + 1 : y}-10-10`), i: '💶', t: 'Manovra' });
+  Object.entries(G.regions).sort((a, b) => a[1].next - b[1].next).slice(0, 2).forEach(([rid, st]) => dl.push({ w: st.next, i: '🗺', t: `Regionali ${regionName(rid)}` }));
+  if (G.cal.quirinale > G.week) dl.push({ w: G.cal.quirinale, i: '🏛', t: 'Nuovo Capo dello Stato' });
+  G.referendums.filter(r => !r.done).forEach(r => dl.push({ w: r.w, i: '✍️', t: 'Referendum' }));
+  dl.sort((a, b) => a.w - b.w);
+  h += `<div class="sec"><h4>In arrivo</h4></div><div class="scrollx">${dl.map(x => `<div class="due"><span class="di">${x.i}</span><b>${esc(x.t)}</b><span class="dw">${weeksLeft(x.w)}</span></div>`).join('')}</div>`;
   return h;
 }
 function newsRow(n) { return `<div class="news-item"><span class="w">${fmtDate(n.w, true).replace(/ \d{4}$/, '')}</span><span class="nk-${n.k}">${esc(n.t)}</span></div>`; }
@@ -140,10 +130,10 @@ function alertsList() {
 // ============================================================
 function leggiTab() {
   const cats = ['Tutte'].concat(Object.keys(LAW_CATS).filter(c => allLaws().some(l => l.cat === c)));
-  let h = `<div class="row"><input id="lawq" placeholder="🔍 Cerca una legge (es. pensioni, cittadinanza)" value="${esc(UI.lawQ)}" oninput="UI.lawQ=this.value;$('#lawlist').innerHTML=lawListHTML()"></div>
+  let h = `<div class="row"><input id="lawq" placeholder="🔍 Cerca una legge" value="${esc(UI.lawQ)}" oninput="UI.lawQ=this.value;$('#lawlist').innerHTML=lawListHTML()"><button class="iconbtn" onclick="UI.howShow=!UI.howShow;renderGame()">❓</button></div>
     <div class="scrollx mt">${cats.map(c => `<button class="fchip ${UI.lawCat === c ? 'on' : ''}" onclick="UI.lawCat='${c}';renderGame()">${LAW_CATS[c] || '📚'} ${c}</button>`).join('')}</div>
     <div class="scrollx mt"><span class="tiny muted" style="align-self:center;flex:none">Voglio migliorare:</span>${Object.keys(METRICS).map(m => `<button class="fchip ${UI.lawMetric === m ? 'on' : ''}" onclick="UI.lawMetric=UI.lawMetric==='${m}'?null:'${m}';renderGame()">${METRICS[m].ico} ${METRICS[m].n}</button>`).join('')}</div>`;
-  if (!UI.howHidden) h += `<div class="card mt"><div class="row between"><h3>📜 Come si fa una legge</h3><button class="xbtn" onclick="UI.howHidden=1;renderGame()">✕</button></div><div class="howto mt">
+  if (UI.howShow) h += `<div class="card mt"><div class="row between"><h3>📜 Come si fa una legge</h3><button class="xbtn" onclick="UI.howShow=0;renderGame()">✕</button></div><div class="howto mt">
     <div>Tocca una legge: vedi <b>com’è oggi</b> e le <b>riforme possibili</b>.</div>
     <div>Scegli la riforma e leggi <b>pro e contro</b>, chi è favorevole e la <b>previsione di voto</b>.</div>
     <div>${isPremier() ? 'Presentala come <b>disegno di legge</b> (⚡3) o <b>decreto</b> (⚡5, subito in vigore).' : G.player.parl || (isLeader() && myParty().seatsC + myParty().seatsS > 0) ? 'Presentala come <b>proposta di legge</b> (⚡2): se la maggioranza non la vuole, resta ferma.' : 'Per presentarla devi avere parlamentari. Intanto puoi <b>metterla nel programma</b>.'}</div>
@@ -181,10 +171,9 @@ function openLaw(id, sel) {
   h += `<h4 class="mt2">Le possibili riforme</h4>`;
   l.opts.forEach((op, i) => {
     if (i === cur) return;
-    h += `<button class="choice ${i === sel ? 'sel' : ''}" onclick="openLawRefresh('${id}',${i})"><div class="row between"><span class="t">${esc(op.t)}</span>${op.costo ? `<span class="tag ${op.costo - (l.opts[cur].costo || 0) > 0 ? 'b' : 'g'}">${op.costo - (l.opts[cur].costo || 0) > 0 ? '+' : ''}${fmt1(op.costo - (l.opts[cur].costo || 0))} mld</span>` : ''}</div><div class="small muted" style="margin-top:4px">${esc(op.d)}</div>${effChipsHTML(effectsOf(l, cur, i), lawGain(myPid(), l, cur, i))}${axisMini(l, op.pos)}</button>`;
+    h += `<button class="choice ${i === sel ? 'sel' : ''}" onclick="openLawRefresh('${id}',${i})"><div class="row between"><span class="t">${esc(op.t)}</span>${op.costo ? `<span class="tag ${op.costo - (l.opts[cur].costo || 0) > 0 ? 'b' : 'g'}">${op.costo - (l.opts[cur].costo || 0) > 0 ? '+' : ''}${fmt1(op.costo - (l.opts[cur].costo || 0))} mld</span>` : ''}</div>${i === sel ? `<div class="small muted" style="margin-top:4px">${esc(op.d)}</div>` : ""}${effChipsHTML(effectsOf(l, cur, i), lawGain(myPid(), l, cur, i))}${i === sel ? axisMini(l, op.pos) : ""}</button>`;
   });
-  h += `<h4 class="mt2">Pro e contro di «${esc(o.t)}»</h4><div class="mt">${proConHTML(imp)}</div>`;
-  h += `<div class="small mt">Per il tuo partito: ${imp.mine > 0.2 ? '<b class="good">in linea con le tue idee</b>' : imp.mine < -0.2 ? '<b class="bad">contraria alle tue idee</b> (la tua base potrebbe non capire)' : '<b class="warn">neutra</b>'}</div>`;
+  h += `<div class="row wrap mt" style="gap:4px"><span class="tiny muted">👍</span>${imp.fav.map(partyChip).join("") || "<span class=\"tiny dim\">nessuno</span>"}</div><div class="row wrap mt" style="gap:4px"><span class="tiny muted">👎</span>${imp.contr.map(partyChip).join("") || "<span class=\"tiny dim\">nessuno</span>"}</div><details class="mt"><summary class="small gold">⚖️ Tutti i pro e contro</summary><div class="mt">${proConHTML(imp, { noParties: true })}</div></details>`;
   // previsione voto
   const fake = { type: l.cost ? 'cost' : 'ddl', proposer: isPremier() ? 'GOV' : 'PLAYER', lawId: id, opt: sel, from: cur, stages: [{ k: 'aula', h: 'C' }], stage: 0 };
   const vc = computeVote(fake, 'C', { det: true }), vs = computeVote(fake, 'S', { det: true });

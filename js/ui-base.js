@@ -280,11 +280,21 @@ function renderSetup() {
   if (st === 'Idee') {
     const tgt = SETUP.mode === 'fondatore' ? SETUP.party.ax : SETUP.player.ax;
     if (SETUP.mode === 'carriera' && !SETUP.join.ownIdeas) { const pp = PARTIES_DEF.find(p => p.id === SETUP.join.party); Object.assign(SETUP.player.ax, pp.ax); }
-    const close = PARTIES_DEF.map(p => ({ p, c: clamp(100 - axisDistRaw(tgt, p.ax) * 8, 0, 100) })).sort((a, b) => b.c - a.c);
-    body = `<h2>${SETUP.mode === 'fondatore' ? 'Le idee del partito' : 'Le tue idee personali'}</h2>
-    <p class="muted small">${SETUP.mode === 'fondatore' ? 'Da qui dipende chi ti vota e con chi potrai allearti.' : 'Partono da quelle del partito. Se ti discosti troppo, il leader ti vedrà come un corpo estraneo… ma potrai fondare una tua corrente.'}</p>
-    ${AXIS_KEYS.map(k => `<div class="axisrow"><div class="row between"><span class="name">${AXES[k].n}</span><b id="axv_${k}">${tgt[k] > 0 ? '+' : ''}${tgt[k]}</b></div><input type="range" min="-10" max="10" step="1" value="${tgt[k]}" oninput="setAx('${k}',+this.value)"><div class="lbls"><span>${AXES[k].l}</span><span>${AXES[k].r}</span></div></div>`).join('')}
-    <div class="card mt"><h4>Affinità con i partiti</h4><div id="affinity" class="mt">${affinityHTML(close)}</div></div>`;
+    if (!SETUP.quizDone && !SETUP.manual) {
+      if (SETUP.qi === undefined) {
+        body = `<h2>${SETUP.mode === 'fondatore' ? 'Le idee del partito' : 'Le tue idee'}</h2><p class="muted">${SETUP.mode === 'fondatore' ? 'Da qui dipendono chi ti vota e con chi potrai allearti.' : 'Partono da quelle del partito: se te ne allontani, il leader ti vedrà come un corpo estraneo, ma potrai costruire una tua corrente.'}</p>
+          <div class="opt on" onclick="SETUP.qi=0;SETUP.answers=[];renderSetup()"><div class="t">📝 Rispondi a 16 domande</div><div class="small muted mt">Consigliato: in un minuto il gioco capisce dove ti collochi.</div></div>
+          <div class="opt" onclick="SETUP.manual=true;renderSetup()"><div class="t">🎚 Imposta a mano</div><div class="small muted mt">Sposti tu gli 8 cursori.</div></div>
+          ${SETUP.mode === 'carriera' ? `<div class="opt" onclick="SETUP.quizDone=true;renderSetup()"><div class="t">🤝 Le stesse del partito</div><div class="small muted mt">Parti in linea con ${esc(PARTIES_DEF.find(p => p.id === SETUP.join.party).short)}.</div></div>` : ''}`;
+      } else body = quizHTML();
+    } else {
+      const close = PARTIES_DEF.map(p => ({ p, c: clamp(100 - axisDistRaw(tgt, p.ax) * 8, 0, 100) })).sort((a, b) => b.c - a.c);
+      body = `<div class="row between"><h2>${SETUP.quizDone ? 'Il tuo profilo' : 'Le tue idee'}</h2><button class="btn sm" onclick="SETUP.quizDone=false;SETUP.manual=false;SETUP.qi=undefined;renderSetup()">Rifai il test</button></div>
+        <div class="card hero mt"><div class="tiny muted">I partiti più vicini a te</div><div class="row wrap mt" style="gap:6px">${close.slice(0, 3).map(x => `<span class="chip" style="--c:${x.p.color}">${esc(x.p.short)} ${Math.round(x.c)}%</span>`).join('')}</div><div class="tiny muted mt">Più sono vicini, più è facile allearsi e prendere i loro elettori.</div></div>
+        <p class="small muted">Sposta i cursori per ritoccare. Sotto ogni tema trovi cosa significa ogni lato.</p>
+        ${AXIS_KEYS.map(k => axisRowHTML(k, tgt[k])).join('')}
+        <div class="card mt"><h4>Affinità con tutti i partiti</h4><div id="affinity" class="mt">${affinityHTML(close)}</div></div>`;
+    }
   }
   if (st === 'Squadra') {
     body = `<h2>La tua squadra</h2><p class="muted small">I dirigenti del tuo partito: potranno diventare ministri. Puoi cambiare i nomi.</p>
@@ -309,12 +319,13 @@ function affinityHTML(close) {
 function setAx(k, v) {
   const tgt = SETUP.mode === 'fondatore' ? SETUP.party.ax : SETUP.player.ax;
   tgt[k] = v; if (SETUP.mode === 'carriera') SETUP.join.ownIdeas = true;
-  $('#axv_' + k).textContent = (v > 0 ? '+' : '') + v;
+  const pl = axisPosLabel(k, v), el = $('#axp_' + k); if (el) { el.textContent = pl.t; el.style.color = pl.c; }
   const close = PARTIES_DEF.map(p => ({ p, c: clamp(100 - axisDistRaw(tgt, p.ax) * 8, 0, 100) })).sort((a, b) => b.c - a.c);
   $('#affinity').innerHTML = affinityHTML(close);
 }
 function setupNext() {
   const steps = SETUP_STEPS(), st = steps[SETUP.step];
+  if (st === 'Idee' && !SETUP.quizDone && !SETUP.manual) { toast('Rispondi alle domande o scegli «Imposta a mano»', 'bad'); return; }
   if (st === 'Personaggio' && !SETUP.player.name.trim()) { toast('Scrivi il tuo nome', 'bad'); return; }
   if (st === 'Partito' && SETUP.mode === 'fondatore' && (!SETUP.party.name.trim() || !SETUP.party.short.trim())) { toast('Dai un nome e una sigla al partito', 'bad'); return; }
   if (SETUP.step < steps.length - 1) { SETUP.step++; renderSetup(); return; }

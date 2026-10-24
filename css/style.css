@@ -303,7 +303,7 @@ details summary { cursor: pointer; list-style: none; padding: 6px 0; }
 .gauge { margin-top: 10px; }
 .gauge .bar { height: 10px; margin-top: 4px; }
 .timer { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
-.timer i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #ff5c5c, #ffb547, #2ecc71); transform-origin: left; animation: timer linear forwards; }
+.timer i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #ff5c5c, #ffb547, #2ecc71); transform-origin: left; animation: timer linear both; }
 @keyframes timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 .ach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .ach { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px; text-align: center; opacity: .45; font-size: 13px; }
@@ -315,3 +315,62 @@ details summary { cursor: pointer; list-style: none; padding: 6px 0; }
 .tl-item { position: relative; display: flex; gap: 12px; align-items: flex-start; padding: 6px 0; animation: fadeUp .35s both; }
 .tl-dot { width: 36px; height: 36px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--card2); border: 2px solid var(--line2); font-size: 17px; z-index: 1; }
 .tl-item.ach .tl-dot { border-color: #ffd60a; } .tl-item.law .tl-dot { border-color: #fb923c; } .tl-item.vote .tl-dot { border-color: #38bdf8; }
+
+/* ===================== SCHERMO INTERO IPHONE ===================== */
+html { height: 100%; height: -webkit-fill-available; background: var(--bg); }
+body { min-height: 100%; min-height: -webkit-fill-available; }
+#app { position: fixed; inset: 0; height: auto; }
+
+/* ===================== UNIFORMITÀ: UNA SOLA FORMA PER PILLOLE, PULSANTI, TITOLI ===================== */
+button, input, select, textarea { font-family: "DM Sans", -apple-system, sans-serif; }
+.chip, .tag, .eff, .stat, .pill, .fchip, .choice .fx span, .fx span { border-radius: 999px !important; display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 11px; font: 700 12px/1 "DM Sans", sans-serif; white-space: nowrap; }
+.stat { height: 30px; font-size: 12.5px; }
+.pill { height: 36px; padding: 0 13px; font-size: 13.5px; }
+.fchip { height: 34px; padding: 0 14px; font-size: 13px; }
+.eff { height: 26px; }
+.btn { border-radius: 16px; font-weight: 800; letter-spacing: .01em; }
+.btn.sm { border-radius: 999px; min-height: 32px; padding: 0 14px; font-size: 12.5px; }
+.seg { border-radius: 999px; padding: 4px; }
+.seg button { border-radius: 999px; }
+.card, .evcard, .swipe-card { border-radius: 22px; }
+.choice { border-radius: 18px; }
+.kpi { border-radius: 18px; }
+.iconbtn { border-radius: 999px; }
+.stamp, .tl-year { font-family: "Bebas Neue", sans-serif; }
+h3 { font-family: "DM Sans", sans-serif; font-weight: 800; font-size: 16px; }
+.sheet h4, .evcard h4 { font-family: "Bebas Neue", sans-serif; font-size: 18px; letter-spacing: 1.5px; font-weight: 400; color: var(--oro); text-transform: uppercase; }
+.small { font-size: 13.5px; } .tiny { font-size: 12px; }
+
+/* ===================== INDICATORI AD ANELLO ===================== */
+.rings { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 14px; }
+.ring { position: relative; display: flex; flex-direction: column; align-items: center; }
+.ring svg { width: 68px; height: 68px; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 7; stroke-linecap: round; }
+.ring .rb { stroke: rgba(255,255,255,.08); }
+.ring .rf { transition: stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1); filter: drop-shadow(0 0 6px currentColor); }
+.ring b { position: absolute; top: 22px; left: 0; right: 0; text-align: center; font-family: "Bebas Neue", sans-serif; font-size: 21px; font-weight: 400; letter-spacing: .02em; }
+.ring span { font-size: 11.5px; font-weight: 700; color: var(--muted); margin-top: 3px; text-align: center; }
+.minirow { display: flex; justify-content: center; gap: 14px; margin-top: 10px; font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.todo { display: grid; gap: 8px; }
+.todo-i { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 6px; font-weight: 700; font-size: 14px; animation: fadeUp .35s both; }
+.todo-i.u2 { border-color: rgba(255,92,92,.5); background: linear-gradient(90deg, rgba(255,92,92,.14), var(--card)); }
+.todo-i.u1 { border-color: rgba(255,181,71,.45); }
+.todo-i .nico { width: 34px; height: 34px; border-radius: 50%; font-size: 17px; }
+.due { flex: none; width: 118px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 10px; display: flex; flex-direction: column; gap: 3px; }
+.due .di { font-size: 22px; } .due b { font-size: 12.5px; line-height: 1.2; } .due .dw { font-size: 11.5px; color: var(--oro); font-weight: 800; }
+.act .star { position: absolute; top: 4px; left: 6px; font-size: 12px; }
+.tip { padding: 10px 12px; border-radius: 18px; }
+.tip .small { font-size: 13px; }
+.axis-help { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; font-size: 11.5px; color: var(--muted); line-height: 1.3; }
+.axis-help div:last-child { text-align: right; }
+.axis-pos { font-size: 12px; font-weight: 800; }
+
+/* ===================== PIÙ SPAZIO SOTTO LA DYNAMIC ISLAND ===================== */
+:root { --top-gap: max(var(--safe-t), 20px); }
+.topbar { padding-top: calc(var(--top-gap) + 10px); }
+.layer.full .sheet { padding-top: calc(var(--top-gap) + 22px); }
+.sheet { max-height: calc(100dvh - var(--top-gap) - 24px); }
+.setup .body { padding-top: calc(var(--top-gap) + 22px); }
+.splash { padding-top: calc(var(--top-gap) + 40px) !important; }
+.fly, .toast-wrap { top: calc(var(--top-gap) + 14px); }
+.timer i { animation-delay: var(--delay, 0s); }
