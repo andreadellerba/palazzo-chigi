@@ -95,8 +95,8 @@ function homeTab() {
   const recs = recommendedActions(), rec = recs.map(r => r.id);
   const acts = availableActions().sort((a, b) => (rec.includes(b.id) && !b.done ? 1 : 0) - (rec.includes(a.id) && !a.done ? 1 : 0) || (a.done ? 1 : 0) - (b.done ? 1 : 0));
   h += sec('Azioni', `<button class="btn sm gold" onclick="autoPlan()">${icon('star')} Pianifica</button>`) +
-    `<div class="acts">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="act-t ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${star ? 'rec' : ''}" style="--ac:${a.ac};animation-delay:${i * 25}ms" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai">${a.done ? icon('check') : icon(ACT_ICON[a.id] || a.ico || 'star')}</span><span class="an">${esc(a.n)}</span><span class="ac">${a.done ? 'fatta' : a.cost ? '⚡' + a.cost : 'gratis'}</span>${star ? '<span class="as">★</span>' : ''}</button>`; }).join('')}</div>
-    <div class="tiny muted center mt">★ consigliate · ogni azione una volta a settimana</div>`;
+    `<div class="acts">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="act-t ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${star ? 'rec' : ''}" style="--ac:${a.ac};animation-delay:${i * 25}ms" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai">${a.done ? icon('check') : icon(ACT_ICON[a.id] || a.ico || 'star')}</span><span class="an">${esc(a.n)}</span><span class="ac">${a.done ? 'fatta' : a.cost ? '⚡' + a.cost : 'gratis'}</span>${star ? '<span class="as">★</span>' : ''}${G.routine && G.routine[a.id] ? `<span class="ar">${icon('refresh', 11)}</span>` : ''}</button>`; }).join('')}</div>
+    <div class="tiny muted center mt">★ consigliate · ↻ ricorrenti: aprila e attiva «Ripeti ogni settimana» per farla in automatico</div>`;
   // staff e social
   h += sec('Il tuo staff') + staffHTML();
   h += feedHomeHTML();
@@ -124,9 +124,12 @@ function careerHint() {
 // ============================================================
 //  LEGGI
 // ============================================================
+// da ministro vedi (e proponi) solo le leggi del tuo ministero
+function ministerCats() { if (!G.player.minister || isPremier() || !MIN_BY_ID[G.player.minister]) return null; const c = MIN_BY_ID[G.player.minister].cats; return c && c.length ? c : null; }
+function visibleLaws() { const c = ministerCats(); return c ? allLaws().filter(l => c.includes(l.cat)) : allLaws(); }
 function leggiTab() {
-  const cats = ['Tutte'].concat(Object.keys(LAW_CATS).filter(c => allLaws().some(l => l.cat === c)));
-  let h = `<div class="row"><div class="searchbox">${icon('search')}<input id="lawq" placeholder="Cerca una legge" value="${esc(UI.lawQ)}" oninput="UI.lawQ=this.value;$('#lawlist').innerHTML=lawListHTML()"></div><button class="iconbtn" onclick="openGlossary()">${icon('info')}</button></div>
+  const cats = ['Tutte'].concat(Object.keys(LAW_CATS).filter(c => visibleLaws().some(l => l.cat === c)));
+  let h = `${ministerCats() ? `<div class="card tight"><div class="row">${medal('briefcase', 40)}<div class="small grow">Sei ministro: <b>${esc(MIN_BY_ID[G.player.minister].n)}</b>. Qui vedi e proponi solo le leggi del tuo ministero.</div></div></div>` : ''}<div class="row"><div class="searchbox">${icon('search')}<input id="lawq" placeholder="Cerca una legge" value="${esc(UI.lawQ)}" oninput="UI.lawQ=this.value;$('#lawlist').innerHTML=lawListHTML()"></div><button class="iconbtn" onclick="openGlossary()">${icon('info')}</button></div>
     <div class="scrollx mt">${cats.map(c => `<button class="fchip ${UI.lawCat === c ? 'on' : ''}" onclick="UI.lawCat='${c}';renderGame()">${icon(CAT_ICON[c] || 'folder')} ${c}</button>`).join('')}</div>
     <div class="scrollx mt"><span class="tiny muted" style="align-self:center;flex:none">Voglio migliorare</span>${Object.keys(METRICS).map(m => `<button class="fchip ${UI.lawMetric === m ? 'on' : ''}" onclick="UI.lawMetric=UI.lawMetric==='${m}'?null:'${m}';renderGame()">${icon(METRIC_ICON[m])} ${METRICS[m].n}</button>`).join('')}</div>`;
   const live = G.bills.filter(b => !b.dead).length;
@@ -145,11 +148,11 @@ function lawCardHTML(l, opt, extra) {
 }
 function lawListHTML() {
   if (UI.lawMetric) {
-    const best = bestLawsFor(UI.lawMetric, 15);
+    const best = bestLawsFor(UI.lawMetric, 15).filter(x => visibleLaws().includes(x.l));
     return best.length ? best.map(x => lawCardHTML(x.l, x.i, effChipsHTML(x.effs, x.mine))).join('') : '<div class="muted center mt2">Nessuna riforma disponibile.</div>';
   }
   const q = UI.lawQ.trim().toLowerCase();
-  const list = allLaws().filter(l => (UI.lawCat === 'Tutte' || l.cat === UI.lawCat) && (!q || (l.nome + ' ' + l.attuale + ' ' + l.opts.map(o => o.t).join(' ')).toLowerCase().includes(q)));
+  const list = visibleLaws().filter(l => (UI.lawCat === 'Tutte' || l.cat === UI.lawCat) && (!q || (l.nome + ' ' + l.attuale + ' ' + l.opts.map(o => o.t).join(' ')).toLowerCase().includes(q)));
   if (!list.length) return '<div class="muted center mt2">Nessuna legge trovata</div>';
   return list.map(l => lawCardHTML(l)).join('');
 }

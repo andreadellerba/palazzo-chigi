@@ -205,27 +205,34 @@ function pickCall(i) {
 
 // ---------- CONSIGLIO DEI MINISTRI (ogni 5 settimane) ----------
 let CDM = null;
+// ogni ministro propone una riforma del suo settore, coerente con le idee del suo partito
 function cdmProposals(n) {
-  const out = [], usedM = new Set(), usedL = new Set();
-  const metrics = redMetrics().map(r => r.k).concat(Object.keys(METRICS).sort(() => Math.random() - 0.5));
   G.flags.rejected = G.flags.rejected || {};
-  for (const metric of metrics) {
+  const busy = new Set(G.bills.filter(b => !b.dead && b.lawId).map(b => b.lawId));
+  const red = redMetrics().map(r => r.k), out = [];
+  const mins = MINISTRIES.filter(m => m.cats.length && G.gov.ministers[m.id] && G.gov.ministers[m.id] !== G.player.name).sort(() => Math.random() - 0.5);
+  for (const m of mins) {
     if (out.length >= n) break;
-    for (const x of bestLawsFor(metric, 8)) {
-      if (x.l.cost || usedL.has(x.l.id) || G.flags.rejected[x.l.id + ':' + x.i] > G.week) continue;
-      let mid = MINISTRIES.find(m => m.cats.includes(x.l.cat) && G.gov.ministers[m.id] && G.gov.ministers[m.id] !== G.player.name && !usedM.has(m.id));
-      if (!mid) mid = MINISTRIES.find(m => m.id === METRIC_MIN[metric] && !usedM.has(m.id));
-      if (!mid || !G.gov.ministers[mid.id] || G.gov.ministers[mid.id] === G.player.name) continue;
-      const name = G.gov.ministers[mid.id], pp = person(name), party = pp && G.parties[pp.party] ? pp.party : null;
-      if (party && lawGain(party, x.l, G.laws[x.l.id], x.i) < 0.05) continue;
-      out.push({ lawId: x.l.id, opt: x.i, metric, min: mid.id, name, party }); usedM.add(mid.id); usedL.add(x.l.id); break;
-    }
+    const name = G.gov.ministers[m.id], pp = person(name), party = pp && G.parties[pp.party] ? pp.party : G.gov.premierParty;
+    let best = null;
+    allLaws().filter(l => !l.cost && !l.custom && m.cats.includes(l.cat) && !busy.has(l.id) && !out.some(o => o.lawId === l.id)).forEach(l => {
+      const cur = G.laws[l.id];
+      l.opts.forEach((o, i) => {
+        if (i === cur || G.flags.rejected[l.id + ':' + i] > G.week) return;
+        const g = lawGain(party, l, cur, i), maj = G.gov.parties.reduce((t, gp) => t + lawGain(gp, l, cur, i), 0);
+        if (g < 0.05 || maj < 0) return;
+        const effs = effectsOf(l, cur, i), helps = effs.filter(e => e.good && red.includes(e.k)).length;
+        const score = g * l.sal + helps * 0.6 + rnd(0, 0.3);
+        if (!best || score > best.score) best = { lawId: l.id, opt: i, score, metric: (effs.find(e => e.good && red.includes(e.k)) || effs.find(e => e.good) || {}).k };
+      });
+    });
+    if (best) out.push(Object.assign(best, { min: m.id, name, party: pp && G.parties[pp.party] ? pp.party : null }));
   }
   return out;
 }
 function openCdM() {
   if (!isPremier()) { G.queue.shift(); return processQueue(); }
-  CDM = { props: cdmProposals(3), res: {}, n: (G.flags.cdmN = (G.flags.cdmN || 0) + 1) };
+  CDM = { props: cdmProposals(4), res: {}, n: (G.flags.cdmN = (G.flags.cdmN || 0) + 1) };
   if (!CDM.props.length) { G.queue.shift(); addNews('Consiglio dei ministri: nessuna nuova riforma all’ordine del giorno.', 'gov'); return processQueue(); }
   openSheet('', { full: true, locked: true }); renderCdM();
 }
@@ -235,7 +242,7 @@ function renderCdM() {
   CDM.props.forEach((p, i) => {
     const l = getLaw(p.lawId), o = l.opts[p.opt], cur = G.laws[p.lawId], r = CDM.res[i], S = SPIEGA[l.id];
     h += `<div class="card mt ${r ? 'decided' : ''}"><div class="row">${portrait(p.name, 50, { party: p.party || undefined })}<div class="grow"><b class="small">${esc(p.name)}</b><div class="tiny muted">${esc(MIN_BY_ID[p.min].n)}</div></div>${r ? `<span class="stamp-s ${r === 'no' ? 'bad' : r === 'rinvia' ? 'warn' : 'good'}">${{ ddl: 'APPROVATO', dl: 'DECRETO', rinvia: 'RINVIATO', no: 'RESPINTO' }[r]}</span>` : ''}</div>
-      <h3 class="mt" style="font-size:17px">${esc(o.t)}</h3><div class="tiny muted">${esc(l.nome)} · per migliorare ${METRICS[p.metric].n.toLowerCase()}</div>
+      <h3 class="mt" style="font-size:17px">${esc(o.t)}</h3><div class="tiny muted">${esc(l.nome)}${p.metric ? ` · migliora ${METRICS[p.metric].n.toLowerCase()}` : ""}</div>
       ${S && S.o[p.opt] ? `<div class="expl mt"><span class="k">In pratica</span>${esc(S.o[p.opt][0])}</div>` : ''}${effChipsHTML(effectsOf(l, cur, p.opt), lawGain(myPid(), l, cur, p.opt))}
       ${r ? '' : `<div class="cdm-b mt"><button class="btn sm gold" onclick="cdmPick(${i},'ddl')">Approva · ⚡3</button><button class="btn sm" onclick="cdmPick(${i},'dl')">Decreto · ⚡5</button><button class="btn sm" onclick="cdmPick(${i},'rinvia')">Rinvia</button><button class="btn sm red" onclick="cdmPick(${i},'no')">Boccia</button></div>`}</div>`;
   });
@@ -393,6 +400,7 @@ function storyTick() {
   ensureStory();
   // i voti forzati valgono solo per la votazione in corso
   Object.keys(G.forced).forEach(id => { const b = G.bills.find(x => x.id === +id); if (!b || b.dead || !(b.stages[b.stage] && b.stages[b.stage].k === 'aula')) delete G.forced[id]; });
+  fixCoalitions();
   memoryAfterVotes(G._wk.votes);
   staffTick();
   summitTick();
@@ -438,3 +446,48 @@ function eventTopHTML(ev, item, v) {
   return `<div class="img">${face || medal(v.img, 84)}</div><h2>${title}</h2><div class="txt">${text}</div>`;
 }
 function animCounters() { document.querySelectorAll('.cnt-up').forEach(el => { if (!el.dataset.done) { el.dataset.done = 1; countUp(el, +el.dataset.to, false, 1600); } }); }
+
+// ---------- AZIONI RICORRENTI: le fa il gioco ogni settimana ----------
+const ROUTINE_NO = ['crisi', 'dimissioni', 'sfiducia', 'anticipate', 'congresso', 'scissione', 'rimpasto', 'tv', 'dibattito', 'incontro', 'poteri', 'tour', 'visita', 'promo'];
+const routineOK = a => !ROUTINE_NO.includes(a.id) && (a.run || a.id === 'comizio');
+function routineToggleHTML(a) {
+  if (!routineOK(a)) return '';
+  const on = !!(G.routine && G.routine[a.id]);
+  return `<div class="card tight mt2"><div class="li click" onclick="toggleRoutine('${a.id}')">${icon('refresh', 20)}<div class="grow"><b class="small">Ripeti ogni settimana</b><div class="tiny muted">${a.id === 'comizio' ? 'Nella regione dove conviene di più' : 'Il gioco la fa da solo quando passi alla settimana successiva'}, se hai capitale e fondi</div></div><span class="tgl ${on ? 'on' : ''}"><i></i></span></div></div>`;
+}
+function toggleRoutine(id) {
+  G.routine = G.routine || {};
+  if (G.routine[id]) delete G.routine[id]; else G.routine[id] = 1;
+  vib(8); closeSheet(); openAction(id); renderGame();
+}
+function runRoutine() {
+  const done = [];
+  if (!G.routine || G.phase !== 'normale') return done;
+  Object.keys(G.routine).forEach(id => {
+    const a = ACTIONS.find(x => x.id === id);
+    if (!a || usedThisWeek(id)) return;
+    let ok = false; try { ok = a.show(); } catch (e) { }
+    if (!ok || G.pc < actionCost(a) || G.funds < (a.funds || 0)) return;
+    if (id === 'comizio') {
+      const reg = REGIONS_DEF.slice().sort((x, y) => (y.el / (G.myReg[y.id] || 1)) - (x.el / (G.myReg[x.id] || 1)))[0];
+      doComizioQuiet(reg.id); if (usedThisWeek('comizio')) done.push({ n: `Comizio in ${reg.n}`, ico: 'mega' }); return;
+    }
+    if (!spendPC(actionCost(a))) return;
+    markUsed(id); if (a.funds) G.funds -= a.funds;
+    try { a.run(); } catch (e) { console.error(e); }
+    done.push({ n: a.n, ico: ACT_ICON[id] || a.ico });
+  });
+  return done;
+}
+
+// ---------- COALIZIONI COERENTI: un partito sta in una sola coalizione ----------
+function fixCoalitions() {
+  const seen = {}, fragile = m => (G.pacts || []).some(p => p.fragile && p.pid === m);
+  // la coalizione del giocatore ha la precedenza
+  G.coalitions.slice().sort((a, b) => (b.members.includes(myPid()) ? 1 : 0) - (a.members.includes(myPid()) ? 1 : 0)).forEach(c => {
+    c.members = c.members.filter(m => { if (seen[m] || !G.parties[m]) return false; seen[m] = 1; return true; });
+    const big = c.members.slice().sort((a, b) => P(b).poll - P(a).poll)[0];
+    c.members = c.members.filter(m => m === big || !never(m, big) || fragile(m) || fragile(big));
+  });
+  G.coalitions = G.coalitions.filter(c => c.members.length > 1 || (c.mine && c.members.length));
+}

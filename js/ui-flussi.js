@@ -73,7 +73,7 @@ function openAction(id) {
   if (a.risk) pc.contro.push({ k: 'pol', t: a.risk });
   const enough = G.pc >= cost && G.funds >= (a.funds || 0);
   openSheet(`<div class="sheet-head"><div class="row grow">${medal(a.ico, 56)}<div class="grow"><h2 style="font-size:22px">${esc(a.n)}</h2>${cost || a.funds ? `<div class="tiny gold" style="font-weight:800;letter-spacing:.08em">COSTA ${cost ? '⚡' + cost : ''}${cost && a.funds ? ' · ' : ''}${a.funds ? euro(a.funds) : ''}</div>` : ''}</div></div><button class="xbtn" onclick="closeSheet()">${icon('x', 18)}</button></div><p class="muted">${esc(a.d)}</p><div class="effs">${pc.pro.map(x => `<span class="eff g">▲ ${esc(x.t)}</span>`).join("")}${pc.contro.map(x => `<span class="eff b">▼ ${esc(x.t)}</span>`).join("")}</div>
-    <button class="btn pri block mt2" ${enough ? '' : 'disabled'} onclick="runAction('${a.id}')">${enough ? 'Procedi' : (G.pc < cost ? 'Capitale politico insufficiente' : 'Fondi insufficienti')}</button>`);
+    ${routineToggleHTML(a)}<button class="btn pri block mt2" ${enough ? '' : 'disabled'} onclick="runAction('${a.id}')">${enough ? 'Procedi' : (G.pc < cost ? 'Capitale politico insufficiente' : 'Fondi insufficienti')}</button>`);
 }
 function runAction(id) {
   const a = ACTIONS.find(x => x.id === id);
@@ -201,7 +201,9 @@ function togglePromise(id, opt) {
 let TVS = null;
 function openTV(show, debate) {
   if (show) return startInterview(show, debate);
-  openSheet(`${head('Scegli il programma')}<div class="list">${TALKSHOWS.map((s, i) => `<div class="li click" onclick="closeSheet();startInterview(TALKSHOWS[${i}])"><span class="nico">${icon('tv')}</span><div class="grow"><b>${esc(s.n)}</b><div class="tiny muted">${esc(s.ch)} · pubblico ${s.lean < -0.3 ? 'progressista' : s.lean > 0.3 ? 'conservatore' : 'generalista'} · ${'★'.repeat(s.reach)}</div></div>${icon('chevron', 16)}</div>`).join('')}</div>`);
+  const row = (s, i) => `<div class="li click" onclick="closeSheet();startInterview(TALKSHOWS[${i}])"><span class="nico">${icon(s.t === 'podcast' ? 'mic' : s.t === 'live' ? 'phone' : 'tv')}</span><div class="grow"><b>${esc(s.n)}</b><div class="tiny muted">${esc(s.ch)} · pubblico ${s.t ? 'giovane' : s.lean < -0.3 ? 'progressista' : s.lean > 0.3 ? 'conservatore' : 'generalista'} · ${'★'.repeat(s.reach)}</div></div>${icon('chevron', 16)}</div>`;
+  const grp = (t, title) => sec(title) + `<div class="card tight"><div class="list">${TALKSHOWS.map((s, i) => (s.t || 'tv') === t ? row(s, i) : '').join('')}</div></div>`;
+  openSheet(`${head('Dove vai a parlare?', 'TV, podcast o una diretta tutta tua')}${grp('tv', 'In TV')}${grp('podcast', 'Podcast')}${grp('live', 'Dirette social')}`);
 }
 function startInterview(show, debate) {
   const cost = debate ? 2 : (isPremier() ? 2 : 1);
@@ -269,6 +271,7 @@ function finishInterview() {
 function nextWeek() {
   if (G.phase === 'formazione') return openFormation();
   if (G.queue.length) return processQueue();
+  const auto = runRoutine();
   const before = { poll: myParty().poll, appr: G.gov ? G.gov.approval : null, spread: G.econ.spread };
   const s = advanceWeek();
   if (!s) return;
@@ -278,10 +281,10 @@ function nextWeek() {
   saveGame('auto');
   renderGame();
   vib(12);
-  showWeekSummary(s, before);
+  showWeekSummary(s, before, auto);
   if (s.ach && s.ach.length) setTimeout(() => celebrate(s.ach), 600);
 }
-function showWeekSummary(s, before) {
+function showWeekSummary(s, before, auto) {
   const dPoll = myParty().poll - before.poll, dSp = G.econ.spread - before.spread;
   const dA = G.gov && before.appr !== null ? G.gov.approval - before.appr : null;
   // la notizia più importante va in prima pagina
@@ -295,6 +298,7 @@ function showWeekSummary(s, before) {
     <div class="grid3 mt">${kpi(esc(myParty().short), fmt1(myParty().poll) + '%', (dPoll >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dPoll)), dPoll >= 0, myParty().color)}
     ${dA !== null ? kpi('Governo', fmt0(G.gov.approval) + '%', (dA >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dA)), dA >= 0, '#ffd60a') : kpi('Fama', fmt0(G.player.fama), null, true, '#a78bfa')}
     ${kpi('Spread', fmt0(G.econ.spread), (dSp >= 0 ? '▲ ' : '▼ ') + fmt0(Math.abs(dSp)), dSp <= 0, '#f472b6')}</div>
+    ${auto && auto.length ? `${sec('Fatto in automatico')}<div class="effs mt">${auto.map(a => `<span class="eff g">${icon(a.ico, 13)} ${esc(a.n)}</span>`).join('')}</div>` : ''}
     ${votes ? `${sec('Votazioni in aula')}<div class="effs mt">${votes}</div>` : ''}
     ${rest.length ? `${sec('In breve')}<div class="mt">${rest.slice(0, 4).map(n => `<div class="news-item"><span class="nk-${n.k}">${esc(n.t)}</span></div>`).join('')}</div>${rest.length > 4 ? `<details class="mt"><summary class="small gold">Altre ${rest.length - 4} notizie</summary>${rest.slice(4).map(n => `<div class="news-item"><span class="nk-${n.k}">${esc(n.t)}</span></div>`).join('')}</details>` : ''}` : ''}
     <button class="btn ${G.queue.length ? 'gold' : 'pri'} block mt2" onclick="closeSheet();${G.queue.length ? 'setTimeout(processQueue,280)' : ''}">${G.queue.length ? `Continua · ${G.queue.length} da decidere ›` : 'Continua'}</button>`);

@@ -215,10 +215,14 @@ function openGlossary() {
 function fiduciaCompareHTML(b, chosen) {
   const s = b.stages[b.stage]; if (!s || !s.h) return '';
   const no = computeVote(b, s.h, { det: true }), si = computeVote(b, s.h, { fiducia: true, det: true });
-  const nAll = G.gov ? G.gov.parties.filter(p => p !== myPid()).length : 0;
+  // franchi tiratori attesi tra i partiti di governo
+  let risk = 0, oppYes = 0;
+  PIDS().forEach(pid => { const n = seatsOf(pid, s.h); if (!n) return; const st = stance(pid, b, s.h); if (inGov(pid) && st.s > 0.15) risk += n * clamp((0.01 + Math.max(0, -st.gain) * 0.09) * D().defect, 0, 0.4); if (!inGov(pid) && no.by[pid] && no.by[pid].vote === 'yes') oppYes += n; });
+  risk = Math.round(risk); const riskF = Math.round(risk * 0.3);
   return `<div class="fidcmp">
-    <div class="${!chosen ? 'on' : ''}"><b>Senza fiducia</b><div class="res ${no.passed ? 'good' : 'bad'}">${no.passed ? 'Passa' : 'Bocciata'}</div>Sì ${no.yes} · No ${no.no}<br>Ogni gruppo vota secondo le sue idee e qualche dissidente può tradire. Gratis.</div>
-    <div class="${chosen ? 'on' : ''}"><b>Con la fiducia · ⚡3</b><div class="res ${si.passed ? 'good' : 'bad'}">${si.passed ? 'Passa' : 'Bocciata'}</div>Sì ${si.yes} · No ${si.no}<br>Gli alleati devono votare sì: niente sorprese. Ma ${nAll ? `i ${nAll} alleati si irritano un po’` : 'gli alleati si irritano'} e, se la perdi, il governo cade.</div></div>`;
+    <div class="${!chosen ? 'on' : ''}"><b>Senza fiducia</b><div class="res ${no.passed ? 'good' : 'bad'}">${no.passed ? 'Passa' : 'Bocciata'}</div>Sì ${no.yes} · No ${no.no}<br>Si vota sulla legge: ${oppYes ? `anche ${oppYes} voti d’opposizione possono dire sì` : 'ognuno vota secondo le sue idee'}. Rischio franchi tiratori: circa <b style="display:inline;color:var(--warn)">${risk}</b>. Gratis.</div>
+    <div class="${chosen ? 'on' : ''}"><b>Con la fiducia · ⚡3</b><div class="res ${si.passed ? 'good' : 'bad'}">${si.passed ? 'Passa' : 'Bocciata'}</div>Sì ${si.yes} · No ${si.no}<br>Si vota sul governo: l’opposizione vota no anche se la legge le piace${oppYes ? ` (per questo i sì possono calare)` : ''}, ma gli alleati non possono tradire: franchi tiratori circa <b style="display:inline;color:var(--good)">${riskF}</b>. Se la perdi, il governo cade.</div></div>
+    <div class="tiny muted mt">Conviene porre la fiducia quando la tua maggioranza ha i numeri ma teme i franchi tiratori, non quando ti servono i voti dell’opposizione.</div>`;
 }
 
 // ---------- ⚡ (capitale politico) come icona a linea, ovunque compaia nel testo ----------

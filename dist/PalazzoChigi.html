@@ -556,6 +556,8 @@ canvas.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 200;
 .sum-photo { display: flex; justify-content: center; align-items: flex-end; gap: 8px; margin-top: 14px; }
 .sum-photo span { width: var(--h); height: var(--h); border-radius: 50%; background: var(--card2); border: 1px solid var(--line2); display: grid; place-items: center; font-weight: 900; font-size: 12px; overflow: hidden; }
 .sum-photo span.it { border: 0; background: none; }
+.act-t .ar { position: absolute; top: 4px; left: 6px; color: var(--good); }
+.act-t .ar .lic { width: 12px; height: 12px; }
 
 </style>
 </head>
@@ -711,17 +713,17 @@ const MINISTRIES = [
   { id: 'MUR',    n: 'Università e Ricerca',                     w: 2, cats: ['Università'] },
   { id: 'MASAF',  n: 'Agricoltura e Sovranità alimentare',       w: 2, cats: ['Agricoltura'] },
   { id: 'CUL',    n: 'Cultura',                                  w: 2, cats: ['Cultura'] },
-  { id: 'TUR',    n: 'Turismo',                                  w: 1, cats: [] },
+  { id: 'TUR',    n: 'Turismo',                                  w: 1, cats: ['Cultura'] },
   { id: 'SOTT',   n: 'Sottosegretario alla Presidenza',          w: 3, port: 0, cats: [] },
   { id: 'UE',     n: 'Affari europei, PNRR e Coesione',          w: 3, port: 0, cats: ['Europa'] },
-  { id: 'RAPP',   n: 'Rapporti con il Parlamento',               w: 2, port: 0, cats: [] },
+  { id: 'RAPP',   n: 'Rapporti con il Parlamento',               w: 2, port: 0, cats: ['Istituzioni'] },
   { id: 'AFFREG', n: 'Affari regionali e Autonomie',             w: 2, port: 0, cats: ['Territorio'] },
   { id: 'RIF',    n: 'Riforme istituzionali',                    w: 2, port: 0, cats: ['Istituzioni'] },
-  { id: 'PA',     n: 'Pubblica Amministrazione',                 w: 1, port: 0, cats: [] },
+  { id: 'PA',     n: 'Pubblica Amministrazione',                 w: 1, port: 0, cats: ['Istituzioni'] },
   { id: 'FAM',    n: 'Famiglia, Natalità e Pari opportunità',    w: 1, port: 0, cats: ['Diritti', 'Famiglia'] },
-  { id: 'PROT',   n: 'Protezione civile e Politiche del mare',   w: 1, port: 0, cats: [] },
-  { id: 'SPORT',  n: 'Sport e Giovani',                          w: 1, port: 0, cats: [] },
-  { id: 'DIS',    n: 'Disabilità',                               w: 1, port: 0, cats: [] },
+  { id: 'PROT',   n: 'Protezione civile e Politiche del mare',   w: 1, port: 0, cats: ['Territorio'] },
+  { id: 'SPORT',  n: 'Sport e Giovani',                          w: 1, port: 0, cats: ['Scuola'] },
+  { id: 'DIS',    n: 'Disabilità',                               w: 1, port: 0, cats: ['Welfare'] },
 ];
 
 // ------------------------------------------------------------
@@ -841,6 +843,14 @@ const TALKSHOWS = [
   { n: 'Dritto e Rovescio', ch: 'Rete 4', lean: 0.8, reach: 2 }, { n: 'Piazzapulita', ch: 'La7', lean: -0.6, reach: 2 },
   { n: 'Che tempo che fa', ch: 'Nove', lean: -0.5, reach: 3 }, { n: 'In Onda', ch: 'La7', lean: -0.3, reach: 1 },
   { n: 'Cinque Minuti', ch: 'Rai 1', lean: 0.3, reach: 2 }, { n: 'Report', ch: 'Rai 3', lean: -0.5, reach: 2 },
+  { n: 'Belve', ch: 'Rai 2', lean: 0, reach: 3 }, { n: 'Le Iene', ch: 'Italia 1', lean: 0, reach: 3 }, { n: 'Mattino Cinque', ch: 'Canale 5', lean: 0.4, reach: 2 },
+  { n: 'Agorà', ch: 'Rai 3', lean: -0.2, reach: 1 }, { n: '4 di sera', ch: 'Rete 4', lean: 0.6, reach: 1 }, { n: 'Tg2 Post', ch: 'Rai 2', lean: 0.3, reach: 1 },
+  // podcast e dirette: pubblico giovane, formato più libero
+  { n: 'Muschio Selvaggio', ch: 'Podcast su YouTube', lean: 0, reach: 3, t: 'podcast' }, { n: 'BSMT', ch: 'Podcast su YouTube', lean: 0, reach: 2, t: 'podcast' },
+  { n: 'One More Time', ch: 'Podcast', lean: -0.1, reach: 2, t: 'podcast' }, { n: 'Tintoria', ch: 'Podcast su YouTube', lean: -0.1, reach: 2, t: 'podcast' },
+  { n: 'Cachemire Podcast', ch: 'Podcast', lean: -0.2, reach: 1, t: 'podcast' },
+  { n: 'Live su Twitch', ch: 'Twitch', lean: -0.2, reach: 2, t: 'live' }, { n: 'Diretta YouTube', ch: 'Il tuo canale', lean: 0, reach: 1, t: 'live' },
+  { n: 'Diretta Instagram', ch: 'Instagram', lean: 0, reach: 2, t: 'live' }, { n: 'Live su TikTok', ch: 'TikTok', lean: 0, reach: 2, t: 'live' },
 ];
 
 // Percorsi di provenienza del tuo personaggio
@@ -5388,10 +5398,14 @@ function openGlossary() {
 function fiduciaCompareHTML(b, chosen) {
   const s = b.stages[b.stage]; if (!s || !s.h) return '';
   const no = computeVote(b, s.h, { det: true }), si = computeVote(b, s.h, { fiducia: true, det: true });
-  const nAll = G.gov ? G.gov.parties.filter(p => p !== myPid()).length : 0;
+  // franchi tiratori attesi tra i partiti di governo
+  let risk = 0, oppYes = 0;
+  PIDS().forEach(pid => { const n = seatsOf(pid, s.h); if (!n) return; const st = stance(pid, b, s.h); if (inGov(pid) && st.s > 0.15) risk += n * clamp((0.01 + Math.max(0, -st.gain) * 0.09) * D().defect, 0, 0.4); if (!inGov(pid) && no.by[pid] && no.by[pid].vote === 'yes') oppYes += n; });
+  risk = Math.round(risk); const riskF = Math.round(risk * 0.3);
   return `<div class="fidcmp">
-    <div class="${!chosen ? 'on' : ''}"><b>Senza fiducia</b><div class="res ${no.passed ? 'good' : 'bad'}">${no.passed ? 'Passa' : 'Bocciata'}</div>Sì ${no.yes} · No ${no.no}<br>Ogni gruppo vota secondo le sue idee e qualche dissidente può tradire. Gratis.</div>
-    <div class="${chosen ? 'on' : ''}"><b>Con la fiducia · ⚡3</b><div class="res ${si.passed ? 'good' : 'bad'}">${si.passed ? 'Passa' : 'Bocciata'}</div>Sì ${si.yes} · No ${si.no}<br>Gli alleati devono votare sì: niente sorprese. Ma ${nAll ? `i ${nAll} alleati si irritano un po’` : 'gli alleati si irritano'} e, se la perdi, il governo cade.</div></div>`;
+    <div class="${!chosen ? 'on' : ''}"><b>Senza fiducia</b><div class="res ${no.passed ? 'good' : 'bad'}">${no.passed ? 'Passa' : 'Bocciata'}</div>Sì ${no.yes} · No ${no.no}<br>Si vota sulla legge: ${oppYes ? `anche ${oppYes} voti d’opposizione possono dire sì` : 'ognuno vota secondo le sue idee'}. Rischio franchi tiratori: circa <b style="display:inline;color:var(--warn)">${risk}</b>. Gratis.</div>
+    <div class="${chosen ? 'on' : ''}"><b>Con la fiducia · ⚡3</b><div class="res ${si.passed ? 'good' : 'bad'}">${si.passed ? 'Passa' : 'Bocciata'}</div>Sì ${si.yes} · No ${si.no}<br>Si vota sul governo: l’opposizione vota no anche se la legge le piace${oppYes ? ` (per questo i sì possono calare)` : ''}, ma gli alleati non possono tradire: franchi tiratori circa <b style="display:inline;color:var(--good)">${riskF}</b>. Se la perdi, il governo cade.</div></div>
+    <div class="tiny muted mt">Conviene porre la fiducia quando la tua maggioranza ha i numeri ma teme i franchi tiratori, non quando ti servono i voti dell’opposizione.</div>`;
 }
 
 // ---------- ⚡ (capitale politico) come icona a linea, ovunque compaia nel testo ----------
@@ -5512,8 +5526,8 @@ function homeTab() {
   const recs = recommendedActions(), rec = recs.map(r => r.id);
   const acts = availableActions().sort((a, b) => (rec.includes(b.id) && !b.done ? 1 : 0) - (rec.includes(a.id) && !a.done ? 1 : 0) || (a.done ? 1 : 0) - (b.done ? 1 : 0));
   h += sec('Azioni', `<button class="btn sm gold" onclick="autoPlan()">${icon('star')} Pianifica</button>`) +
-    `<div class="acts">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="act-t ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${star ? 'rec' : ''}" style="--ac:${a.ac};animation-delay:${i * 25}ms" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai">${a.done ? icon('check') : icon(ACT_ICON[a.id] || a.ico || 'star')}</span><span class="an">${esc(a.n)}</span><span class="ac">${a.done ? 'fatta' : a.cost ? '⚡' + a.cost : 'gratis'}</span>${star ? '<span class="as">★</span>' : ''}</button>`; }).join('')}</div>
-    <div class="tiny muted center mt">★ consigliate · ogni azione una volta a settimana</div>`;
+    `<div class="acts">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="act-t ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${star ? 'rec' : ''}" style="--ac:${a.ac};animation-delay:${i * 25}ms" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai">${a.done ? icon('check') : icon(ACT_ICON[a.id] || a.ico || 'star')}</span><span class="an">${esc(a.n)}</span><span class="ac">${a.done ? 'fatta' : a.cost ? '⚡' + a.cost : 'gratis'}</span>${star ? '<span class="as">★</span>' : ''}${G.routine && G.routine[a.id] ? `<span class="ar">${icon('refresh', 11)}</span>` : ''}</button>`; }).join('')}</div>
+    <div class="tiny muted center mt">★ consigliate · ↻ ricorrenti: aprila e attiva «Ripeti ogni settimana» per farla in automatico</div>`;
   // staff e social
   h += sec('Il tuo staff') + staffHTML();
   h += feedHomeHTML();
@@ -5541,9 +5555,12 @@ function careerHint() {
 // ============================================================
 //  LEGGI
 // ============================================================
+// da ministro vedi (e proponi) solo le leggi del tuo ministero
+function ministerCats() { if (!G.player.minister || isPremier() || !MIN_BY_ID[G.player.minister]) return null; const c = MIN_BY_ID[G.player.minister].cats; return c && c.length ? c : null; }
+function visibleLaws() { const c = ministerCats(); return c ? allLaws().filter(l => c.includes(l.cat)) : allLaws(); }
 function leggiTab() {
-  const cats = ['Tutte'].concat(Object.keys(LAW_CATS).filter(c => allLaws().some(l => l.cat === c)));
-  let h = `<div class="row"><div class="searchbox">${icon('search')}<input id="lawq" placeholder="Cerca una legge" value="${esc(UI.lawQ)}" oninput="UI.lawQ=this.value;$('#lawlist').innerHTML=lawListHTML()"></div><button class="iconbtn" onclick="openGlossary()">${icon('info')}</button></div>
+  const cats = ['Tutte'].concat(Object.keys(LAW_CATS).filter(c => visibleLaws().some(l => l.cat === c)));
+  let h = `${ministerCats() ? `<div class="card tight"><div class="row">${medal('briefcase', 40)}<div class="small grow">Sei ministro: <b>${esc(MIN_BY_ID[G.player.minister].n)}</b>. Qui vedi e proponi solo le leggi del tuo ministero.</div></div></div>` : ''}<div class="row"><div class="searchbox">${icon('search')}<input id="lawq" placeholder="Cerca una legge" value="${esc(UI.lawQ)}" oninput="UI.lawQ=this.value;$('#lawlist').innerHTML=lawListHTML()"></div><button class="iconbtn" onclick="openGlossary()">${icon('info')}</button></div>
     <div class="scrollx mt">${cats.map(c => `<button class="fchip ${UI.lawCat === c ? 'on' : ''}" onclick="UI.lawCat='${c}';renderGame()">${icon(CAT_ICON[c] || 'folder')} ${c}</button>`).join('')}</div>
     <div class="scrollx mt"><span class="tiny muted" style="align-self:center;flex:none">Voglio migliorare</span>${Object.keys(METRICS).map(m => `<button class="fchip ${UI.lawMetric === m ? 'on' : ''}" onclick="UI.lawMetric=UI.lawMetric==='${m}'?null:'${m}';renderGame()">${icon(METRIC_ICON[m])} ${METRICS[m].n}</button>`).join('')}</div>`;
   const live = G.bills.filter(b => !b.dead).length;
@@ -5562,11 +5579,11 @@ function lawCardHTML(l, opt, extra) {
 }
 function lawListHTML() {
   if (UI.lawMetric) {
-    const best = bestLawsFor(UI.lawMetric, 15);
+    const best = bestLawsFor(UI.lawMetric, 15).filter(x => visibleLaws().includes(x.l));
     return best.length ? best.map(x => lawCardHTML(x.l, x.i, effChipsHTML(x.effs, x.mine))).join('') : '<div class="muted center mt2">Nessuna riforma disponibile.</div>';
   }
   const q = UI.lawQ.trim().toLowerCase();
-  const list = allLaws().filter(l => (UI.lawCat === 'Tutte' || l.cat === UI.lawCat) && (!q || (l.nome + ' ' + l.attuale + ' ' + l.opts.map(o => o.t).join(' ')).toLowerCase().includes(q)));
+  const list = visibleLaws().filter(l => (UI.lawCat === 'Tutte' || l.cat === UI.lawCat) && (!q || (l.nome + ' ' + l.attuale + ' ' + l.opts.map(o => o.t).join(' ')).toLowerCase().includes(q)));
   if (!list.length) return '<div class="muted center mt2">Nessuna legge trovata</div>';
   return list.map(l => lawCardHTML(l)).join('');
 }
@@ -6019,7 +6036,7 @@ function openAction(id) {
   if (a.risk) pc.contro.push({ k: 'pol', t: a.risk });
   const enough = G.pc >= cost && G.funds >= (a.funds || 0);
   openSheet(`<div class="sheet-head"><div class="row grow">${medal(a.ico, 56)}<div class="grow"><h2 style="font-size:22px">${esc(a.n)}</h2>${cost || a.funds ? `<div class="tiny gold" style="font-weight:800;letter-spacing:.08em">COSTA ${cost ? '⚡' + cost : ''}${cost && a.funds ? ' · ' : ''}${a.funds ? euro(a.funds) : ''}</div>` : ''}</div></div><button class="xbtn" onclick="closeSheet()">${icon('x', 18)}</button></div><p class="muted">${esc(a.d)}</p><div class="effs">${pc.pro.map(x => `<span class="eff g">▲ ${esc(x.t)}</span>`).join("")}${pc.contro.map(x => `<span class="eff b">▼ ${esc(x.t)}</span>`).join("")}</div>
-    <button class="btn pri block mt2" ${enough ? '' : 'disabled'} onclick="runAction('${a.id}')">${enough ? 'Procedi' : (G.pc < cost ? 'Capitale politico insufficiente' : 'Fondi insufficienti')}</button>`);
+    ${routineToggleHTML(a)}<button class="btn pri block mt2" ${enough ? '' : 'disabled'} onclick="runAction('${a.id}')">${enough ? 'Procedi' : (G.pc < cost ? 'Capitale politico insufficiente' : 'Fondi insufficienti')}</button>`);
 }
 function runAction(id) {
   const a = ACTIONS.find(x => x.id === id);
@@ -6147,7 +6164,9 @@ function togglePromise(id, opt) {
 let TVS = null;
 function openTV(show, debate) {
   if (show) return startInterview(show, debate);
-  openSheet(`${head('Scegli il programma')}<div class="list">${TALKSHOWS.map((s, i) => `<div class="li click" onclick="closeSheet();startInterview(TALKSHOWS[${i}])"><span class="nico">${icon('tv')}</span><div class="grow"><b>${esc(s.n)}</b><div class="tiny muted">${esc(s.ch)} · pubblico ${s.lean < -0.3 ? 'progressista' : s.lean > 0.3 ? 'conservatore' : 'generalista'} · ${'★'.repeat(s.reach)}</div></div>${icon('chevron', 16)}</div>`).join('')}</div>`);
+  const row = (s, i) => `<div class="li click" onclick="closeSheet();startInterview(TALKSHOWS[${i}])"><span class="nico">${icon(s.t === 'podcast' ? 'mic' : s.t === 'live' ? 'phone' : 'tv')}</span><div class="grow"><b>${esc(s.n)}</b><div class="tiny muted">${esc(s.ch)} · pubblico ${s.t ? 'giovane' : s.lean < -0.3 ? 'progressista' : s.lean > 0.3 ? 'conservatore' : 'generalista'} · ${'★'.repeat(s.reach)}</div></div>${icon('chevron', 16)}</div>`;
+  const grp = (t, title) => sec(title) + `<div class="card tight"><div class="list">${TALKSHOWS.map((s, i) => (s.t || 'tv') === t ? row(s, i) : '').join('')}</div></div>`;
+  openSheet(`${head('Dove vai a parlare?', 'TV, podcast o una diretta tutta tua')}${grp('tv', 'In TV')}${grp('podcast', 'Podcast')}${grp('live', 'Dirette social')}`);
 }
 function startInterview(show, debate) {
   const cost = debate ? 2 : (isPremier() ? 2 : 1);
@@ -6215,6 +6234,7 @@ function finishInterview() {
 function nextWeek() {
   if (G.phase === 'formazione') return openFormation();
   if (G.queue.length) return processQueue();
+  const auto = runRoutine();
   const before = { poll: myParty().poll, appr: G.gov ? G.gov.approval : null, spread: G.econ.spread };
   const s = advanceWeek();
   if (!s) return;
@@ -6224,10 +6244,10 @@ function nextWeek() {
   saveGame('auto');
   renderGame();
   vib(12);
-  showWeekSummary(s, before);
+  showWeekSummary(s, before, auto);
   if (s.ach && s.ach.length) setTimeout(() => celebrate(s.ach), 600);
 }
-function showWeekSummary(s, before) {
+function showWeekSummary(s, before, auto) {
   const dPoll = myParty().poll - before.poll, dSp = G.econ.spread - before.spread;
   const dA = G.gov && before.appr !== null ? G.gov.approval - before.appr : null;
   // la notizia più importante va in prima pagina
@@ -6241,6 +6261,7 @@ function showWeekSummary(s, before) {
     <div class="grid3 mt">${kpi(esc(myParty().short), fmt1(myParty().poll) + '%', (dPoll >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dPoll)), dPoll >= 0, myParty().color)}
     ${dA !== null ? kpi('Governo', fmt0(G.gov.approval) + '%', (dA >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dA)), dA >= 0, '#ffd60a') : kpi('Fama', fmt0(G.player.fama), null, true, '#a78bfa')}
     ${kpi('Spread', fmt0(G.econ.spread), (dSp >= 0 ? '▲ ' : '▼ ') + fmt0(Math.abs(dSp)), dSp <= 0, '#f472b6')}</div>
+    ${auto && auto.length ? `${sec('Fatto in automatico')}<div class="effs mt">${auto.map(a => `<span class="eff g">${icon(a.ico, 13)} ${esc(a.n)}</span>`).join('')}</div>` : ''}
     ${votes ? `${sec('Votazioni in aula')}<div class="effs mt">${votes}</div>` : ''}
     ${rest.length ? `${sec('In breve')}<div class="mt">${rest.slice(0, 4).map(n => `<div class="news-item"><span class="nk-${n.k}">${esc(n.t)}</span></div>`).join('')}</div>${rest.length > 4 ? `<details class="mt"><summary class="small gold">Altre ${rest.length - 4} notizie</summary>${rest.slice(4).map(n => `<div class="news-item"><span class="nk-${n.k}">${esc(n.t)}</span></div>`).join('')}</details>` : ''}` : ''}
     <button class="btn ${G.queue.length ? 'gold' : 'pri'} block mt2" onclick="closeSheet();${G.queue.length ? 'setTimeout(processQueue,280)' : ''}">${G.queue.length ? `Continua · ${G.queue.length} da decidere ›` : 'Continua'}</button>`);
@@ -7290,7 +7311,7 @@ function closeDeal() {
   confetti([myParty().color, p.color, '#d6b25e']);
   const prom = [of.min1 && 'un ministero', of.minKey && 'un ministero chiave', of.vice && 'la vicepresidenza', of.law && 'una legge bandiera', of.premier && 'la candidatura a premier', of.collegi && 'collegi sicuri', of.fondi && 'fondi per la campagna'].filter(Boolean);
   resultSheet('hands', 'Accordo raggiunto', `${esc(p.leader)} stringe la mano: ${b.kind === 'join' ? `sei in ${esc(c.name)}` : `${esc(p.short)} entra in ${esc(c.name)}`}.${prom.length ? ` Hai promesso ${prom.join(', ')}.` : ''}`);
-  DEAL = null; renderGame();
+  DEAL = null; fixCoalitions(); renderGame();
 }
 // le promesse fatte nelle trattative, al momento di formare il governo
 function pactsLine(set) {
@@ -7519,27 +7540,34 @@ function pickCall(i) {
 
 // ---------- CONSIGLIO DEI MINISTRI (ogni 5 settimane) ----------
 let CDM = null;
+// ogni ministro propone una riforma del suo settore, coerente con le idee del suo partito
 function cdmProposals(n) {
-  const out = [], usedM = new Set(), usedL = new Set();
-  const metrics = redMetrics().map(r => r.k).concat(Object.keys(METRICS).sort(() => Math.random() - 0.5));
   G.flags.rejected = G.flags.rejected || {};
-  for (const metric of metrics) {
+  const busy = new Set(G.bills.filter(b => !b.dead && b.lawId).map(b => b.lawId));
+  const red = redMetrics().map(r => r.k), out = [];
+  const mins = MINISTRIES.filter(m => m.cats.length && G.gov.ministers[m.id] && G.gov.ministers[m.id] !== G.player.name).sort(() => Math.random() - 0.5);
+  for (const m of mins) {
     if (out.length >= n) break;
-    for (const x of bestLawsFor(metric, 8)) {
-      if (x.l.cost || usedL.has(x.l.id) || G.flags.rejected[x.l.id + ':' + x.i] > G.week) continue;
-      let mid = MINISTRIES.find(m => m.cats.includes(x.l.cat) && G.gov.ministers[m.id] && G.gov.ministers[m.id] !== G.player.name && !usedM.has(m.id));
-      if (!mid) mid = MINISTRIES.find(m => m.id === METRIC_MIN[metric] && !usedM.has(m.id));
-      if (!mid || !G.gov.ministers[mid.id] || G.gov.ministers[mid.id] === G.player.name) continue;
-      const name = G.gov.ministers[mid.id], pp = person(name), party = pp && G.parties[pp.party] ? pp.party : null;
-      if (party && lawGain(party, x.l, G.laws[x.l.id], x.i) < 0.05) continue;
-      out.push({ lawId: x.l.id, opt: x.i, metric, min: mid.id, name, party }); usedM.add(mid.id); usedL.add(x.l.id); break;
-    }
+    const name = G.gov.ministers[m.id], pp = person(name), party = pp && G.parties[pp.party] ? pp.party : G.gov.premierParty;
+    let best = null;
+    allLaws().filter(l => !l.cost && !l.custom && m.cats.includes(l.cat) && !busy.has(l.id) && !out.some(o => o.lawId === l.id)).forEach(l => {
+      const cur = G.laws[l.id];
+      l.opts.forEach((o, i) => {
+        if (i === cur || G.flags.rejected[l.id + ':' + i] > G.week) return;
+        const g = lawGain(party, l, cur, i), maj = G.gov.parties.reduce((t, gp) => t + lawGain(gp, l, cur, i), 0);
+        if (g < 0.05 || maj < 0) return;
+        const effs = effectsOf(l, cur, i), helps = effs.filter(e => e.good && red.includes(e.k)).length;
+        const score = g * l.sal + helps * 0.6 + rnd(0, 0.3);
+        if (!best || score > best.score) best = { lawId: l.id, opt: i, score, metric: (effs.find(e => e.good && red.includes(e.k)) || effs.find(e => e.good) || {}).k };
+      });
+    });
+    if (best) out.push(Object.assign(best, { min: m.id, name, party: pp && G.parties[pp.party] ? pp.party : null }));
   }
   return out;
 }
 function openCdM() {
   if (!isPremier()) { G.queue.shift(); return processQueue(); }
-  CDM = { props: cdmProposals(3), res: {}, n: (G.flags.cdmN = (G.flags.cdmN || 0) + 1) };
+  CDM = { props: cdmProposals(4), res: {}, n: (G.flags.cdmN = (G.flags.cdmN || 0) + 1) };
   if (!CDM.props.length) { G.queue.shift(); addNews('Consiglio dei ministri: nessuna nuova riforma all’ordine del giorno.', 'gov'); return processQueue(); }
   openSheet('', { full: true, locked: true }); renderCdM();
 }
@@ -7549,7 +7577,7 @@ function renderCdM() {
   CDM.props.forEach((p, i) => {
     const l = getLaw(p.lawId), o = l.opts[p.opt], cur = G.laws[p.lawId], r = CDM.res[i], S = SPIEGA[l.id];
     h += `<div class="card mt ${r ? 'decided' : ''}"><div class="row">${portrait(p.name, 50, { party: p.party || undefined })}<div class="grow"><b class="small">${esc(p.name)}</b><div class="tiny muted">${esc(MIN_BY_ID[p.min].n)}</div></div>${r ? `<span class="stamp-s ${r === 'no' ? 'bad' : r === 'rinvia' ? 'warn' : 'good'}">${{ ddl: 'APPROVATO', dl: 'DECRETO', rinvia: 'RINVIATO', no: 'RESPINTO' }[r]}</span>` : ''}</div>
-      <h3 class="mt" style="font-size:17px">${esc(o.t)}</h3><div class="tiny muted">${esc(l.nome)} · per migliorare ${METRICS[p.metric].n.toLowerCase()}</div>
+      <h3 class="mt" style="font-size:17px">${esc(o.t)}</h3><div class="tiny muted">${esc(l.nome)}${p.metric ? ` · migliora ${METRICS[p.metric].n.toLowerCase()}` : ""}</div>
       ${S && S.o[p.opt] ? `<div class="expl mt"><span class="k">In pratica</span>${esc(S.o[p.opt][0])}</div>` : ''}${effChipsHTML(effectsOf(l, cur, p.opt), lawGain(myPid(), l, cur, p.opt))}
       ${r ? '' : `<div class="cdm-b mt"><button class="btn sm gold" onclick="cdmPick(${i},'ddl')">Approva · ⚡3</button><button class="btn sm" onclick="cdmPick(${i},'dl')">Decreto · ⚡5</button><button class="btn sm" onclick="cdmPick(${i},'rinvia')">Rinvia</button><button class="btn sm red" onclick="cdmPick(${i},'no')">Boccia</button></div>`}</div>`;
   });
@@ -7707,6 +7735,7 @@ function storyTick() {
   ensureStory();
   // i voti forzati valgono solo per la votazione in corso
   Object.keys(G.forced).forEach(id => { const b = G.bills.find(x => x.id === +id); if (!b || b.dead || !(b.stages[b.stage] && b.stages[b.stage].k === 'aula')) delete G.forced[id]; });
+  fixCoalitions();
   memoryAfterVotes(G._wk.votes);
   staffTick();
   summitTick();
@@ -7752,6 +7781,51 @@ function eventTopHTML(ev, item, v) {
   return `<div class="img">${face || medal(v.img, 84)}</div><h2>${title}</h2><div class="txt">${text}</div>`;
 }
 function animCounters() { document.querySelectorAll('.cnt-up').forEach(el => { if (!el.dataset.done) { el.dataset.done = 1; countUp(el, +el.dataset.to, false, 1600); } }); }
+
+// ---------- AZIONI RICORRENTI: le fa il gioco ogni settimana ----------
+const ROUTINE_NO = ['crisi', 'dimissioni', 'sfiducia', 'anticipate', 'congresso', 'scissione', 'rimpasto', 'tv', 'dibattito', 'incontro', 'poteri', 'tour', 'visita', 'promo'];
+const routineOK = a => !ROUTINE_NO.includes(a.id) && (a.run || a.id === 'comizio');
+function routineToggleHTML(a) {
+  if (!routineOK(a)) return '';
+  const on = !!(G.routine && G.routine[a.id]);
+  return `<div class="card tight mt2"><div class="li click" onclick="toggleRoutine('${a.id}')">${icon('refresh', 20)}<div class="grow"><b class="small">Ripeti ogni settimana</b><div class="tiny muted">${a.id === 'comizio' ? 'Nella regione dove conviene di più' : 'Il gioco la fa da solo quando passi alla settimana successiva'}, se hai capitale e fondi</div></div><span class="tgl ${on ? 'on' : ''}"><i></i></span></div></div>`;
+}
+function toggleRoutine(id) {
+  G.routine = G.routine || {};
+  if (G.routine[id]) delete G.routine[id]; else G.routine[id] = 1;
+  vib(8); closeSheet(); openAction(id); renderGame();
+}
+function runRoutine() {
+  const done = [];
+  if (!G.routine || G.phase !== 'normale') return done;
+  Object.keys(G.routine).forEach(id => {
+    const a = ACTIONS.find(x => x.id === id);
+    if (!a || usedThisWeek(id)) return;
+    let ok = false; try { ok = a.show(); } catch (e) { }
+    if (!ok || G.pc < actionCost(a) || G.funds < (a.funds || 0)) return;
+    if (id === 'comizio') {
+      const reg = REGIONS_DEF.slice().sort((x, y) => (y.el / (G.myReg[y.id] || 1)) - (x.el / (G.myReg[x.id] || 1)))[0];
+      doComizioQuiet(reg.id); if (usedThisWeek('comizio')) done.push({ n: `Comizio in ${reg.n}`, ico: 'mega' }); return;
+    }
+    if (!spendPC(actionCost(a))) return;
+    markUsed(id); if (a.funds) G.funds -= a.funds;
+    try { a.run(); } catch (e) { console.error(e); }
+    done.push({ n: a.n, ico: ACT_ICON[id] || a.ico });
+  });
+  return done;
+}
+
+// ---------- COALIZIONI COERENTI: un partito sta in una sola coalizione ----------
+function fixCoalitions() {
+  const seen = {}, fragile = m => (G.pacts || []).some(p => p.fragile && p.pid === m);
+  // la coalizione del giocatore ha la precedenza
+  G.coalitions.slice().sort((a, b) => (b.members.includes(myPid()) ? 1 : 0) - (a.members.includes(myPid()) ? 1 : 0)).forEach(c => {
+    c.members = c.members.filter(m => { if (seen[m] || !G.parties[m]) return false; seen[m] = 1; return true; });
+    const big = c.members.slice().sort((a, b) => P(b).poll - P(a).poll)[0];
+    c.members = c.members.filter(m => m === big || !never(m, big) || fragile(m) || fragile(big));
+  });
+  G.coalitions = G.coalitions.filter(c => c.members.length > 1 || (c.mine && c.members.length));
+}
 
 </script>
 <script>

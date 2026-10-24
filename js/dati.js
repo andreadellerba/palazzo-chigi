@@ -145,17 +145,17 @@ const MINISTRIES = [
   { id: 'MUR',    n: 'Università e Ricerca',                     w: 2, cats: ['Università'] },
   { id: 'MASAF',  n: 'Agricoltura e Sovranità alimentare',       w: 2, cats: ['Agricoltura'] },
   { id: 'CUL',    n: 'Cultura',                                  w: 2, cats: ['Cultura'] },
-  { id: 'TUR',    n: 'Turismo',                                  w: 1, cats: [] },
+  { id: 'TUR',    n: 'Turismo',                                  w: 1, cats: ['Cultura'] },
   { id: 'SOTT',   n: 'Sottosegretario alla Presidenza',          w: 3, port: 0, cats: [] },
   { id: 'UE',     n: 'Affari europei, PNRR e Coesione',          w: 3, port: 0, cats: ['Europa'] },
-  { id: 'RAPP',   n: 'Rapporti con il Parlamento',               w: 2, port: 0, cats: [] },
+  { id: 'RAPP',   n: 'Rapporti con il Parlamento',               w: 2, port: 0, cats: ['Istituzioni'] },
   { id: 'AFFREG', n: 'Affari regionali e Autonomie',             w: 2, port: 0, cats: ['Territorio'] },
   { id: 'RIF',    n: 'Riforme istituzionali',                    w: 2, port: 0, cats: ['Istituzioni'] },
-  { id: 'PA',     n: 'Pubblica Amministrazione',                 w: 1, port: 0, cats: [] },
+  { id: 'PA',     n: 'Pubblica Amministrazione',                 w: 1, port: 0, cats: ['Istituzioni'] },
   { id: 'FAM',    n: 'Famiglia, Natalità e Pari opportunità',    w: 1, port: 0, cats: ['Diritti', 'Famiglia'] },
-  { id: 'PROT',   n: 'Protezione civile e Politiche del mare',   w: 1, port: 0, cats: [] },
-  { id: 'SPORT',  n: 'Sport e Giovani',                          w: 1, port: 0, cats: [] },
-  { id: 'DIS',    n: 'Disabilità',                               w: 1, port: 0, cats: [] },
+  { id: 'PROT',   n: 'Protezione civile e Politiche del mare',   w: 1, port: 0, cats: ['Territorio'] },
+  { id: 'SPORT',  n: 'Sport e Giovani',                          w: 1, port: 0, cats: ['Scuola'] },
+  { id: 'DIS',    n: 'Disabilità',                               w: 1, port: 0, cats: ['Welfare'] },
 ];
 
 // ------------------------------------------------------------
@@ -275,6 +275,14 @@ const TALKSHOWS = [
   { n: 'Dritto e Rovescio', ch: 'Rete 4', lean: 0.8, reach: 2 }, { n: 'Piazzapulita', ch: 'La7', lean: -0.6, reach: 2 },
   { n: 'Che tempo che fa', ch: 'Nove', lean: -0.5, reach: 3 }, { n: 'In Onda', ch: 'La7', lean: -0.3, reach: 1 },
   { n: 'Cinque Minuti', ch: 'Rai 1', lean: 0.3, reach: 2 }, { n: 'Report', ch: 'Rai 3', lean: -0.5, reach: 2 },
+  { n: 'Belve', ch: 'Rai 2', lean: 0, reach: 3 }, { n: 'Le Iene', ch: 'Italia 1', lean: 0, reach: 3 }, { n: 'Mattino Cinque', ch: 'Canale 5', lean: 0.4, reach: 2 },
+  { n: 'Agorà', ch: 'Rai 3', lean: -0.2, reach: 1 }, { n: '4 di sera', ch: 'Rete 4', lean: 0.6, reach: 1 }, { n: 'Tg2 Post', ch: 'Rai 2', lean: 0.3, reach: 1 },
+  // podcast e dirette: pubblico giovane, formato più libero
+  { n: 'Muschio Selvaggio', ch: 'Podcast su YouTube', lean: 0, reach: 3, t: 'podcast' }, { n: 'BSMT', ch: 'Podcast su YouTube', lean: 0, reach: 2, t: 'podcast' },
+  { n: 'One More Time', ch: 'Podcast', lean: -0.1, reach: 2, t: 'podcast' }, { n: 'Tintoria', ch: 'Podcast su YouTube', lean: -0.1, reach: 2, t: 'podcast' },
+  { n: 'Cachemire Podcast', ch: 'Podcast', lean: -0.2, reach: 1, t: 'podcast' },
+  { n: 'Live su Twitch', ch: 'Twitch', lean: -0.2, reach: 2, t: 'live' }, { n: 'Diretta YouTube', ch: 'Il tuo canale', lean: 0, reach: 1, t: 'live' },
+  { n: 'Diretta Instagram', ch: 'Instagram', lean: 0, reach: 2, t: 'live' }, { n: 'Live su TikTok', ch: 'TikTok', lean: 0, reach: 2, t: 'live' },
 ];
 
 // Percorsi di provenienza del tuo personaggio

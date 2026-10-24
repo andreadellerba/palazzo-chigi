@@ -213,7 +213,7 @@ function closeDeal() {
   confetti([myParty().color, p.color, '#d6b25e']);
   const prom = [of.min1 && 'un ministero', of.minKey && 'un ministero chiave', of.vice && 'la vicepresidenza', of.law && 'una legge bandiera', of.premier && 'la candidatura a premier', of.collegi && 'collegi sicuri', of.fondi && 'fondi per la campagna'].filter(Boolean);
   resultSheet('hands', 'Accordo raggiunto', `${esc(p.leader)} stringe la mano: ${b.kind === 'join' ? `sei in ${esc(c.name)}` : `${esc(p.short)} entra in ${esc(c.name)}`}.${prom.length ? ` Hai promesso ${prom.join(', ')}.` : ''}`);
-  DEAL = null; renderGame();
+  DEAL = null; fixCoalitions(); renderGame();
 }
 // le promesse fatte nelle trattative, al momento di formare il governo
 function pactsLine(set) {
