@@ -541,3 +541,34 @@ canvas.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 200;
 .sum-photo span.it { border: 0; background: none; }
 .act-t .ar { position: absolute; top: 4px; left: 6px; color: var(--good); }
 .act-t .ar .lic { width: 12px; height: 12px; }
+
+/* K2: le leggi come fascicoli con linguetta colorata */
+.folder { position: relative; margin: 22px 0 12px; cursor: pointer; animation: fadeUp .35s both; }
+.folder .ftab { position: absolute; top: -19px; left: 0; height: 20px; padding: 0 11px; border-radius: 9px 9px 0 0; background: var(--cc); color: #10142a; font-size: 10.5px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; display: inline-flex; align-items: center; gap: 5px; }
+.folder .ftab .lic { width: 13px; height: 13px; stroke-width: 2.4; }
+.folder .fbody { background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.012)), var(--card); border: 1px solid var(--line); border-top: 3px solid var(--cc); border-radius: 0 16px 16px 16px; padding: 12px 13px; box-shadow: 0 10px 22px rgba(0,0,0,.28); }
+.folder:active .fbody { transform: scale(.985); }
+
+/* K3: figurine dei partiti */
+.figs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.fig { perspective: 900px; height: 236px; cursor: pointer; animation: fadeUp .35s both; }
+.fig .fin { position: relative; width: 100%; height: 100%; transition: transform .55s cubic-bezier(.2,.8,.2,1); transform-style: preserve-3d; }
+.fig.fl .fin { transform: rotateY(180deg); }
+.fig .ff, .fig .fb { position: absolute; inset: 0; border-radius: 18px; padding: 10px; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: hidden; }
+.fig .ff { display: flex; flex-direction: column; align-items: center; gap: 3px; text-align: center; background: linear-gradient(165deg, color-mix(in srgb, var(--pc) 85%, white 0%), color-mix(in srgb, var(--pc) 55%, black)); box-shadow: inset 0 0 0 2px rgba(255,255,255,.35), 0 10px 22px rgba(0,0,0,.4); color: #fff; }
+.fig .ff > b { font-family: var(--serif); font-size: 17px; margin-top: 4px; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+.fig .fl1 { font-size: 11px; opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.fig .fst { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; width: 100%; margin-top: auto; }
+.fig .fst div { background: rgba(0,0,0,.22); border-radius: 9px; padding: 4px 2px; font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em; }
+.fig .fst b { display: block; font-size: 14px; letter-spacing: 0; text-transform: none; }
+.fig .fme { position: absolute; top: 8px; right: 8px; font-size: 9px; font-weight: 900; text-transform: uppercase; background: rgba(0,0,0,.3); border-radius: 999px; padding: 2px 7px; }
+.fig .fb { transform: rotateY(180deg); background: var(--card2); border: 2px solid var(--pc); display: flex; flex-direction: column; gap: 4px; }
+.fig .fb > b { font-size: 12px; color: var(--cream); }
+.fig .fax span { font-size: 9.5px; color: var(--muted); }
+.fig .fbar { position: relative; height: 4px; border-radius: 2px; background: linear-gradient(90deg, #c2414a, #6c6f80 50%, #4b74d9); }
+.fig .fbar i { position: absolute; top: -3px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: var(--cream); border: 2px solid var(--pc); }
+.fig .fb .btn { margin-top: auto; }
+.vrow { display: flex; align-items: center; gap: 10px; padding: 8px 0; animation: fadeUp .35s both; }
+.vrow + .vrow { border-top: 1px solid var(--line); }
+.vrow .stamp-s { flex: none; min-width: 86px; text-align: center; }
+.stamp-s.good { color: var(--good); } .stamp-s.bad { color: var(--bad); } .stamp-s.warn { color: var(--warn); }

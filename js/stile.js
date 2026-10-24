@@ -167,6 +167,7 @@ function stat4(label, value, key, color) {
   const up = d > 0, good = BAD_UP[key] ? !up : up;
   // verde se migliora, rosso se peggiora, neutro se fermo
   color = Math.abs(d) > 0.05 ? (good ? "#34d399" : "#ff6b6b") : "#f3e6c4";
+  const num = parseFloat(String(value).replace(',', '.')), dec = key === 'poll' ? 1 : 0, suf = String(value).endsWith('%') ? '%' : '';  if (['poll', 'noto', 'appr', 'fama'].includes(key) && !isNaN(num)) value = `<span ${rollAttr('st' + key, num, dec)}>${dec ? fmt1(num) : fmt0(num)}</span>${suf}`;
   return `<div class="st4"><div class="st4-v" style="color:${color}">${value}</div><div class="st4-l">${label}${Math.abs(d) > 0.05 ? ` <span class="${good ? 'good' : 'bad'}">${up ? '▲' : '▼'}</span>` : ''}</div>${spark(h, color, 70, 24)}</div>`;
 }
 
@@ -243,3 +244,19 @@ new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nod
 ICON_PATHS.chigi = '<path d="M1.5 20.5h21"/><path d="M2.3 8.6h19.4"/><path d="M3 9.9h18"/><path d="M3.4 9.9v10.6M20.6 9.9v10.6"/><path d="M12 8.6V3.6"/><path d="M12 3.8h3.4v2.3H12"/><rect x="5" y="11.1" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="7.5" y="11.1" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="10" y="11.1" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="12.9" y="11.1" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="15.4" y="11.1" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="17.9" y="11.1" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="5" y="13.9" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="7.5" y="13.9" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="10" y="13.9" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="12.9" y="13.9" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="15.4" y="13.9" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="17.9" y="13.9" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="5" y="16.8" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="7.5" y="16.8" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="15.4" y="16.8" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><rect x="17.9" y="16.8" width="1.15" height="1.8" rx=".2" fill="currentColor" stroke="none"/><path d="M10.2 16.3h3.6"/><path d="M10.75 20.5v-2.4a1.25 1.25 0 0 1 2.5 0v2.4"/>';
 function logoChigi(size) { return `<span class="logo-chigi" style="--ls:${size}px">${icon('chigi')}</span>`; }
 ICON_PATHS.arrowr = '<path d="M5 12h14M13 6l6 6-6 6"/>';
+// colore della linguetta di ogni categoria di leggi (fascicoli)
+const CAT_COLOR = { Pensioni: '#fb923c', Lavoro: '#38bdf8', Fisco: '#22c55e', Welfare: '#f472b6', Famiglia: '#f9a8d4', Sanità: '#ef4444', Diritti: '#a78bfa', Immigrazione: '#0ea5e9', Giustizia: '#94a3b8', Sicurezza: '#64748b', Istituzioni: '#d6b25e', Scuola: '#facc15', Università: '#eab308', Ambiente: '#16a34a', Energia: '#f59e0b', Infrastrutture: '#a8a29e', Economia: '#10b981', Difesa: '#6b7280', Europa: '#3b82f6', Territorio: '#84cc16', Agricoltura: '#a3e635', Cultura: '#c084fc' };
+
+// ---------- M3: numeri che scorrono quando cambiano ----------
+const rollAttr = (key, val, dec) => `data-roll="${key}" data-v="${val}" data-d="${dec || 0}"`;
+function rollNumbers() {
+  UI.prevNums = UI.prevNums || {};
+  document.querySelectorAll('[data-roll]').forEach(el => {
+    const k = el.dataset.roll, v = +el.dataset.v, d = +el.dataset.d, prev = UI.prevNums[k];
+    UI.prevNums[k] = v;
+    if (prev === undefined || isNaN(v) || Math.abs(prev - v) < (d ? 0.05 : 0.5)) return;
+    const t0 = performance.now(), ms = 900, f = x => d ? fmt1(x) : fmt0(x);
+    el.classList.add('rolling');
+    (function step(t) { const k2 = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k2, 3); el.textContent = f(prev + (v - prev) * e); if (k2 < 1) requestAnimationFrame(step); else el.classList.remove('rolling'); })(t0);
+  });
+}

@@ -233,7 +233,7 @@ function cdmProposals(n) {
 function openCdM() {
   if (!isPremier()) { G.queue.shift(); return processQueue(); }
   CDM = { props: cdmProposals(4), res: {}, n: (G.flags.cdmN = (G.flags.cdmN || 0) + 1) };
-  if (!CDM.props.length) { G.queue.shift(); addNews('Consiglio dei ministri: nessuna nuova riforma all’ordine del giorno.', 'gov'); return processQueue(); }
+  if (!CDM.props.length) { CDM = null; G.queue.shift(); addNews('Consiglio dei ministri: nessuna nuova riforma all’ordine del giorno.', 'gov'); return processQueue(); }
   openSheet('', { full: true, locked: true }); renderCdM();
 }
 function renderCdM() {

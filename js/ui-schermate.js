@@ -41,8 +41,8 @@ function topbar() {
   const old = G.hist.polls.length > 5 ? G.hist.polls[G.hist.polls.length - 5].p[myPid()] : mp.poll;
   const d = mp.poll - (old || mp.poll);
   const chips = [];
-  chips.push(`<span class="stat" onclick="goTab('partiti')">${esc(mp.short)}<b>${fmt1(mp.poll)}% <span class="d ${d >= 0 ? 'good' : 'bad'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</span></b></span>`);
-  if (G.gov) chips.push(`<span class="stat" onclick="openGovernment()">Governo<b style="color:${pctColor(G.gov.approval * 1.4)}">${fmt0(G.gov.approval)}%</b></span>`);
+  chips.push(`<span class="stat" onclick="goTab('partiti')">${esc(mp.short)}<b><span ${rollAttr('tp', mp.poll, 1)}>${fmt1(mp.poll)}</span>% <span class="d ${d >= 0 ? 'good' : 'bad'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</span></b></span>`);
+  if (G.gov) chips.push(`<span class="stat" onclick="openGovernment()">Governo<b style="color:${pctColor(G.gov.approval * 1.4)}"><span ${rollAttr('tg', G.gov.approval, 0)}>${fmt0(G.gov.approval)}</span>%</b></span>`);
   chips.push(topbarThird());
   const n = urgentCount();
   return `<div class="topbar"><div class="row between"><div class="grow"><div class="date"><span class="flip" key="${G.week}">${fmtDate(G.week)}</span></div><div class="role ellipsis">${esc(roleLabel())}</div></div>
@@ -74,6 +74,7 @@ function tabContent() {
 }
 function postRender() {
   if (UI.tab === 'aula') { const s = $('#hemi-main'); if (s) setTimeout(() => fillHemi(s), 30); }
+  rollNumbers();
 }
 
 // ============================================================
@@ -143,8 +144,8 @@ function lawCardHTML(l, opt, extra) {
   const busy = G.bills.find(b => !b.dead && b.lawId === l.id);
   const changed = G.laws[l.id] !== l.cur;
   const promised = G.promises.find(pr => pr.lawId === l.id && !pr.kept);
-  return `<div class="card tight click" onclick="openLaw('${l.id}'${opt !== undefined ? ',' + opt : ''})"><div class="row">${medal(CAT_ICON[l.cat] || 'doc', 44)}<div class="grow"><h3 style="font-size:16px">${esc(opt !== undefined ? l.opts[opt].t : l.nome)}</h3><div class="small muted ellipsis">${opt !== undefined ? esc(l.nome) : 'Oggi: ' + esc(l.opts[G.laws[l.id]].t)}</div>
-    ${extra || ''}<div class="row wrap" style="gap:4px;margin-top:6px">${busy ? `<span class="tag w">${icon('vote')} in Parlamento</span>` : ''}${changed ? '<span class="tag o">modificata</span>' : ''}${promised ? '<span class="tag g">nel programma</span>' : ''}${l.cost ? '<span class="tag">costituzionale</span>' : ''}${l.custom ? '<span class="tag">tua proposta</span>' : ''}</div></div>${icon('chevron', 18)}</div></div>`;
+  return `<div class="folder click" style="--cc:${CAT_COLOR[l.cat] || '#d6b25e'}" onclick="openLaw('${l.id}'${opt !== undefined ? ',' + opt : ''})"><span class="ftab">${icon(CAT_ICON[l.cat] || 'doc', 13)} ${esc(l.cat)}</span><div class="fbody"><div class="row"><div class="grow"><h3 style="font-size:16px">${esc(opt !== undefined ? l.opts[opt].t : l.nome)}</h3><div class="small muted ellipsis">${opt !== undefined ? esc(l.nome) : 'Oggi: ' + esc(l.opts[G.laws[l.id]].t)}</div>
+    ${extra || ''}<div class="row wrap" style="gap:4px;margin-top:6px">${busy ? `<span class="tag w">${icon('vote')} in Parlamento</span>` : ''}${changed ? '<span class="tag o">modificata</span>' : ''}${promised ? '<span class="tag g">nel programma</span>' : ''}${l.cost ? '<span class="tag">costituzionale</span>' : ''}${l.custom ? '<span class="tag">tua proposta</span>' : ''}</div></div>${icon('chevron', 18)}</div></div></div>`;
 }
 function lawListHTML() {
   if (UI.lawMetric) {
@@ -365,14 +366,15 @@ function partitiTab() {
     h += sec('Coalizioni') + `<div class="card">${G.coalitions.map(c => { const s = c.members.reduce((t, m) => t + (G.parties[m] ? P(m).poll : 0), 0); return `<div style="margin:8px 0"><div class="row between small"><b>${esc(c.name)}</b><b>${fmt1(s)}%</b></div><div style="position:relative;margin-top:4px">${barH(s, 60, c.color)}<i style="position:absolute;left:${42 / 60 * 100}%;top:-3px;bottom:-3px;width:2px;background:var(--cream);opacity:.7"></i></div><div class="row wrap" style="gap:3px;margin-top:6px">${c.members.map(partyChip).join('')}</div></div>`; }).join('')}<div class="tiny dim">La linea bianca è il 42%: la soglia del premio di maggioranza.</div></div>`;
   }
   if (v === 'partiti') {
-    h += '<div class="mt"></div>';
-    PIDS().sort((a, b) => P(b).poll - P(a).poll).forEach(id => {
-      const p = P(id), me = id === myPid();
-      const c = me ? 100 : compat(id, myPid()), r = me ? 0 : rel(id, myPid());
-      const coal = coalitionOf(id);
-      h += `<div class="card tight click" onclick="openParty('${id}')"><div class="row"><span class="av-badge">${leaderPortrait(id, 52)}<span class="pbadge" style="--c:${p.color}">${partyMark(id, 24)}</span></span><div class="grow"><div class="row between"><h3 class="ellipsis" style="font-size:16px">${esc(p.name)}</h3><b>${fmt1(p.poll)}%</b></div><div class="tiny muted ellipsis">${esc(leaderName(id))} · ${p.seatsC} dep. · ${p.seatsS} sen.${coal ? ' · ' + esc(coal.name) : ''}${inGov(id) ? ' · al governo' : ''}</div>
-        ${me ? '<div class="tiny gold mt">Il tuo partito</div>' : `<div class="row mt" style="gap:6px"><span class="tiny muted" style="width:52px">Affinità</span><div class="grow">${barH(c, 100, pctColor(c), true)}</div><span class="tiny muted" style="width:56px">Rapporto</span><div class="grow">${barH(r + 100, 200, relColor(r), true)}</div></div>`}</div></div></div>`;
-    });
+    // K3: figurine dei partiti, si girano toccandole
+    h += `<div class="tiny muted center mt">Tocca una figurina per girarla e vedere le idee</div><div class="figs">${PIDS().sort((a, b) => P(b).poll - P(a).poll).map(id => {
+      const p = P(id), me = id === myPid(), c = me ? 100 : compat(id, myPid()), r = me ? 0 : rel(id, myPid());
+      const back = AXIS_KEYS.map(k => { const x = (p.ax[k] + 10) / 20 * 100; return `<div class="fax"><span>${AXES[k].n}</span><div class="fbar"><i style="left:${x}%"></i></div></div>`; }).join('');
+      return `<div class="fig" style="--pc:${p.color}" onclick="this.classList.toggle('fl')"><div class="fin">
+        <div class="ff">${partyMark(id, 58)}<b>${esc(p.short)}</b><span class="fl1">${esc(leaderName(id))}</span>
+          <div class="fst"><div><b>${fmt1(p.poll)}%</b>voti</div><div><b>${p.seatsC + p.seatsS}</b>seggi</div><div><b>${me ? '—' : relNum(r)}</b>rapporto</div><div><b>${me ? '—' : fmt0(c) + '%'}</b>affinità</div></div>${me ? '<span class="fme">il tuo partito</span>' : inGov(id) ? '<span class="fme">al governo</span>' : ''}</div>
+        <div class="fb"><b>${esc(p.short)} · le idee</b>${back}<button class="btn sm gold" onclick="event.stopPropagation();openParty('${id}')">Apri la scheda</button></div></div></div>`;
+    }).join('')}</div>`;
   }
   if (v === 'alleanze') h += alleanzeHTML();
   return h;

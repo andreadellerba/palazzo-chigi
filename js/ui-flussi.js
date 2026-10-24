@@ -292,16 +292,19 @@ function showWeekSummary(s, before, auto) {
   const sorted = s.news.slice().sort((a, b) => (prio[b.k] || 0) - (prio[a.k] || 0));
   const top = sorted[0], rest = sorted.slice(1);
   const kpi = (l, v, d, good, c) => `<div class="kpi center" style="--kc:${c}"><div class="l">${l}</div><div class="v">${v}</div>${d !== null ? `<div class="tiny ${good ? 'good' : 'bad'}">${d}</div>` : ''}</div>`;
-  const votes = s.votes.map(({ bill, v }) => `<span class="eff ${v.passed ? 'g' : 'b'}">${v.passed ? '✓' : '✗'} ${esc(billName(bill))}${G.myPersonal[bill.id] && G.player.parl === v.h ? ` · tu: ${VLAB[G.myPersonal[bill.id]]}` : ''}</span>`).join('');
+  // M2: ogni voto chiuso con un timbro · M5: l'emiciclo del primo voto si accende seggio per seggio
+  const votes = s.votes.map(({ bill, v }, i) => `<div class="vrow" style="animation-delay:${300 + i * 250}ms"><span class="stamp-s ${v.passed ? 'good' : 'bad'}" style="animation-delay:${400 + i * 250}ms">${v.passed ? 'APPROVATA' : 'RESPINTA'}</span><div class="grow"><b class="small">${esc(billName(bill))}</b><div class="tiny muted">${v.h === 'C' ? 'Camera' : 'Senato'} · sì ${v.yes} · no ${v.no}${G.myPersonal[bill.id] && G.player.parl === v.h ? ` · tu: ${VLAB[G.myPersonal[bill.id]]}` : ''}</div></div></div>`).join('');
+  const v0 = s.votes.find(x => x.v && x.v.by);
   openSheet(`<div class="paper"><div class="mast">IL QUOTIDIANO DI ROMA</div><div class="tiny center muted">${fmtDate(G.week).toUpperCase()} · SETTIMANA ${G.week}</div>
     ${top ? `<div class="headline nk-${top.k}">${esc(top.t)}</div>` : '<div class="headline">Settimana tranquilla nei palazzi della politica</div>'}</div>
     <div class="grid3 mt">${kpi(esc(myParty().short), fmt1(myParty().poll) + '%', (dPoll >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dPoll)), dPoll >= 0, myParty().color)}
     ${dA !== null ? kpi('Governo', fmt0(G.gov.approval) + '%', (dA >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dA)), dA >= 0, '#ffd60a') : kpi('Fama', fmt0(G.player.fama), null, true, '#a78bfa')}
     ${kpi('Spread', fmt0(G.econ.spread), (dSp >= 0 ? '▲ ' : '▼ ') + fmt0(Math.abs(dSp)), dSp <= 0, '#f472b6')}</div>
     ${auto && auto.length ? `${sec('Fatto in automatico')}<div class="effs mt">${auto.map(a => `<span class="eff g">${icon(a.ico, 13)} ${esc(a.n)}</span>`).join('')}</div>` : ''}
-    ${votes ? `${sec('Votazioni in aula')}<div class="effs mt">${votes}</div>` : ''}
+    ${votes ? `${sec('Votazioni in aula')}${v0 ? `<div class="card tight">${hemicycle(v0.v.h, { id: 'hemi-week', empty: true, slow: true })}<div class="tiny muted center">${esc(billName(v0.bill))}</div></div>` : ''}<div class="card tight">${votes}</div>` : ''}
     ${rest.length ? `${sec('In breve')}<div class="mt">${rest.slice(0, 4).map(n => `<div class="news-item"><span class="nk-${n.k}">${esc(n.t)}</span></div>`).join('')}</div>${rest.length > 4 ? `<details class="mt"><summary class="small gold">Altre ${rest.length - 4} notizie</summary>${rest.slice(4).map(n => `<div class="news-item"><span class="nk-${n.k}">${esc(n.t)}</span></div>`).join('')}</details>` : ''}` : ''}
     <button class="btn ${G.queue.length ? 'gold' : 'pri'} block mt2" onclick="closeSheet();${G.queue.length ? 'setTimeout(processQueue,280)' : ''}">${G.queue.length ? `Continua · ${G.queue.length} da decidere ›` : 'Continua'}</button>`);
+  if (v0) setTimeout(() => animateVote(document.getElementById('hemi-week'), v0.v.by), 450);
 }
 function processQueue() {
   if (!G.queue.length) { renderGame(); return; }
