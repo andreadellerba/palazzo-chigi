@@ -318,18 +318,23 @@ function showEvent(item) {
   try { v = eventView(item); } catch (e) { console.error(e); G.queue.shift(); renderGame(); return; }
   window._ev = { item, v };
   const ev = EVENT_BY_ID[item.id] || {};
-  openSheet(`<div class="evcard">${eventTopHTML(ev, item, v)}
+  clearTimeout(window._evTimer);
+  const tm = ev.timer ? `<div class="timer mt"><i style="animation-duration:${ev.timer}s"></i></div><div class="tiny warn center" style="margin-top:4px;font-weight:800">Hai ${ev.timer} secondi, poi decide il tuo staff</div>` : '';
+  if (ev.timer) window._evTimer = setTimeout(() => { if (window._ev && window._ev.item === item && !window._ev.done) { window._ev.staff = true; chooseEvent(staffPick(v.choices)); } }, ev.timer * 1000);
+  openSheet(`<div class="evcard">${eventTopHTML(ev, item, v)}${tm}
     <div class="mt">${v.choices.map((ch, i) => `<button class="choice" style="animation-delay:${200 + i * 80}ms" onclick="chooseEvent(${i})"><div class="t">${esc(ch.t)}</div>${fxChips(ch.fx, ch.run && !ch.fx ? '<span class="n">• esito incerto</span>' : '')}</button>`).join('')}</div></div>`, { locked: true });
   setTimeout(() => { if (typeof animCounters === 'function') animCounters(); }, 250);
 }
 function chooseEvent(i) {
   const { item, v } = window._ev; const c = v.choices[i];
+  if (window._ev.done) return; window._ev.done = true; clearTimeout(window._evTimer);
+  if (typeof maybeHiddenPrice === 'function') maybeHiddenPrice(EVENT_BY_ID[item.id] || {}, item, c);
   applyFx(c.fx);
   if (c.run) { try { c.run(); } catch (e) { console.error(e); } }
   // conseguenze che tornano dopo qualche settimana
   if (c.later) { G.chains = G.chains || []; G.chains.push({ w: G.week + c.later.w, id: c.later.id, ctx: item.ctx || {} }); }
   vib(20);
-  replaceSheet(`<div class="evcard"><div class="img">${medal(v.img, 70)}</div><h2>${esc(v.title)}</h2><div class="center mt"><span class="stamp gold">DECISO</span></div><div class="card mt"><b>${esc(c.t)}</b><div class="small muted mt">${esc(c.r || '')}</div>${c.later ? '<div class="tiny warn mt">Questa scelta potrebbe avere conseguenze nelle prossime settimane.</div>' : ''}</div><button class="btn pri block mt" onclick="closeSheet();doneQueue()">Continua</button></div>`);
+  replaceSheet(`<div class="evcard"><div class="img">${medal(v.img, 70)}</div><h2>${esc(v.title)}</h2><div class="center mt"><span class="stamp gold">DECISO</span></div><div class="card mt">${window._ev.staff ? '<div class="tiny warn" style="font-weight:800">Tempo scaduto: ha deciso il tuo staff</div>' : ''}<b>${esc(c.t)}</b><div class="small muted mt">${esc(c.r || '')}</div>${c.later ? '<div class="tiny warn mt">Questa scelta potrebbe avere conseguenze nelle prossime settimane.</div>' : ''}</div><button class="btn pri block mt" onclick="closeSheet();doneQueue()">Continua</button></div>`);
 }
 
 // ============================================================

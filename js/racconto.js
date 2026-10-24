@@ -404,6 +404,7 @@ function storyTick() {
   memoryAfterVotes(G._wk.votes);
   staffTick();
   if (typeof sfideTick === "function") sfideTick();
+  if (typeof shockTick === "function") shockTick();
   summitTick();
   chainTick();
   callTick();
