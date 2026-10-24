@@ -368,3 +368,21 @@ function setupNext() {
       <button class="btn gold block mt" onclick="closeSheet();setTimeout(()=>startTutorial(0),320)">Guida rapida (consigliata)</button><button class="btn block mt" onclick="closeSheet()">Salta, conosco il gioco</button>`);
   }, 300);
 }
+
+// ---------- iPhone: altezza vera dello schermo ----------
+// nelle app aggiunte alla schermata Home iOS all'avvio dà un'altezza più corta
+// (si sistemava solo ruotando il telefono): la calcoliamo noi e la applichiamo a tutto
+function fixAppHeight() {
+  const st = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  const root = document.documentElement;
+  root.classList.toggle('pwa', !!st);
+  if (!st) { root.style.removeProperty('--app-h'); return; }
+  const portrait = window.innerHeight >= window.innerWidth;
+  const full = portrait ? Math.max(screen.height, screen.width) : Math.min(screen.height, screen.width);
+  root.style.setProperty('--app-h', Math.max(window.innerHeight, full) + 'px');
+}
+fixAppHeight();
+['resize', 'orientationchange', 'pageshow', 'focus'].forEach(ev => window.addEventListener(ev, () => { fixAppHeight(); setTimeout(fixAppHeight, 300); }));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { fixAppHeight(); setTimeout(fixAppHeight, 300); } });
+if (window.visualViewport) visualViewport.addEventListener('resize', fixAppHeight);
+[100, 500, 1500].forEach(t => setTimeout(fixAppHeight, t));

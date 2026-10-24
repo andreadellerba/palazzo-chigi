@@ -239,9 +239,9 @@ details summary { cursor: pointer; list-style: none; padding: 6px 0; } details s
 .who .w b { color: var(--good); } .who .l b { color: var(--bad); }
 
 /* ---------- fogli e finestre ---------- */
-.layer { position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100lvh; z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
+.layer { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
 .backdrop { position: absolute; inset: 0; background: rgba(3,6,16,.66); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); animation: fade .25s both; }
-.sheet { position: relative; width: 100%; max-width: 640px; max-height: calc(100dvh - var(--top-gap) - 24px); overflow-y: auto; background: radial-gradient(120% 40% at 50% 0%, rgba(214,178,94,.08), transparent 60%), var(--bg2); border-radius: 26px 26px 0 0; border: 1px solid var(--line2); border-bottom: 0; padding: 8px 16px calc(80px + var(--safe-b)); animation: sheetUp .38s cubic-bezier(.2,.9,.25,1) both; -webkit-overflow-scrolling: touch; }
+.sheet { position: relative; width: 100%; max-width: 640px; max-height: calc(100dvh - var(--top-gap) - 24px); overflow-y: auto; background: radial-gradient(120% 40% at 50% 0%, rgba(214,178,94,.08), transparent 60%), var(--bg2); border-radius: 26px 26px 0 0; border: 1px solid var(--line2); border-bottom: 0; padding: 8px 16px calc(40px + var(--safe-b)); animation: sheetUp .38s cubic-bezier(.2,.9,.25,1) both; -webkit-overflow-scrolling: touch; }
 .sheet .grab { display: none; width: 42px; height: 5px; border-radius: 3px; background: var(--line2); margin: 0 auto 12px; }
 .layer.full .sheet { max-height: none; height: 100%; border-radius: 0; padding-top: calc(var(--top-gap) + 10px); }
 .layer.closing .sheet { animation: sheetDown .25s ease-in both; }
@@ -623,6 +623,12 @@ canvas.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 200;
 .map .pin path, .map .pin rect, .map .pin circle.ic { fill: none; stroke: var(--oro2); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .map .pin { animation: pinBob 2.2s ease-in-out infinite; transform-box: fill-box; }
 @keyframes pinBob { 50% { transform: translateY(-2px); } }
+
+/* app sulla schermata Home: altezza calcolata (vedi fixAppHeight) e comandi agganciati all'app, non alla finestra */
+html.pwa, html.pwa body { height: var(--app-h, 100%); min-height: var(--app-h, 100%); }
+html.pwa #app { height: var(--app-h, 100vh); }
+html.pwa .layer { bottom: auto; height: var(--app-h, 100%); }
+html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolute; }
 
 </style>
 </head>
@@ -5587,6 +5593,24 @@ function setupNext() {
       <button class="btn gold block mt" onclick="closeSheet();setTimeout(()=>startTutorial(0),320)">Guida rapida (consigliata)</button><button class="btn block mt" onclick="closeSheet()">Salta, conosco il gioco</button>`);
   }, 300);
 }
+
+// ---------- iPhone: altezza vera dello schermo ----------
+// nelle app aggiunte alla schermata Home iOS all'avvio dà un'altezza più corta
+// (si sistemava solo ruotando il telefono): la calcoliamo noi e la applichiamo a tutto
+function fixAppHeight() {
+  const st = navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+  const root = document.documentElement;
+  root.classList.toggle('pwa', !!st);
+  if (!st) { root.style.removeProperty('--app-h'); return; }
+  const portrait = window.innerHeight >= window.innerWidth;
+  const full = portrait ? Math.max(screen.height, screen.width) : Math.min(screen.height, screen.width);
+  root.style.setProperty('--app-h', Math.max(window.innerHeight, full) + 'px');
+}
+fixAppHeight();
+['resize', 'orientationchange', 'pageshow', 'focus'].forEach(ev => window.addEventListener(ev, () => { fixAppHeight(); setTimeout(fixAppHeight, 300); }));
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { fixAppHeight(); setTimeout(fixAppHeight, 300); } });
+if (window.visualViewport) visualViewport.addEventListener('resize', fixAppHeight);
+[100, 500, 1500].forEach(t => setTimeout(fixAppHeight, t));
 
 </script>
 <script>
