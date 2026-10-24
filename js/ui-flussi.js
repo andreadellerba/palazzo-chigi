@@ -216,8 +216,8 @@ function startInterview(show, debate) {
   const topics = interviewTopics(3);
   // nel confronto TV c'è un avversario in studio: il leader del primo partito rivale
   const opp = debate ? PIDS().filter(p => p !== myPid() && !(coalitionOf(p) && coalitionOf(p) === coalitionOf(myPid()))).sort((a, b) => P(b).poll - P(a).poll)[0] : null;
-  ensureStory(); const jj = journalistFor(show.lean);
-  TVS = { show, debate, opp, j: debate ? null : jj, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll, app: clamp(50 + staffLiv('portavoce') * 3 + (debate ? 0 : jj.rel / 6), 30, 70), secs: debate ? 20 : 30, read: 4 };
+  ensureStory(); const iv = interviewerOf(show), jj = iv.j || null;
+  TVS = { show, debate, opp, j: debate ? null : jj, iv: debate ? null : iv, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll, app: clamp(50 + staffLiv('portavoce') * 3 + (debate || !jj ? 0 : jj.rel / 6), 30, 70), secs: debate ? 20 : 30, read: 4 };
   G.player.stress = clamp(G.player.stress + 3, 0, 100);
   openSheet('', { full: true, locked: true });
   renderInterview();
@@ -229,8 +229,8 @@ function renderInterview() {
   if (!qq) return finishInterview();
   replaceSheet(`<div class="row between"><span class="tag o">${esc(s.show.n)} · ${esc(s.show.ch)}</span><span class="small muted">Domanda ${s.i + 1}/${s.qs.length}</span></div>
     ${gaugeHTML(s.app)}
-    <div class="row mt" style="justify-content:center;gap:22px">${portrait(G.player.name, 62, { party: myPid() })}${s.opp ? `<b class="gold" style="align-self:center">VS</b>${leaderPortrait(s.opp, 62)}` : TVS.j ? `<span class="center">${jPortrait(TVS.j, 62)}<div class="tiny muted" style="margin-top:4px">${esc(TVS.j.n)}</div></span>` : medal('mic', 62)}</div>
-    <div class="small muted center mt">${s.debate ? 'Il moderatore chiede:' : s.j ? esc(s.j.n) + ' (' + esc(s.j.t) + ') chiede:' : 'Il conduttore chiede:'}</div>
+    <div class="row mt" style="justify-content:center;gap:22px">${portrait(G.player.name, 62, { party: myPid() })}${s.opp ? `<b class="gold" style="align-self:center">VS</b>${leaderPortrait(s.opp, 62)}` : TVS.iv ? interviewerFace(TVS.iv) : medal('mic', 62)}</div>
+    <div class="small muted center mt">${s.debate ? 'Il moderatore chiede:' : s.iv ? esc(s.iv.who) + (s.iv.plur ? ' chiedono:' : ' chiede:') : 'Il conduttore chiede:'}</div>
     <div class="big-q center mt">${esc(qq.q)}</div>
     <div class="timer mt"><i style="animation-duration:${s.secs}s;--delay:${s.read}s"></i></div><div class="tiny muted center">Hai ${s.secs} secondi per rispondere (il tempo parte tra ${s.read} secondi)</div>
     <div class="qcard mt">${qq.explain || ''}</div>

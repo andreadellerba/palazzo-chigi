@@ -6708,8 +6708,8 @@ function startInterview(show, debate) {
   const topics = interviewTopics(3);
   // nel confronto TV c'è un avversario in studio: il leader del primo partito rivale
   const opp = debate ? PIDS().filter(p => p !== myPid() && !(coalitionOf(p) && coalitionOf(p) === coalitionOf(myPid()))).sort((a, b) => P(b).poll - P(a).poll)[0] : null;
-  ensureStory(); const jj = journalistFor(show.lean);
-  TVS = { show, debate, opp, j: debate ? null : jj, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll, app: clamp(50 + staffLiv('portavoce') * 3 + (debate ? 0 : jj.rel / 6), 30, 70), secs: debate ? 20 : 30, read: 4 };
+  ensureStory(); const iv = interviewerOf(show), jj = iv.j || null;
+  TVS = { show, debate, opp, j: debate ? null : jj, iv: debate ? null : iv, qs: topics.map(t => interviewQuestion(t, show)), i: 0, log: [], before: myParty().poll, app: clamp(50 + staffLiv('portavoce') * 3 + (debate || !jj ? 0 : jj.rel / 6), 30, 70), secs: debate ? 20 : 30, read: 4 };
   G.player.stress = clamp(G.player.stress + 3, 0, 100);
   openSheet('', { full: true, locked: true });
   renderInterview();
@@ -6721,8 +6721,8 @@ function renderInterview() {
   if (!qq) return finishInterview();
   replaceSheet(`<div class="row between"><span class="tag o">${esc(s.show.n)} · ${esc(s.show.ch)}</span><span class="small muted">Domanda ${s.i + 1}/${s.qs.length}</span></div>
     ${gaugeHTML(s.app)}
-    <div class="row mt" style="justify-content:center;gap:22px">${portrait(G.player.name, 62, { party: myPid() })}${s.opp ? `<b class="gold" style="align-self:center">VS</b>${leaderPortrait(s.opp, 62)}` : TVS.j ? `<span class="center">${jPortrait(TVS.j, 62)}<div class="tiny muted" style="margin-top:4px">${esc(TVS.j.n)}</div></span>` : medal('mic', 62)}</div>
-    <div class="small muted center mt">${s.debate ? 'Il moderatore chiede:' : s.j ? esc(s.j.n) + ' (' + esc(s.j.t) + ') chiede:' : 'Il conduttore chiede:'}</div>
+    <div class="row mt" style="justify-content:center;gap:22px">${portrait(G.player.name, 62, { party: myPid() })}${s.opp ? `<b class="gold" style="align-self:center">VS</b>${leaderPortrait(s.opp, 62)}` : TVS.iv ? interviewerFace(TVS.iv) : medal('mic', 62)}</div>
+    <div class="small muted center mt">${s.debate ? 'Il moderatore chiede:' : s.iv ? esc(s.iv.who) + (s.iv.plur ? ' chiedono:' : ' chiede:') : 'Il conduttore chiede:'}</div>
     <div class="big-q center mt">${esc(qq.q)}</div>
     <div class="timer mt"><i style="animation-duration:${s.secs}s;--delay:${s.read}s"></i></div><div class="tiny muted center">Hai ${s.secs} secondi per rispondere (il tempo parte tra ${s.read} secondi)</div>
     <div class="qcard mt">${qq.explain || ''}</div>
@@ -8345,10 +8345,11 @@ function eventTopHTML(ev, item, v) {
 function animCounters() { document.querySelectorAll('.cnt-up').forEach(el => { if (!el.dataset.done) { el.dataset.done = 1; countUp(el, +el.dataset.to, false, 1600); } }); }
 
 // ---------- AZIONI RICORRENTI: le fa il gioco ogni settimana ----------
-const ROUTINE_NO = ['crisi', 'dimissioni', 'sfiducia', 'anticipate', 'congresso', 'scissione', 'rimpasto', 'tv', 'dibattito', 'incontro', 'poteri', 'tour', 'visita', 'promo'];
-const routineOK = a => !ROUTINE_NO.includes(a.id) && (a.run || a.id === 'comizio');
+// solo le decisioni enormi non si ripetono da sole
+const ROUTINE_NO = ['crisi', 'dimissioni', 'sfiducia', 'anticipate', 'congresso', 'scissione', 'rimpasto'];
+const routineOK = a => !ROUTINE_NO.includes(a.id) && (a.run || a.id === 'comizio' || ROUTINE_AUTO[a.id]);
 function routineToggleHTML(a) {
-  if (!routineOK(a)) return '';
+  if (!routineOK(a)) return `<div class="tiny muted center mt2">È una decisione importante: non si può ripetere in automatico, la prendi tu ogni volta.</div>`;
   const on = !!(G.routine && G.routine[a.id]);
   return `<div class="card tight mt2"><div class="li click" onclick="toggleRoutine('${a.id}')">${icon('refresh', 20)}<div class="grow"><b class="small">Ripeti ogni settimana</b><div class="tiny muted">${a.id === 'comizio' ? 'Nella regione dove conviene di più' : 'Il gioco la fa da solo quando passi alla settimana successiva'}, se hai capitale e fondi</div></div><span class="tgl ${on ? 'on' : ''}"><i></i></span></div></div>`;
 }
@@ -8365,6 +8366,7 @@ function runRoutine() {
     if (!a || usedThisWeek(id)) return;
     let ok = false; try { ok = a.show(); } catch (e) { }
     if (!ok || G.pc < actionCost(a) || G.funds < (a.funds || 0)) return;
+    if (ROUTINE_AUTO[id]) { if (!spendPC(actionCost(a))) return; markUsed(id); if (a.funds) G.funds -= a.funds; const t = ROUTINE_AUTO[id](); if (t) done.push({ n: t, ico: ACT_ICON[id] || a.ico }); return; }
     if (id === 'comizio') {
       const reg = REGIONS_DEF.slice().sort((x, y) => (y.el / (G.myReg[y.id] || 1)) - (x.el / (G.myReg[x.id] || 1)))[0];
       doComizioQuiet(reg.id); if (usedThisWeek('comizio')) done.push({ n: `Comizio in ${reg.n}`, ico: 'mega' }); return;
@@ -8406,6 +8408,47 @@ function mapPinsSVG() {
   return pins.map((p, k) => { const r = REGIONS_DEF.find(x => x.id === p.rid); if (!r) return ''; const n = used[p.rid] = (used[p.rid] || 0) + 1; const x = r.lab[0] + (n - 1) * 15, y = r.lab[1] - 13; return `<g transform="translate(${x} ${y})"><g class="pin" onclick="pinInfo(${k})" style="animation-delay:${k * 0.2}s"><circle r="7.5"/><g transform="translate(-5.2 -5.2) scale(.43)">${ICON_PATHS[p.i] || ICON_PATHS.alert}</g></g></g>`; }).join('');
 }
 function pinInfo(k) { const p = (window._pins || [])[k]; if (!p) return; toast(`${esc(regionName(p.rid))}: ${esc(p.t)}`); }
+
+// ---------- chi ti fa le domande: dipende da dove vai ----------
+function interviewerOf(show) {
+  ensureStory();
+  if (show.t === 'carta') { const j = G.journalists.find(x => x.t === show.n); return j ? { j, who: `${j.n} (${show.n})` } : { n: `Redazione ${show.n}`, who: `Un giornalista di ${show.n}` }; }
+  if (show.t === 'podcast') return { n: `Podcast ${show.n}`, who: `I conduttori di ${show.n}`, plur: true };
+  if (show.t === 'live') return { chat: true, who: `La chat della diretta (${show.ch})` };
+  return { n: `Studio ${show.n}`, who: `Il conduttore di ${show.n}` };
+}
+function interviewerFace(iv) {
+  const face = iv.chat ? medal('chat', 62) : iv.j ? jPortrait(iv.j, 62) : portrait(iv.n, 62, { ring: 'rgba(255,255,255,.25)' });
+  return `<span class="center">${face}<div class="tiny muted" style="margin-top:4px">${esc(iv.chat ? 'chat' : iv.j ? iv.j.n : iv.who.replace(/^(Il conduttore|I conduttori|Un giornalista) di /, ''))}</div></span>`;
+}
+
+// ---------- azioni che di solito chiedono una scelta: in automatico sceglie il gioco ----------
+const myLean = () => (myParty().ax.eco + myParty().ax.soc + myParty().ax.imm) / 30;
+function autoInterview(debate) {
+  const pl = myLean();
+  const show = debate ? TALKSHOWS[0] : TALKSHOWS.slice().sort((a, b) => (b.reach - Math.abs(b.lean - pl) * 1.5) - (a.reach - Math.abs(a.lean - pl) * 1.5))[0];
+  G.stats.tv = (G.stats.tv || 0) + 1;
+  let good = 0;
+  interviewTopics(3).forEach(t => { const q = interviewQuestion(t, show); const a = q.answers.slice().sort((x, y) => (y.pre.pro.length - y.pre.contro.length) - (x.pre.pro.length - x.pre.contro.length))[0]; const r = a.apply(show); if (r && r.good) good++; });
+  return `${debate ? 'Confronto TV' : 'Intervista'} a ${show.n}: ${good >= 2 ? 'bene' : good ? 'così così' : 'male'}`;
+}
+const ROUTINE_AUTO = {
+  tv: () => autoInterview(false),
+  dibattito: () => autoInterview(true),
+  incontro: () => {
+    const me = myPid(), c = coalitionOf(me);
+    const pool = PIDS().filter(p => p !== me && !never(p, me));
+    const ally = c ? pool.filter(p => c.members.includes(p)).sort((a, b) => rel(a, me) - rel(b, me))[0] : null;
+    const id = ally || pool.sort((a, b) => willing(b, me) - willing(a, me))[0]; if (!id) return null;
+    const g = Math.round(4 + G.player.car * 0.8 + rnd(-2, 3)); addRel(id, me, g);
+    if (isPremier() && G.gov.sat[id] !== undefined) G.gov.sat[id] = clamp(G.gov.sat[id] + 4, 0, 100);
+    return `Incontro con ${P(id).leader}`;
+  },
+  poteri: () => { const gk = Object.keys(GROUPS).sort((a, b) => G.groups[a] - G.groups[b])[0]; G.groups[gk] = clamp(G.groups[gk] + Math.round(6 + G.player.car * 0.6), -100, 100); if (POWER_RIVAL[gk]) G.groups[POWER_RIVAL[gk]] -= 2; return `Incontro con ${GROUPS[gk].n}`; },
+  visita: () => { const r = REGIONS_DEF.slice().sort((a, b) => (b.el / (G.myReg[b.id] || 1)) - (a.el / (G.myReg[a.id] || 1)))[0]; G.myReg[r.id] = (G.myReg[r.id] || 1) + 0.1; G.gov.popBank += 0.4 + r.el * 0.08; addPin(r.id, 'map', 'Visita istituzionale'); return `Visita in ${r.n}`; },
+  tour: () => { const r = REGIONS_DEF.filter(x => !(G.tour || []).includes(x.id)).sort((a, b) => b.el - a.el)[0] || pick(REGIONS_DEF); ensureStory(); G.tour.push(r.id); G.myReg[r.id] = (G.myReg[r.id] || 1) + 0.2; myParty().spinta += 0.25 * Math.sqrt(r.el); addPin(r.id, 'bus', 'Tappa del tour'); return `Tappa del tour in ${r.n}`; },
+  discorso: () => { const S = SPEECH.nazione; let maj = 0; S.rounds.forEach(rd => { const o = rd.o.slice().sort((a, b) => (b.maj + b.opp) - (a.maj + a.opp))[0]; applyFx(o.fx); maj += o.maj; }); applyFx({ fama: 2 }); return `Discorso alla nazione${maj >= 4 ? ': ovazione' : ''}`; },
+};
 
 </script>
 <script>
