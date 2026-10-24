@@ -381,7 +381,7 @@ function openParty(id) {
   const p = P(id), me = id === myPid();
   let h = `<div class="sheet-head"><div class="row grow"><span class="av-badge">${leaderPortrait(id, 70)}<span class="pbadge" style="--c:${p.color}">${partyMark(id, 26)}</span></span><div class="grow"><h2 style="font-size:22px">${esc(p.name)}</h2><div class="tiny muted">${esc(p.area)} · ${esc(p.family)}</div><div class="small">Leader: <b>${esc(leaderName(id))}</b></div></div></div><button class="xbtn" onclick="closeSheet()">${icon('x', 18)}</button></div>`;
   h += `<div class="grid3"><div class="kpi center"><div class="l">Sondaggi</div><div class="v">${fmt1(p.poll)}%</div>${spark(histOf('poll', 12, id), p.color, 70, 20)}</div><div class="kpi center"><div class="l">Deputati</div><div class="v">${p.seatsC}</div></div><div class="kpi center"><div class="l">Senatori</div><div class="v">${p.seatsS}</div></div></div>`;
-  h += `<div class="card tight center mt">${partyLogoBig(id)}<div class="tiny muted mt">${me ? 'Il simbolo del tuo partito' : typeof LOGHI !== 'undefined' && LOGHI[id] ? 'Simbolo · Wikimedia Commons, pubblico dominio' : 'Stemma disegnato per il gioco: il simbolo ufficiale non ha una licenza libera'}</div></div>`;
+  h += `<div class="card tight center mt">${partyLogoBig(id)}<div class="tiny muted mt">${me ? 'Il simbolo del tuo partito' : typeof LOGHI !== 'undefined' && LOGHI[id] ? 'Simbolo del partito · da Wikimedia' : 'Stemma disegnato per il gioco: il simbolo ufficiale non ha una licenza libera'}</div></div>`;
   if (!me) {
     const c = compat(id, myPid()), r = rel(id, myPid());
     h += `<div class="card tight mt"><div class="row between small"><span>Affinità di idee con te</span><b style="color:${pctColor(c)}">${fmt0(c)}%</b></div>${barH(c, 100, pctColor(c), true)}<div class="row between small mt"><span>Rapporto con ${esc(firstName(p.leader))}</span><b style="color:${relColor(r)}">${relNum(r)} · ${relLabel(r)}</b></div>${barH(r + 100, 200, relColor(r), true)}
@@ -485,7 +485,7 @@ function openMenu() {
 }
 function openCredits() {
   openSheet(`${head('Crediti')}<div class="card tight small" style="line-height:1.55">
-    <b>Loghi dei partiti</b> — Wikimedia Commons, file in pubblico dominio: ${Object.values(LOGHI_FONTI).map(esc).join(', ')}. Per Fratelli d’Italia, AVS, Futuro Nazionale e Italia Viva non c’è un logo libero adatto: il gioco usa uno stemma disegnato con il colore del partito.<br><br>
+    <b>Loghi dei partiti</b> — da Wikimedia Commons e Wikipedia: ${Object.values(LOGHI_FONTI).map(esc).join(', ')}. I simboli appartengono ai rispettivi partiti e sono usati solo per riconoscerli nel gioco.<br><br>
     <b>Dati politici</b> — sondaggi di ottobre 2026 (Supermedia YouTrend-Agi, SWG, BiDiMedia, Termometro Politico), composizione dei gruppi da camera.it, governo da governo.it, legge elettorale 2026 (Il Post).<br><br>
     <b>Mappa</b> — confini regionali ISTAT (openpolis/geojson-italy).<br><br>
     <b>Avatar</b> — disegnati con il generatore di Laurera.<br><br>
