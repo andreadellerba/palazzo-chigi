@@ -1071,8 +1071,9 @@ function aiGovTick() {
 function aiManovra(year) {
   // il governo IA scrive la manovra in base al suo orientamento
   const pp = P(G.gov.premierParty), eco = pp.ax.eco;
-  const spese = BUDGET_MEASURES.filter(m => m.g === 'Spese');
-  const cop = BUDGET_MEASURES.filter(m => m.g === 'Coperture');
+  const menu = typeof manovraMenu === 'function' ? manovraMenu(year) : BUDGET_MEASURES;
+  const spese = menu.filter(m => m.g === 'Spese');
+  const cop = menu.filter(m => m.g === 'Coperture');
   const chosen = [];
   let net = 0;
   // obiettivo: deficit intorno al 3% (più l'eventuale flessibilità concessa da Bruxelles)
