@@ -612,3 +612,7 @@ html.pwa, html.pwa body { height: var(--app-h, 100%); min-height: var(--app-h, 1
 html.pwa #app { height: var(--app-h, 100vh); }
 html.pwa .layer { bottom: auto; height: var(--app-h, 100%); }
 html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolute; }
+/* i valori colorati (rosso fuori soglia, verde in regola) devono vincere sul colore base delle schede */
+.kpi .v.bad, .stat b.bad, .st4-v.bad { color: var(--bad); }
+.kpi .v.good, .stat b.good, .st4-v.good { color: var(--good); }
+.kpi .v.warn, .stat b.warn { color: var(--warn); }

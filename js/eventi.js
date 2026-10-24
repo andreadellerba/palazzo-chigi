@@ -238,7 +238,7 @@ const EVENTS = [
       { t: 'Accoglierli', fx: { rel: { [c.p]: -15 }, my: 0.5, cred: -2 }, r: 'Nasce la componente del tuo partito alla Camera.', run: () => { const n = Math.min(3, P(c.p).seatsC); P(c.p).seatsC -= n; myParty().seatsC += n; addNews(`${n} deputati lasciano ${P(c.p).short} e passano a ${myParty().short}.`, 'mio'); } },
       { t: 'Rifiutare: «Niente trasformismo»', fx: { cred: 3, rel: { [c.p]: 4 } }, r: 'Gesto apprezzato dagli elettori.' },
     ] },
-  { id: 'vannacci_prov', for: 'all', w: 1, cool: 30, cond: () => !!G.parties.FN && myPid() !== 'FN', img: 'book', title: 'Nuovo libro di Vannacci',
+  { id: 'vannacci_prov', for: 'all', w: 0.3, cool: 104, cond: () => !!G.parties.FN && myPid() !== 'FN', img: 'book', title: 'Nuovo libro di Vannacci',
     text: 'Il generale presenta un nuovo libro con frasi destinate a far discutere su immigrazione e diritti. È polemica nazionale.',
     choices: () => [
       { t: 'Condannare duramente', fx: { my: 0.3, rel: { FN: -8 } }, r: 'Una parte del Paese ti applaude.', run: () => { P('FN').spinta += 0.4; } },
