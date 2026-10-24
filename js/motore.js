@@ -774,6 +774,7 @@ function assignCabinet(set, premierParty, premierName, mineChoice) {
 }
 function govName(premierName) { const parts = premierName.split(' '); return 'Governo ' + parts[parts.length - 1]; }
 function formAIGovernment(set, premierName, premierParty, tecnico) {
+  premierParty = premierParty || largestIn(set);
   const ministers = assignCabinet(set, premierParty, premierName);
   const vice = set.filter(p => p !== premierParty).sort((a, b) => seatsOf(b, 'C') - seatsOf(a, 'C')).slice(0, 2).map(p => P(p).leader).filter(n => n && n !== premierName && Object.values(ministers).includes(n));
   G.gov = { premier: premierName, premierParty, parties: set.slice(), ministers, vice, start: G.week, approval: 48 + (tecnico ? 6 : 0), popBank: 0, sat: {}, tecnico: !!tecnico, decreti: [], name: govName(premierName), lowSat: {} };
@@ -1250,7 +1251,7 @@ function advanceWeek() {
   calendarTick();
   if (G.gov && isPremier()) { G.stats.weeksPremier++; partnerTick(); }
   // votazioni della prossima settimana in cui conti tu
-  if (G.phase === 'normale') { const up = upcomingVotes(); if (up.length) G._wk.specials.push({ k: 'voti', ids: up }); }
+  if (G.phase === 'normale') { const up = upcomingVotes(); if (up.length) G._wk.specials.push({ k: 'voti', ids: up }); const mp = ministerProposal(); if (mp) G._wk.specials.push(mp); }
   // eventi casuali
   if (G.phase === 'normale') rollEvents();
   // presenza territoriale del tuo partito: lieve decadimento
@@ -1376,7 +1377,7 @@ function calendarTick() {
 // ============================================================
 const SAVE_PREFIX = 'palazzochigi_';
 function saveGame(slot) { try { localStorage.setItem(SAVE_PREFIX + slot, JSON.stringify(G)); return true; } catch (e) { return false; } }
-function migrate() { G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
+function migrate() { if (G.gov && !G.gov.premierParty) G.gov.premierParty = largestIn(G.gov.parties); G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
 function loadGame(slot) { try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return false; G = JSON.parse(s); migrate(); return true; } catch (e) { return false; } }
 function slotInfo(slot) {
   try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return null; const g = JSON.parse(s); return { name: g.player.name, party: g.parties[g.player.party].short, date: fmtDate(g.week), premier: g.gov && g.gov.premier === 'PLAYER' }; } catch (e) { return null; }

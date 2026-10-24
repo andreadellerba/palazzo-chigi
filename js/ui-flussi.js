@@ -81,12 +81,13 @@ function runAction(id) {
   if (a.custom) { a.custom(); return; }
   if (!spendPC(actionCost(a))) return toast('Capitale politico insufficiente', 'bad');
   markUsed(id);
+  const before = snap();
   if (a.funds) G.funds -= a.funds;
   const r = a.run();
   vib();
   renderGame();
   if (G.phase === 'formazione') { openFormation(); return; }
-  resultSheet(a.ico, a.n, r);
+  flyResult(a.ico, a.n, diffChips(before, snap()), r);
 }
 function resultSheet(ico, title, text) {
   openSheet(`<div class="center"><div style="font-size:52px" class="pop">${ico}</div><h2 class="mt">${esc(title)}</h2><p class="muted">${text}</p></div><button class="btn pri block mt" onclick="closeSheet()">OK</button>`);
@@ -111,7 +112,7 @@ function doComizio(rid) {
   G.player.fama = clamp(G.player.fama + 1, 0, 100);
   if (!isLeader()) G.player.seguito = clamp(G.player.seguito + 1, 0, 100);
   addNews(`${G.player.name} in ${r.n}: ${pick(['piazza piena', 'sala gremita', 'incontro con i lavoratori', 'tour nei mercati rionali', 'confronto con gli studenti'])}.`, 'mio');
-  renderGame(); toast(`📣 Comizio in ${r.n}: consenso locale in crescita`, 'good');
+  renderGame(); flyResult('📣', `Comizio in ${r.n}`, [{ t: 'Radicamento locale ▲', g: true }, { t: 'Fama +1', g: true }, { t: 'Fondi −20k€', g: false }]);
 }
 function doVisita(rid) {
   if (usedThisWeek('visita')) return toast('Hai già fatto una visita questa settimana', 'bad');
@@ -129,7 +130,7 @@ function doIncontro(id) {
   const g = Math.round(4 + G.player.car * 0.8 + rnd(-2, 3));
   addRel(id, myPid(), g);
   if (G.gov && G.gov.sat[id] !== undefined && isPremier()) G.gov.sat[id] = clamp(G.gov.sat[id] + 4, 0, 100);
-  renderGame(); resultSheet('☕', `Incontro con ${P(id).leader}`, `Colloquio cordiale. Rapporto con ${esc(P(id).short)} +${g}.`);
+  renderGame(); flyResult('☕', `Incontro con ${P(id).leader}`, [{ t: `Rapporto con ${P(id).short} +${g}`, g: true }]);
 }
 function doPropose(id, opt, type) {
   const cost = isPremier() ? { ddl: 3, dl: 5, cost: 6 }[type] : 2;
@@ -264,13 +265,19 @@ function nextWeek() {
 function showWeekSummary(s, before) {
   const dPoll = myParty().poll - before.poll, dSp = G.econ.spread - before.spread;
   const dA = G.gov && before.appr !== null ? G.gov.approval - before.appr : null;
-  const votes = s.votes.map(({ bill, v }) => `<div class="li"><div class="grow"><div class="small"><b>${esc(billName(bill))}</b></div><div class="tiny muted">${v.h === 'C' ? 'Camera' : 'Senato'}${v.fiducia ? ' · fiducia' : ''} · Sì ${v.yes} · No ${v.no}${G.myPersonal[bill.id] && G.player.parl === v.h ? ' · <b class="gold">il tuo voto: ' + VLAB[G.myPersonal[bill.id]] + '</b>' : ''}</div></div><span class="tag ${v.passed ? 'g' : 'b'}">${v.passed ? 'approvato' : 'respinto'}</span></div>`).join('');
-  openSheet(`<div class="center"><div class="tiny muted">SETTIMANA DEL</div><h2 class="flip">${fmtDate(G.week)}</h2></div>
-    <div class="grid3 mt"><div class="kpi center"><div class="l">${esc(myParty().short)}</div><div class="v">${fmt1(myParty().poll)}%</div><div class="tiny ${dPoll >= 0 ? 'good' : 'bad'}">${dPoll >= 0 ? '▲' : '▼'} ${fmt1(Math.abs(dPoll))}</div></div>
-    ${dA !== null ? `<div class="kpi center"><div class="l">Governo</div><div class="v">${fmt0(G.gov.approval)}%</div><div class="tiny ${dA >= 0 ? 'good' : 'bad'}">${dA >= 0 ? '▲' : '▼'} ${fmt1(Math.abs(dA))}</div></div>` : `<div class="kpi center"><div class="l">Fama</div><div class="v">${fmt0(G.player.fama)}</div></div>`}
-    <div class="kpi center"><div class="l">Spread</div><div class="v">${fmt0(G.econ.spread)}</div><div class="tiny ${dSp <= 0 ? 'good' : 'bad'}">${dSp >= 0 ? '▲' : '▼'} ${fmt0(Math.abs(dSp))}</div></div></div>
-    ${votes ? `<h4 class="mt2">Votazioni in aula</h4><div class="card tight mt"><div class="list">${votes}</div></div>` : ''}
-    <h4 class="mt2">Rassegna stampa</h4><div class="card tight mt"><div class="list">${s.news.length ? s.news.map(n => `<div class="news-item"><span class="nk-${n.k}">${esc(n.t)}</span></div>`).join('') : '<div class="small dim">Settimana tranquilla.</div>'}</div></div>
+  // la notizia più importante va in prima pagina
+  const prio = { mio: 5, bad: 4, good: 3, gov: 2, parl: 2, eco: 1, info: 0 };
+  const sorted = s.news.slice().sort((a, b) => (prio[b.k] || 0) - (prio[a.k] || 0));
+  const top = sorted[0], rest = sorted.slice(1);
+  const kpi = (l, v, d, good, c) => `<div class="kpi center" style="--kc:${c}"><div class="l">${l}</div><div class="v">${v}</div>${d !== null ? `<div class="tiny ${good ? 'good' : 'bad'}">${d}</div>` : ''}</div>`;
+  const votes = s.votes.map(({ bill, v }) => `<span class="eff ${v.passed ? 'g' : 'b'}">${v.passed ? '✓' : '✗'} ${esc(billName(bill))}${G.myPersonal[bill.id] && G.player.parl === v.h ? ` · tu: ${VLAB[G.myPersonal[bill.id]]}` : ''}</span>`).join('');
+  openSheet(`<div class="paper"><div class="mast">IL QUOTIDIANO DI ROMA</div><div class="tiny center muted">${fmtDate(G.week).toUpperCase()} · SETTIMANA ${G.week}</div>
+    ${top ? `<div class="headline nk-${top.k}">${esc(top.t)}</div>` : '<div class="headline">Settimana tranquilla nei palazzi della politica</div>'}</div>
+    <div class="grid3 mt">${kpi(esc(myParty().short), fmt1(myParty().poll) + '%', (dPoll >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dPoll)), dPoll >= 0, myParty().color)}
+    ${dA !== null ? kpi('Governo', fmt0(G.gov.approval) + '%', (dA >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dA)), dA >= 0, '#ffd60a') : kpi('Fama', fmt0(G.player.fama), null, true, '#a78bfa')}
+    ${kpi('Spread', fmt0(G.econ.spread), (dSp >= 0 ? '▲ ' : '▼ ') + fmt0(Math.abs(dSp)), dSp <= 0, '#f472b6')}</div>
+    ${votes ? `<h4 class="mt2">Votazioni in aula</h4><div class="effs mt">${votes}</div>` : ''}
+    ${rest.length ? `<h4 class="mt2">In breve</h4><div class="mt">${rest.slice(0, 4).map(n => `<div class="news-item"><span class="nk-${n.k}">${esc(n.t)}</span></div>`).join('')}</div>${rest.length > 4 ? `<details class="mt"><summary class="small gold">Altre ${rest.length - 4} notizie</summary>${rest.slice(4).map(n => `<div class="news-item"><span class="nk-${n.k}">${esc(n.t)}</span></div>`).join('')}</details>` : ''}` : ''}
     <button class="btn ${G.queue.length ? 'gold' : 'pri'} block mt2" onclick="closeSheet();${G.queue.length ? 'setTimeout(processQueue,280)' : ''}">${G.queue.length ? `Continua · ${G.queue.length} da decidere ›` : 'Continua'}</button>`);
 }
 function processQueue() {
@@ -312,6 +319,7 @@ function handleSpecial(sp) {
       G.flags.refLost && isPremier() ? () => { G.flags.refLost = false; confirmSheet('Ti dimetti?', '<p class="muted">Avevi legato il governo all’esito del referendum. Dimettersi è coerente, restare ti costerà credibilità.</p>', 'Mi dimetto', () => { openCrisis('referendum'); renderGame(); openFormation(); }, 'red'); } : null);
   }
   if (k === 'voti') return openVotes(sp.ids);
+  if (k === 'minprop') return openMinisterProposal(sp);
   if (k === 'primarie') return openPrimarie();
   if (k === 'candidatura') return openCandidatura();
   if (k === 'promozione') { const t = promote(sp.rank); return specialCard('📈', 'Promozione!', t); }
@@ -988,10 +996,10 @@ window.addEventListener('load', () => { showSplash(); });
 // ============================================================
 let VOTI = null;
 const VLAB = { yes: 'Sì', no: 'No', abst: 'Astensione' };
-function openVotes(ids) {
-  const bills = ids.map(id => G.bills.find(b => b.id === id)).filter(b => b && !b.dead && b.stages[b.stage] && b.stages[b.stage].k === 'aula');
-  if (!bills.length) { G.queue.shift(); return processQueue(); }
-  VOTI = { bills: bills.map(b => b.id), sel: {} };
+function openVotes(ids, direct) {
+  const bills = ids.map(id => G.bills.find(b => b.id === id)).filter(b => b && !b.dead && b.stages[b.stage] && b.stages[b.stage].k === 'aula' && b.askedAt !== b.stage);
+  if (!bills.length) { if (direct) return toast('Hai già votato tutto'); G.queue.shift(); return processQueue(); }
+  VOTI = { bills: bills.map(b => b.id), sel: {}, direct };
   bills.forEach(b => { const h = b.stages[b.stage].h; const line = isPremier() && b.proposer === 'GOV' ? 'yes' : (G.myVotes[b.id] || partyLine(b, h)); VOTI.sel[b.id] = { group: line, me: line, fid: !!b.fiducia, line }; });
   openSheet('', { full: true, locked: true });
   renderVotes();
@@ -1057,5 +1065,9 @@ function confirmVotes() {
       } else applyFx({ rap: 1 });
     }
   });
-  closeSheet(); doneQueue();
+  const direct = VOTI.direct;
+  closeSheet();
+  // rimuove dalla coda un'eventuale scheda di voto ormai compilata
+  if (direct) { G.queue = G.queue.filter(q => !(q.sp && q.sp.k === 'voti' && q.sp.ids.every(id => { const b = G.bills.find(x => x.id === id); return !b || b.askedAt === b.stage; }))); renderGame(); flyResult('🗳', 'Voti registrati', [], 'Il risultato arriva con la settimana successiva'); }
+  else doneQueue();
 }

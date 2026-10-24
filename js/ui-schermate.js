@@ -36,7 +36,7 @@ function topbar() {
   chips.push(st('#22c55e', `Fondi <b>${euro(G.funds)}</b>`));
   chips.push(st('#fb923c', `Stress <b class="${p.stress > 70 ? 'bad' : ''}">${fmt0(p.stress)}</b>`));
   return `<div class="topbar"><div class="row between"><div class="grow"><div class="date"><span class="flip" key="${G.week}">${fmtDate(G.week)}</span></div><div class="role ellipsis">${esc(roleLabel())}</div></div>
-    <span class="pill pc" onclick="toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')">⚡ ${G.pc}/${pcMax()}</span><button class="iconbtn" onclick="openMenu()">☰</button></div>
+    <span class="pill pc" onclick="toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')">⚡ ${G.pc}/${pcMax()}</span>${(() => { const n = urgentCount(); return `<button class="iconbtn bell" onclick="openNotifications()">🔔${n ? `<span class="bdg">${n}</span>` : ""}</button>`; })()}<button class="iconbtn" onclick="openMenu()">☰</button></div>
     <div class="chips">${chips.join('')}</div></div>`;
 }
 function tickerHTML() {
@@ -50,7 +50,7 @@ function fabHTML() {
   return `<button class="fab" onclick="nextWeek()">Settimana successiva <span style="opacity:.75;font-weight:600">· ${fmtDate(G.week + 1, true)}</span> ▸</button>`;
 }
 function navHTML() {
-  const live = G.bills.filter(b => !b.dead && b.stages[b.stage] && b.stages[b.stage].k === 'aula').length;
+  const live = typeof pendingVoteIds === 'function' ? pendingVoteIds().length : 0;
   return `<nav class="tabs-mobile2"><div class="tbar">${TABS.map(t => `<button type="button" class="tbtn ${UI.tab === t.id ? 'active' : ''}" style="--tc:${t.c}" onclick="goTab('${t.id}')" title="${t.n}">${t.svg}<span class="tl">${t.n}</span>${t.id === 'aula' && live && UI.tab !== 'aula' ? `<span class="badge">${live}</span>` : ''}</button>`).join('')}</div></nav>`;
 }
 function tabContent() {
@@ -83,6 +83,9 @@ function homeTab() {
       <div><div class="tiny muted">Maggioranza</div><b>${gs}</b><span class="small muted">/${totalSeats('C')} Camera</span><br><b>${gss}</b><span class="small muted">/${totalSeats('S')} Senato</span></div></div></div>`;
   }
   h += `</div>`;
+  // da fare ora e azioni consigliate
+  h += todoHTML();
+  h += recHTML();
   // scadenze
   const dl = [];
   if (G.cal.election > G.week) dl.push({ w: G.cal.election, t: '🗳 Elezioni politiche', s: fmtDate(G.cal.election) });
@@ -93,9 +96,6 @@ function homeTab() {
   G.referendums.filter(r => !r.done).forEach(r => dl.push({ w: r.w, t: `🗳 Referendum: ${getLaw(r.lawId).nome}`, s: fmtDate(r.w) }));
   dl.sort((a, b) => a.w - b.w);
   h += `<div class="sec"><h4>Prossime scadenze</h4></div><div class="card tight"><div class="list">${dl.slice(0, 4).map(x => `<div class="li"><div class="grow"><b class="small">${x.t}</b><div class="tiny muted">${x.s}</div></div><span class="tag ${x.w - G.week < 6 ? 'w' : ''}">${weeksLeft(x.w)}</span></div>`).join('')}</div></div>`;
-  // avvisi
-  const al = alertsList();
-  if (al.length) h += `<div class="sec"><h4>Da sapere</h4></div><div class="card tight"><div class="list">${al.map(a => `<div class="li ${a.on ? 'click' : ''}" ${a.on ? `onclick="${a.on}"` : ''}><span style="font-size:20px">${a.i}</span><div class="grow small">${a.t}</div>${a.on ? '<span class="dim">›</span>' : ''}</div>`).join('')}</div></div>`;
   // agenda
   const acts = availableActions();
   h += `<div class="sec"><h4>Agenda della settimana</h4><span class="small muted">⚡ ${G.pc} disponibili</span></div><div class="tiny muted" style="margin:-4px 2px 8px">Ogni azione si può fare una volta a settimana.</div><div class="actions">${acts.map(a => `<button class="act ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''}" style="--ac:${a.ac}" onclick="openAction('${a.id}')"><span class="c">${a.cost ? '⚡' + a.cost : ''}</span><span class="i">${a.ico}</span>${esc(a.n)}</button>`).join('')}</div>`;
@@ -141,7 +141,8 @@ function alertsList() {
 function leggiTab() {
   const cats = ['Tutte'].concat(Object.keys(LAW_CATS).filter(c => allLaws().some(l => l.cat === c)));
   let h = `<div class="row"><input id="lawq" placeholder="🔍 Cerca una legge (es. pensioni, cittadinanza)" value="${esc(UI.lawQ)}" oninput="UI.lawQ=this.value;$('#lawlist').innerHTML=lawListHTML()"></div>
-    <div class="scrollx mt">${cats.map(c => `<button class="fchip ${UI.lawCat === c ? 'on' : ''}" onclick="UI.lawCat='${c}';renderGame()">${LAW_CATS[c] || '📚'} ${c}</button>`).join('')}</div>`;
+    <div class="scrollx mt">${cats.map(c => `<button class="fchip ${UI.lawCat === c ? 'on' : ''}" onclick="UI.lawCat='${c}';renderGame()">${LAW_CATS[c] || '📚'} ${c}</button>`).join('')}</div>
+    <div class="scrollx mt"><span class="tiny muted" style="align-self:center;flex:none">Voglio migliorare:</span>${Object.keys(METRICS).map(m => `<button class="fchip ${UI.lawMetric === m ? 'on' : ''}" onclick="UI.lawMetric=UI.lawMetric==='${m}'?null:'${m}';renderGame()">${METRICS[m].ico} ${METRICS[m].n}</button>`).join('')}</div>`;
   if (!UI.howHidden) h += `<div class="card mt"><div class="row between"><h3>📜 Come si fa una legge</h3><button class="xbtn" onclick="UI.howHidden=1;renderGame()">✕</button></div><div class="howto mt">
     <div>Tocca una legge: vedi <b>com’è oggi</b> e le <b>riforme possibili</b>.</div>
     <div>Scegli la riforma e leggi <b>pro e contro</b>, chi è favorevole e la <b>previsione di voto</b>.</div>
@@ -156,6 +157,7 @@ function leggiTab() {
   return h;
 }
 function lawListHTML() {
+  if (UI.lawMetric) { const best = bestLawsFor(UI.lawMetric, 15); return `<div class="small muted mt">Le riforme che migliorano di più ${METRICS[UI.lawMetric].ico} <b>${METRICS[UI.lawMetric].n}</b>, partendo da quelle più vicine alle tue idee:</div>` + (best.length ? best.map(x => `<div class="card tight click mt" onclick="openLaw('${x.l.id}',${x.i})"><div class="tiny muted">${LAW_CATS[x.l.cat] || ''} ${esc(x.l.nome)}</div><b>${esc(x.l.opts[x.i].t)}</b>${effChipsHTML(x.effs, x.mine)}</div>`).join('') : '<div class="muted center mt2">Nessuna riforma disponibile.</div>'); }
   const q = UI.lawQ.trim().toLowerCase();
   const list = allLaws().filter(l => (UI.lawCat === 'Tutte' || l.cat === UI.lawCat) && (!q || (l.nome + ' ' + l.attuale + ' ' + l.opts.map(o => o.t).join(' ')).toLowerCase().includes(q)));
   if (!list.length) return '<div class="muted center mt2">Nessuna legge trovata</div>';
@@ -179,7 +181,7 @@ function openLaw(id, sel) {
   h += `<h4 class="mt2">Le possibili riforme</h4>`;
   l.opts.forEach((op, i) => {
     if (i === cur) return;
-    h += `<button class="choice ${i === sel ? 'sel' : ''}" onclick="openLawRefresh('${id}',${i})"><div class="row between"><span class="t">${esc(op.t)}</span>${op.costo ? `<span class="tag ${op.costo - (l.opts[cur].costo || 0) > 0 ? 'b' : 'g'}">${op.costo - (l.opts[cur].costo || 0) > 0 ? '+' : ''}${fmt1(op.costo - (l.opts[cur].costo || 0))} mld</span>` : ''}</div><div class="small muted" style="margin-top:4px">${esc(op.d)}</div>${axisMini(l, op.pos)}</button>`;
+    h += `<button class="choice ${i === sel ? 'sel' : ''}" onclick="openLawRefresh('${id}',${i})"><div class="row between"><span class="t">${esc(op.t)}</span>${op.costo ? `<span class="tag ${op.costo - (l.opts[cur].costo || 0) > 0 ? 'b' : 'g'}">${op.costo - (l.opts[cur].costo || 0) > 0 ? '+' : ''}${fmt1(op.costo - (l.opts[cur].costo || 0))} mld</span>` : ''}</div><div class="small muted" style="margin-top:4px">${esc(op.d)}</div>${effChipsHTML(effectsOf(l, cur, i), lawGain(myPid(), l, cur, i))}${axisMini(l, op.pos)}</button>`;
   });
   h += `<h4 class="mt2">Pro e contro di «${esc(o.t)}»</h4><div class="mt">${proConHTML(imp)}</div>`;
   h += `<div class="small mt">Per il tuo partito: ${imp.mine > 0.2 ? '<b class="good">in linea con le tue idee</b>' : imp.mine < -0.2 ? '<b class="bad">contraria alle tue idee</b> (la tua base potrebbe non capire)' : '<b class="warn">neutra</b>'}</div>`;
@@ -229,6 +231,7 @@ function lawActionsHTML(l, sel) {
 function aulaTab() {
   const h0 = UI.aula;
   let h = `<div class="seg"><button class="${h0 === 'C' ? 'on' : ''}" onclick="UI.aula='C';renderGame()">Camera (${totalSeats('C')})</button><button class="${h0 === 'S' ? 'on' : ''}" onclick="UI.aula='S';renderGame()">Senato (${totalSeats('S')})</button></div>`;
+  h = aulaBanner() + h;
   h += `<div class="card mt">${hemicycle(h0, { id: 'hemi-main', empty: true, ring: true })}<div class="mt">${hemiLegend(h0)}</div>`;
   if (G.gov) h += `<div class="small mt">Maggioranza di governo: <b>${govSeats(h0)}</b> seggi su ${totalSeats(h0)} (${govSeats(h0) >= majority(h0) ? '<span class="good">autosufficiente</span>' : '<span class="bad">sotto la maggioranza</span>'})</div>`;
   h += `<div class="tiny dim mt">Presidente ${h0 === 'C' ? 'della Camera: ' + INSTITUTIONS.presCamera : 'del Senato: ' + INSTITUTIONS.presSenato}</div></div>`;
@@ -242,6 +245,16 @@ function aulaTab() {
   }
   return h;
 }
+function aulaBanner() {
+  const pv = pendingVoteIds();
+  if (pv.length) return `<div class="card hero" style="--pc:#38bdf8"><div class="row"><span style="font-size:34px">🗳</span><div class="grow"><b>Devi votare ${pv.length} ${pv.length > 1 ? 'provvedimenti' : 'provvedimento'}</b><div class="tiny muted">Si vota in aula questa settimana. Se non decidi, il tuo gruppo segue la linea del partito.</div></div></div><button class="btn gold block mt" onclick="openVotesNow()">Vota ora</button></div>`;
+  const seats = myParty().seatsC + myParty().seatsS;
+  let why;
+  if (isPremier()) why = 'Nessun provvedimento del tuo governo è al voto questa settimana.';
+  else if (!G.player.parl && !(isLeader() && seats)) why = isLeader() ? `${esc(myParty().short)} non ha parlamentari: voterai dopo le elezioni, se superi il 3%. Intanto segui cosa fanno gli altri.` : 'Non sei in Parlamento: voterai quando sarai eletto deputato o senatore.';
+  else why = 'Nessun voto per te questa settimana. Quando un testo arriva in aula, te lo segnalo qui e nelle notifiche 🔔.';
+  return `<div class="card tight"><div class="row"><span style="font-size:24px">✅</span><div class="small muted grow">${why}</div></div></div>`;
+}
 function proposerLabel(b) {
   if (b.proposer === 'GOV') return isPremier() ? '<span class="tag o">Tuo governo</span>' : '<span class="tag">Governo</span>';
   if (b.proposer === 'PLAYER') return `<span class="tag o">Tua proposta</span>`;
@@ -252,12 +265,11 @@ function billCard(b) {
   const pr = predictVote(b);
   const inAula = s.k === 'aula';
   const myH = s.h || 'C';
-  const canVote = isLeader() && seatsOf(myPid(), myH) > 0 && b.proposer !== 'PLAYER' && !(isPremier() && b.proposer === 'GOV');
-  const mv = G.myVotes[b.id] || '';
   let h = `<div class="card" ${inAula ? 'style="border-color:rgba(255,181,71,.35)"' : ''}>
     <div class="row between"><span class="tag">${billTypeName(b)}</span>${proposerLabel(b)}</div>
     <div style="margin-top:8px"><b>${esc(billName(b))}</b></div>
     ${b.lawId ? `<div class="small muted">${esc(getLaw(b.lawId).nome)}</div>` : ''}
+    ${b.lawId ? effChipsHTML(effectsOf(getLaw(b.lawId), b.from, b.opt), lawGain(myPid(), getLaw(b.lawId), b.from, b.opt)) : ""}
     <div class="progress mt">${b.stages.map((x, i) => `<i class="${i < b.stage ? 'd' : i === b.stage ? 'c' : ''}"></i>`).join('')}</div>
     <div class="row between small mt"><span>${esc(stageLabel(b))}${s.k === 'comm' && b.wait > 0 && !b.stalled ? ` · ${b.wait} sett.` : ''}</span>${b.type === 'dl' ? `<span class="tag w">scade ${fmtDate(b.deadline, true)}</span>` : ''}</div>`;
   if (s.k === 'aula') h += `<div class="small mt">Previsione: <b class="${pr.passed ? 'good' : 'bad'}">${pr.passed ? 'passa' : 'bocciata'}</b> <span class="muted">(Sì ${pr.yes}, No ${pr.no}, Ast. ${pr.abst})</span></div>`;
@@ -266,8 +278,15 @@ function billCard(b) {
   if (isPremier() && b.proposer === 'GOV' && b.type !== 'manovra') h += `<button class="btn sm" onclick="withdrawBill(${b.id})">Ritira</button>`;
   if (isLeader() && !inGov(myPid()) && b.proposer === 'GOV') h += `<button class="btn sm" onclick="doObstr(${b.id})">🛑 Ostruzionismo · ⚡2</button>`;
   h += `</div>`;
-  if (canVote) h += `<div class="mt"><div class="tiny muted" style="font-weight:700;margin-bottom:4px">IL TUO GRUPPO VOTA ${seatsOf(myPid(), myH)} seggi</div><div class="seg"><button class="${!mv ? 'on' : ''}" onclick="setMyVote(${b.id},'')">Linea</button><button class="${mv === 'yes' ? 'on' : ''}" onclick="setMyVote(${b.id},'yes')">Sì</button><button class="${mv === 'abst' ? 'on' : ''}" onclick="setMyVote(${b.id},'abst')">Asten.</button><button class="${mv === 'no' ? 'on' : ''}" onclick="setMyVote(${b.id},'no')">No</button></div><div class="tiny dim" style="margin-top:4px">«Linea» = il gruppo vota secondo le idee del partito (${stance(myPid(), b, myH).s > 0.15 ? 'sì' : stance(myPid(), b, myH).s < -0.15 ? 'no' : 'astensione'}).</div></div>`;
-  else if (!isLeader() && G.player.parl && s.h === G.player.parl) h += `<div class="tiny muted mt">Voti con il tuo gruppo. Per votare diversamente usa «Dissenso in aula» nell’agenda.</div>`;
+  // il tuo voto: stato chiaro
+  if (inAula) {
+    const pend = pendingVoteIds().includes(b.id);
+    const mine = G.myPersonal[b.id] || G.myVotes[b.id];
+    const relevant = G.player.parl === s.h || (isLeader() && seatsOf(myPid(), s.h) > 0);
+    if (pend) h += `<button class="btn gold block mt" onclick="openVotes([${b.id}],true)">🗳 Al voto questa settimana · Vota</button>`;
+    else if (mine && relevant) h += `<div class="small mt">🗳 Il tuo voto: <b class="gold">${VLAB[mine]}</b> · risultato la prossima settimana</div>`;
+    else if (!relevant && !(isPremier() && b.proposer === 'GOV')) h += `<div class="tiny muted mt">Non voti su questo testo: ${G.player.parl ? 'si vota nell’altra Camera' : 'non sei in Parlamento'}.</div>`;
+  }
   return h + `</div>`;
 }
 function setMyVote(id, v) { if (v) G.myVotes[id] = v; else delete G.myVotes[id]; vib(); renderGame(); }
@@ -439,8 +458,11 @@ function alleanzeHTML() {
 // ============================================================
 function contiTab() {
   const e = G.econ;
-  const k = (l, v, cls, sub) => `<div class="kpi"><div class="l">${l}</div><div class="v ${cls || ''}">${v}</div>${sub ? `<div class="tiny muted">${sub}</div>` : ''}</div>`;
-  let h = `<div class="grid2">${k('Crescita PIL', sgn(e.pil) + '%', e.pil < 0 ? 'bad' : e.pil > 1 ? 'good' : '', 'annua')}${k('Deficit / PIL', fmt1(e.deficit) + '%', e.deficit > 3 ? 'bad' : 'good', 'limite UE 3%')}${k('Debito / PIL', fmt1(e.debito) + '%', e.debito > 140 ? 'bad' : '', 'circa ' + fmt0(e.debito * e.pilNom / 100) + ' mld')}${k('Spread BTP-Bund', fmt0(e.spread), e.spread > 200 ? 'bad' : e.spread < 100 ? 'good' : 'warn', 'punti base')}${k('Inflazione', fmt1(e.infl) + '%', e.infl > 3 ? 'bad' : '')}${k('Disoccupazione', fmt1(e.dis) + '%', e.dis > 8 ? 'bad' : '')}</div>`;
+  const k = (l, v, cls, sub, m) => `<div class="kpi ${m ? 'click' : ''}" ${m ? `onclick="openAdvice('${m}')"` : ''} style="--kc:${cls === 'bad' ? '#ff5c5c' : cls === 'good' ? '#2ecc71' : cls === 'warn' ? '#ffb547' : '#4b8bff'}"><div class="l">${l}</div><div class="v ${cls || ''}">${v}</div>${sub ? `<div class="tiny muted">${sub}</div>` : ''}${m ? '<div class="tiny" style="color:var(--tc);font-weight:700;margin-top:2px">Come migliorarlo ›</div>' : ''}</div>`;
+  const red = redMetrics();
+  let h = '';
+  if (red.length) h += `<div class="card hero" style="--pc:#ff5c5c"><h3>🚨 Indicatori in rosso</h3>${red.map(r => `<div class="li click" onclick="openAdvice('${r.k}')"><span class="nico u2">${METRICS[r.k].ico}</span><div class="grow small"><b>${esc(r.t)}</b><div class="tiny muted">Tocca per le leggi che aiutano</div></div><span class="btn sm">Rimedi</span></div>`).join('')}</div>`;
+  h += `<div class="grid2">${k('Crescita PIL', sgn(e.pil) + '%', e.pil < 0.4 ? 'bad' : e.pil > 1 ? 'good' : '', 'annua', 'pil')}${k('Deficit / PIL', fmt1(e.deficit) + '%', e.deficit > 3 ? 'bad' : 'good', 'limite UE 3%', 'deficit')}${k('Debito / PIL', fmt1(e.debito) + '%', e.debito > 140 ? 'bad' : '', 'circa ' + fmt0(e.debito * e.pilNom / 100) + ' mld', 'deficit')}${k('Spread BTP-Bund', fmt0(e.spread), e.spread > 200 ? 'bad' : e.spread < 100 ? 'good' : 'warn', 'punti base', 'spread')}${k('Inflazione', fmt1(e.infl) + '%', e.infl > 3 ? 'bad' : '', '', 'prezzi')}${k('Disoccupazione', fmt1(e.dis) + '%', e.dis > 7.5 ? 'bad' : '', '', 'lavoro')}</div>`;
   h += `<div class="row wrap mt" style="gap:6px"><span class="tag o">Rating ${e.rating}</span><span class="tag ${e.pde ? 'b' : 'g'}">${e.pde ? 'In procedura UE per deficit eccessivo' : 'Fuori dalla procedura UE'}</span><span class="tag">PIL nominale ${fmt0(e.pilNom)} mld</span></div>`;
   const hist = G.hist.econ.slice(-UI.range);
   if (hist.length > 1) {
