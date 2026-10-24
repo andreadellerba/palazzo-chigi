@@ -1389,9 +1389,20 @@ function calendarTick() {
 //  SALVATAGGI
 // ============================================================
 const SAVE_PREFIX = 'palazzochigi_';
-function saveGame(slot) { try { localStorage.setItem(SAVE_PREFIX + slot, JSON.stringify(G)); return true; } catch (e) { return false; } }
-function migrate() { G.pacts = G.pacts || []; if (G.player && !G.player.av && typeof rerollPlayerAvatar === 'function') rerollPlayerAvatar(); G.stats.tv = G.stats.tv || 0; if (G.gov && !G.gov.premierParty) G.gov.premierParty = largestIn(G.gov.parties); G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
-function loadGame(slot) { try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return false; G = JSON.parse(s); migrate(); return true; } catch (e) { return false; } }
+function saveGame(slot) {
+  try { localStorage.setItem(SAVE_PREFIX + slot, JSON.stringify(G)); return true; }
+  catch (e) {
+    // memoria del telefono piena: alleggeriamo lo storico e riproviamo
+    try {
+      G.news = (G.news || []).slice(0, 120); G.feed = (G.feed || []).slice(0, 15); G.memory = (G.memory || []).slice(-80);
+      ['polls', 'econ', 'me'].forEach(k => { if (G.hist && G.hist[k]) G.hist[k] = G.hist[k].slice(-160); });
+      G.bills = (G.bills || []).filter(b => !b.dead || (b.votes && b.votes.length && G.week - b.votes[b.votes.length - 1].w < 60));
+      localStorage.setItem(SAVE_PREFIX + slot, JSON.stringify(G)); return true;
+    } catch (e2) { if (typeof toast === 'function') toast('Salvataggio non riuscito: memoria del telefono piena', 'bad'); return false; }
+  }
+}
+function migrate() { G.pacts = G.pacts || []; G.flags = G.flags || {}; G.queue = (G.queue || []).filter(q => q && (q.sp || (q.id && EVENT_BY_ID[q.id]))); G.hist = G.hist || {}; G.hist.me = G.hist.me || []; G.enacted = G.enacted || []; G.promises = G.promises || []; G.customLaws = G.customLaws || []; if (typeof LAWS !== 'undefined') LAWS.forEach(l => { if (G.laws[l.id] === undefined) G.laws[l.id] = l.cur; }); if (typeof ensureStory === 'function') ensureStory(); if (G.player && !G.player.av && typeof rerollPlayerAvatar === 'function') rerollPlayerAvatar(); G.stats.tv = G.stats.tv || 0; if (G.gov && !G.gov.premierParty) G.gov.premierParty = largestIn(G.gov.parties); G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
+function loadGame(slot) { try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return false; G = JSON.parse(s); migrate(); return true; } catch (e) { if (typeof toast === 'function') toast('Errore nel caricare la partita: ' + e.message, 'bad'); return false; } }
 function slotInfo(slot) {
   try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return null; const g = JSON.parse(s); return { name: g.player.name, party: g.parties[g.player.party].short, date: fmtDate(g.week), premier: g.gov && g.gov.premier === 'PLAYER' }; } catch (e) { return null; }
 }

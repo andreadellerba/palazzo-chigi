@@ -232,7 +232,12 @@ function showSplash() {
     <div class="tiny dim mt2">Partiti, leader, seggi, leggi e istituzioni reali. Eventi e risultati sono simulati.</div>
   </div>`;
 }
-function continueGame() { if (loadGame('auto')) { UI.tab = 'home'; renderGame(); afterLoad(); } }
+function continueGame() {
+  if (!loadGame('auto')) return toast('Nessuna partita da continuare', 'bad');
+  UI.tab = 'home';
+  try { renderGame(); } catch (e) { toast('Errore: ' + esc(e.message), 'bad'); console.error(e); return; }
+  afterLoad();
+}
 function openLoad() {
   const rows = ['1', '2', '3', 'auto'].map(s => { const i = slotInfo(s); return `<div class="li"><div class="grow"><b>${s === 'auto' ? 'Salvataggio automatico' : 'Slot ' + s}</b><div class="small muted">${i ? `${esc(i.name)} · ${esc(i.party)} · ${esc(i.date)}${i.premier ? ' · premier' : ''}` : 'vuoto'}</div></div>${i ? `<button class="btn sm pri" onclick="closeSheet(true);if(loadGame('${s}')){renderGame();afterLoad();}">Carica</button>` : ''}</div>`; }).join('');
   openSheet(`${head('Carica partita')}<div class="list">${rows}</div><label class="lbl">Importa un file di salvataggio</label><input type="file" accept=".json,application/json" onchange="importSave(this.files[0])">`);
