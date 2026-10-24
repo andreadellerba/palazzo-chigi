@@ -616,3 +616,12 @@ html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolut
 .kpi .v.bad, .stat b.bad, .st4-v.bad { color: var(--bad); }
 .kpi .v.good, .stat b.good, .st4-v.good { color: var(--good); }
 .kpi .v.warn, .stat b.warn { color: var(--warn); }
+/* Regola le leggi */
+.tsum { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 14px; border-bottom: 1px solid var(--line); }
+.tsum:last-of-type { border-bottom: 0; }
+.tsum.g b { color: var(--good); } .tsum.b b { color: var(--bad); }
+.card.tuned { border-color: var(--oro); box-shadow: 0 0 0 1px var(--oro) inset; }
+.tune-val { font-weight: 700; font-size: 15px; margin: 4px 0 2px; }
+.tune-rail { position: relative; padding: 6px 0; }
+.tune-rail input { width: 100%; accent-color: var(--oro); height: 26px; margin: 0; }
+.tune-rail .now { position: absolute; top: 0; width: 2px; height: 8px; margin-left: -1px; background: var(--muted); border-radius: 1px; pointer-events: none; }

@@ -137,6 +137,7 @@ function leggiTab() {
   const live = G.bills.filter(b => !b.dead).length;
   h += `<div class="card tight mt click" onclick="goTab('aula')"><div class="row">${medal('vote', 44)}<div class="grow"><b>${live} provvedimenti in Parlamento</b><div class="small muted">Tuoi, del governo e degli altri partiti</div></div>${icon('chevron', 18)}</div></div>`;
   if (isPremier() || isLeader() || G.player.parl) h += `<button class="btn block" onclick="openCustomLaw()">${icon('pen')} Scrivi una nuova legge</button>`;
+  h += `<button class="btn gold block mt" onclick="openTuner()">${icon('gear')} Regola le leggi attuali</button>`;
   h += sec(UI.lawMetric ? `Per migliorare: ${METRICS[UI.lawMetric].n}` : 'Il catalogo delle leggi') + `<div id="lawlist">${lawListHTML()}</div>`;
   if (G.enacted.length) h += sec('Ultime leggi cambiate') + `<div class="card tight"><div class="list">${G.enacted.slice(0, 12).map(e => { const l = getLaw(e.id); return `<div class="li click" onclick="openLaw('${e.id}')">${icon(CAT_ICON[l.cat] || 'doc')}<div class="grow"><div class="small"><b>${esc(l.opts[e.to].t)}</b></div><div class="tiny muted">${fmtDate(e.w, true)} · ${{ player: 'tuo governo', aigov: 'governo', parl: 'Parlamento', playerparl: 'tua proposta', revert: 'annullata', consulta: 'Consulta' }[e.by] || ''}</div></div></div>`; }).join('')}</div></div>`;
   return h;
