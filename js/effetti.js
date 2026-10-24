@@ -3,12 +3,12 @@
 // ============================================================
 // metriche: per ognuna "meglio" se il valore va nella direzione indicata
 const METRICS = {
-  pil:     { ico: '📈', n: 'PIL',        good: 1,  tip: 'Crescita economica' },
-  deficit: { ico: '💶', n: 'Deficit',    good: -1, tip: 'Conti pubblici' },
-  spread:  { ico: '📉', n: 'Spread',     good: -1, tip: 'Fiducia dei mercati' },
-  lavoro:  { ico: '👷', n: 'Lavoro',     good: 1,  tip: 'Occupazione' },
-  prezzi:  { ico: '🛒', n: 'Prezzi',     good: -1, tip: 'Inflazione' },
-  consenso:{ ico: '🙂', n: 'Consenso',   good: 1,  tip: 'Gradimento degli italiani' },
+  pil:     { ico: 'trend',     n: 'PIL',        good: 1,  tip: 'Crescita economica' },
+  deficit: { ico: 'euro',      n: 'Deficit',    good: -1, tip: 'Conti pubblici' },
+  spread:  { ico: 'chartdown', n: 'Spread',     good: -1, tip: 'Fiducia dei mercati' },
+  lavoro:  { ico: 'briefcase', n: 'Lavoro',     good: 1,  tip: 'Occupazione' },
+  prezzi:  { ico: 'cart',      n: 'Prezzi',     good: -1, tip: 'Inflazione' },
+  consenso:{ ico: 'smile',     n: 'Consenso',   good: 1,  tip: 'Gradimento degli italiani' },
 };
 // variazioni di una riforma rispetto a oggi (valori grezzi)
 function effectsRaw(law, from, to) {
@@ -33,8 +33,8 @@ function effectsOf(law, from, to) {
 }
 function effChipsHTML(effs, mine) {
   if (!effs.length && mine === undefined) return '';
-  let h = effs.map(e => `<span class="eff ${e.good ? 'g' : 'b'}">${METRICS[e.k].ico} ${METRICS[e.k].n} ${e.up ? '▲' : '▼'}${e.big ? (e.up ? '▲' : '▼') : ''}</span>`).join('');
-  if (mine !== undefined && Math.abs(mine) > 0.2) h += `<span class="eff ${mine > 0 ? 'g' : 'b'}">${mine > 0 ? '👍 Piace al tuo partito' : '👎 Contro le tue idee'}</span>`;
+  let h = effs.map(e => `<span class="eff ${e.good ? 'g' : 'b'}">${icon(METRICS[e.k].ico, 13)} ${METRICS[e.k].n} ${e.up ? '▲' : '▼'}${e.big ? (e.up ? '▲' : '▼') : ''}</span>`).join('');
+  if (mine !== undefined && Math.abs(mine) > 0.2) h += `<span class="eff ${mine > 0 ? 'g' : 'b'}">${mine > 0 ? icon('smile', 13) + ' Piace al tuo partito' : icon('frown', 13) + ' Contro le tue idee'}</span>`;
   if (!effs.length) h += '<span class="eff n">Nessun effetto economico</span>';
   return `<div class="effs">${h}</div>`;
 }
@@ -75,7 +75,7 @@ function redMetrics() {
 function openAdvice(metric) {
   const m = METRICS[metric];
   const list = bestLawsFor(metric, 6);
-  let h = head(`${m.ico} Migliorare: ${m.n}`, m.tip);
+  let h = `<div class="sheet-head"><div class="row grow">${medal(m.ico, 52)}<div class="grow"><h2 style="font-size:22px">Migliorare: ${m.n}</h2><div class="muted small">${m.tip}</div></div></div><button class="xbtn" onclick="closeSheet()">${icon('x', 18)}</button></div>`;
   const extra = {
     deficit: 'In manovra: scegli più coperture (spending review, contributo delle banche, taglio dei bonus) e meno spese.',
     spread: 'Anche una «Missione a Bruxelles», conti in ordine e un governo stabile abbassano lo spread.',
@@ -84,11 +84,11 @@ function openAdvice(metric) {
     lavoro: 'In manovra: decontribuzione per chi assume e investimenti pubblici.',
     prezzi: 'In manovra: il fondo contro il caro bollette raffredda i prezzi.',
   }[metric];
-  if (extra) h += `<div class="tip"><b class="h">💡 Idea</b><div class="small" style="margin-top:4px">${extra}</div></div>`;
-  h += `<h4>Leggi che aiutano</h4>`;
+  if (extra) h += `<div class="tip">${icon('bulb')}<div><b class="h">Idea</b><div class="small" style="margin-top:4px">${extra}</div></div></div>`;
+  h += sec('Leggi che aiutano');
   if (!list.length) h += '<div class="small muted mt">Nessuna riforma disponibile migliora questo indicatore in modo sensibile.</div>';
   list.forEach(x => {
-    h += `<button class="choice" onclick="closeSheet();openLaw('${x.l.id}',${x.i})"><div class="tiny muted">${LAW_CATS[x.l.cat] || ''} ${esc(x.l.nome)}</div><div class="t">${esc(x.l.opts[x.i].t)}</div>${effChipsHTML(x.effs, x.mine)}</button>`;
+    h += `<button class="choice" onclick="closeSheet();openLaw('${x.l.id}',${x.i})"><div class="tiny muted">${icon(LAW_CATS[x.l.cat] || 'doc', 14)} ${esc(x.l.nome)}</div><div class="t">${esc(x.l.opts[x.i].t)}</div>${effChipsHTML(x.effs, x.mine)}</button>`;
   });
   openSheet(h);
 }

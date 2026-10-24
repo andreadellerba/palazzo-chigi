@@ -5,8 +5,32 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let UI = { tab: 'home', map: 'primo', aula: 'C', lawCat: 'Tutte', lawQ: '', range: 52, partiti: 'sondaggi', scroll: {} };
 
-function partyChip(pid) { const p = G.parties[pid]; if (!p) return pid === 'ALT' ? '<span class="chip" style="--c:#888">Altri</span>' : ''; return `<span class="chip" style="--c:${p.color}">${esc(p.short)}</span>`; }
-function sym(pid, big) { const p = G.parties[pid]; return `<div class="sym ${big ? 'big' : ''}" style="--c:${p.color}">${esc(p.symbol && p.mine ? p.symbol : p.short)}</div>`; }
+// simbolo del partito: logo ufficiale libero se c'è, altrimenti uno stemma disegnato (colore, iniziali, anello d'oro)
+function partyDef(pid) { return (G && G.parties && G.parties[pid]) || PARTIES_DEF.find(x => x.id === pid); }
+function partyMark(pid, size) {
+  size = size || 20;
+  const d = partyDef(pid);
+  if (!d) return `<span class="pmark em" style="--s:${size}px;--c:#7a7f92;--f:${size * .4}px">·</span>`;
+  const L = typeof LOGHI !== 'undefined' && !d.mine ? LOGHI[pid] : null;
+  const src = L ? (L.r > 1.6 ? L.m : L.src) : null;
+  if (src) return `<span class="pmark ${L.bg ? 'pad' : ''}" style="--s:${size}px;${L.bg ? `--lb:${L.bg}` : ''}"><img src="${src}" alt=""></span>`;
+  return emblem(d.mine && d.symbol ? d.symbol : d.short, d.color, size);
+}
+function emblem(t, color, size) {
+  t = String(t || '?');
+  const ic = ICON_PATHS[t] ? t : EMO_ICON[t];
+  if (ic) return `<span class="pmark em ic" style="--s:${size}px;--c:${color}">${icon(ic)}</span>`;
+  const n = [...t].length, k = n <= 1 ? .52 : n === 2 ? .4 : .32;
+  return `<span class="pmark em" style="--s:${size}px;--c:${color};--f:${(size * k).toFixed(1)}px">${esc(t)}</span>`;
+}
+// simbolo grande per la scheda del partito (logo intero, anche orizzontale)
+function partyLogoBig(pid) {
+  const d = partyDef(pid), L = typeof LOGHI !== 'undefined' && d && !d.mine ? LOGHI[pid] : null;
+  if (L && L.r > 1.2) return `<span class="plogo-w" style="--lb:${L.bg || '#fff'}"><img src="${L.src}" alt="${esc(d.name)}"></span>`;
+  return partyMark(pid, 96);
+}
+function partyChip(pid) { const p = G.parties[pid]; if (!p) return pid === 'ALT' ? '<span class="chip nologo" style="--c:#888">Altri</span>' : ''; return `<span class="chip" style="--c:${p.color}">${partyMark(pid, 19)}${esc(p.short)}</span>`; }
+function sym(pid, big) { return partyMark(pid, big ? 64 : 42); }
 function barH(v, max, color, thin) { return `<div class="bar ${thin ? 'thin' : ''}"><i style="width:${clamp(v / max * 100, 0, 100)}%;--c:${color || 'var(--blu)'}"></i></div>`; }
 function relColor(v) { return v > 25 ? 'var(--good)' : v < -25 ? 'var(--bad)' : 'var(--warn)'; }
 function relColorHex(v) { return v > 25 ? '#2ecc71' : v < -25 ? '#ff5c5c' : '#ffb547'; }
@@ -43,7 +67,7 @@ function closeSheet(all) {
   }
 }
 function replaceSheet(html) { const l = layers[layers.length - 1]; if (!l) return openSheet(html); l.el.querySelector('.sheet').innerHTML = (l.el.classList.contains('full') ? '' : '<div class="grab"></div>') + html; l.el.querySelector('.sheet').scrollTop = 0; return l.el.querySelector('.sheet'); }
-function head(title, sub) { return `<div class="sheet-head"><div class="grow"><h2>${title}</h2>${sub ? `<div class="muted small">${sub}</div>` : ''}</div><button class="xbtn" onclick="closeSheet()">✕</button></div>`; }
+function head(title, sub) { return `<div class="sheet-head"><div class="grow"><h2>${title}</h2>${sub ? `<div class="muted small">${sub}</div>` : ''}</div><button class="xbtn" onclick="closeSheet()">${icon('x', 18)}</button></div>`; }
 function confirmSheet(title, body, ok, cb, kind) {
   openSheet(`${head(title)}<div>${body}</div><div class="row mt2"><button class="btn block" onclick="closeSheet()">Annulla</button><button class="btn block ${kind || 'pri'}" id="okbtn">${ok}</button></div>`);
   $('#okbtn').onclick = () => { closeSheet(); cb(); };
@@ -55,8 +79,8 @@ function proConHTML(imp, opts) {
   opts = opts || {};
   const li = arr => arr.map(x => `<div class="pc-item"><span class="k">${PCK[x.k] || ''}</span><span>${esc(x.t)}</span></div>`).join('');
   let h = `<div class="pc-box">
-    <div class="pc-list p"><h5>✅ Pro</h5>${imp.pro.length ? li(imp.pro) : '<div class="small dim">Nessun vantaggio evidente</div>'}</div>
-    <div class="pc-list c"><h5>⚠️ Contro</h5>${imp.contro.length ? li(imp.contro) : '<div class="small dim">Nessuno svantaggio evidente</div>'}</div></div>`;
+    <div class="pc-list p"><h5>${icon('check', 14)} Pro</h5>${imp.pro.length ? li(imp.pro) : '<div class="small dim">Nessun vantaggio evidente</div>'}</div>
+    <div class="pc-list c"><h5>${icon('alert', 14)} Contro</h5>${imp.contro.length ? li(imp.contro) : '<div class="small dim">Nessuno svantaggio evidente</div>'}</div></div>`;
   if (!opts.noParties && (imp.fav || imp.contr)) {
     h += `<div class="mt small"><div class="row wrap" style="gap:4px"><span class="muted" style="min-width:74px">Favorevoli</span>${imp.fav.length ? imp.fav.map(partyChip).join('') : '<span class="dim">nessuno</span>'}</div>
       <div class="row wrap mt" style="gap:4px"><span class="muted" style="min-width:74px">Contrari</span>${imp.contr.length ? imp.contr.map(partyChip).join('') : '<span class="dim">nessuno</span>'}</div></div>`;
@@ -80,7 +104,7 @@ function fxProCon(fx) {
   if (fx.spread) add(-fx.spread, `Spread ${fx.spread} punti`, `Spread +${fx.spread} punti`, 'eco');
   if (fx.pil) add(fx.pil, 'Crescita economica', 'Frena la crescita', 'eco');
   if (fx.infl) add(-fx.infl, 'Prezzi più bassi', 'Inflazione in aumento', 'eco');
-  if (fx.oneOff) add(-fx.oneOff, `Entrate per ${fmt1(-fx.oneOff)} mld`, `Costa ${fmt1(fx.oneOff)} mld (deficit +${fmt1(fx.oneOff / G.econ.pilNom * 100)}%)`, 'eco');
+  if (fx.oneOff) { const dd = fx.oneOff / G.econ.pilNom * 100; add(-fx.oneOff, `Entrate per ${fmt1(-fx.oneOff)} mld`, `Costa ${fmt1(fx.oneOff)} mld${dd >= 0.05 ? ` (deficit +${fmt1(dd)}%)` : ''}`, 'eco'); }
   if (fx.debt) add(-fx.debt, 'Debito in calo', 'Debito in aumento', 'eco');
   if (fx.grp) Object.keys(fx.grp).forEach(k => add(fx.grp[k], `${GRPN[k]} favorevoli`, `${GRPN[k]} contrari`, 'grp'));
   if (fx.rel) Object.keys(fx.rel).forEach(k => { if (G.parties[k]) add(fx.rel[k], `Rapporti migliori con ${P(k).short}`, `Rapporti peggiori con ${P(k).short}`, 'pol'); });
@@ -195,22 +219,22 @@ function vib(ms) { try { navigator.vibrate && navigator.vibrate(ms || 15); } cat
 function showSplash() {
   const auto = slotInfo('auto');
   $('#app').innerHTML = `<div class="splash">
-    <div class="logo">🏛</div>
+    <div class="logo"><span class="medallion" style="--ms:124px">${icon('building')}</span></div>
     <h1>Palazzo Chigi</h1>
     <div class="flag3"><i></i><i></i><i></i></div>
     <div class="sub">Simulatore politico italiano · dati reali a ottobre 2026</div>
     <div class="btns">
-      ${auto ? `<button class="btn gold block" onclick="continueGame()">▶ Continua · ${esc(auto.name)} (${esc(auto.party)}), ${esc(auto.date)}</button>` : ''}
-      <button class="btn pri block" onclick="startSetup()">Nuova partita</button>
-      <button class="btn block" onclick="openLoad()">Carica partita</button>
-      <button class="btn block" onclick="openGuide()">Come si gioca</button>
+      ${auto ? `<button class="btn gold block" onclick="continueGame()">${icon('chevron')} Continua · ${esc(auto.name)} (${esc(auto.party)}), ${esc(auto.date)}</button>` : ''}
+      <button class="btn ${auto ? '' : 'pri'} block" onclick="startSetup()">${icon('plus')} Nuova partita</button>
+      <button class="btn block" onclick="openLoad()">${icon('folder')} Carica partita</button>
+      <button class="btn block" onclick="openGuide()">${icon('info')} Come si gioca</button>
     </div>
     <div class="tiny dim mt2">Partiti, leader, seggi, leggi e istituzioni reali. Eventi e risultati sono simulati.</div>
   </div>`;
 }
 function continueGame() { if (loadGame('auto')) { UI.tab = 'home'; renderGame(); afterLoad(); } }
 function openLoad() {
-  const rows = ['1', '2', '3', 'auto'].map(s => { const i = slotInfo(s); return `<div class="li"><div class="grow"><b>${s === 'auto' ? 'Salvataggio automatico' : 'Slot ' + s}</b><div class="small muted">${i ? `${esc(i.name)} · ${esc(i.party)} · ${esc(i.date)}${i.premier ? ' · 🏛 premier' : ''}` : 'vuoto'}</div></div>${i ? `<button class="btn sm pri" onclick="closeSheet(true);if(loadGame('${s}')){renderGame();afterLoad();}">Carica</button>` : ''}</div>`; }).join('');
+  const rows = ['1', '2', '3', 'auto'].map(s => { const i = slotInfo(s); return `<div class="li"><div class="grow"><b>${s === 'auto' ? 'Salvataggio automatico' : 'Slot ' + s}</b><div class="small muted">${i ? `${esc(i.name)} · ${esc(i.party)} · ${esc(i.date)}${i.premier ? ' · premier' : ''}` : 'vuoto'}</div></div>${i ? `<button class="btn sm pri" onclick="closeSheet(true);if(loadGame('${s}')){renderGame();afterLoad();}">Carica</button>` : ''}</div>`; }).join('');
   openSheet(`${head('Carica partita')}<div class="list">${rows}</div><label class="lbl">Importa un file di salvataggio</label><input type="file" accept=".json,application/json" onchange="importSave(this.files[0])">`);
 }
 function importSave(file) {
@@ -242,7 +266,7 @@ function startSetup() {
   const ax = {}; AXIS_KEYS.forEach(k => ax[k] = 0);
   SETUP = { step: 0, mode: 'fondatore', diff: 'media',
     player: { name: '', art: 'il', age: 42, region: 'LAZ', bg: 'avv', ax: Object.assign({}, ax) },
-    party: { name: '', short: '', symbol: '★', color: PARTY_COLORS[0], ax: Object.assign({}, ax), people: [randomName(), randomName(), randomName(), randomName(), randomName(), randomName()] },
+    party: { name: '', short: '', symbol: 'star', color: PARTY_COLORS[0], ax: Object.assign({}, ax), people: [randomName(), randomName(), randomName(), randomName(), randomName(), randomName()] },
     join: { party: 'FDI', rank: 0, ownIdeas: false } };
   renderSetup();
 }
@@ -251,8 +275,8 @@ function renderSetup() {
   const steps = SETUP_STEPS(), st = steps[SETUP.step];
   let body = '';
   if (st === 'Modalità') body = `<h2>Come vuoi entrare in politica?</h2><p class="muted">Ottobre 2026: il governo Meloni è al quarto anno, le elezioni politiche sono previste per la primavera 2027.</p>
-    <div class="opt ${SETUP.mode === 'fondatore' ? 'on' : ''}" onclick="SETUP.mode='fondatore';renderSetup()"><div class="t">⚑ Fonda il tuo partito</div><div class="small muted mt">Parti da zero con un tuo movimento: nome, simbolo, idee. Cresci nei sondaggi, cerca alleati, corri per Palazzo Chigi.</div></div>
-    <div class="opt ${SETUP.mode === 'carriera' ? 'on' : ''}" onclick="SETUP.mode='carriera';renderSetup()"><div class="t">🪜 Entra in un partito esistente</div><div class="small muted mt">Inizi da militante, consigliere o parlamentare di FdI, PD, M5S, Lega… Fai carriera, diventa ministro, scala il partito o fai una scissione come Vannacci.</div></div>`;
+    <div class="opt ${SETUP.mode === 'fondatore' ? 'on' : ''}" onclick="SETUP.mode='fondatore';renderSetup()"><div class="row">${medal('flag', 52)}<div class="grow"><div class="t">Fonda il tuo partito</div><div class="small muted" style="margin-top:4px">Parti da zero con un tuo movimento: nome, simbolo, idee. Cresci nei sondaggi, cerca alleati, corri per Palazzo Chigi.</div></div></div></div>
+    <div class="opt ${SETUP.mode === 'carriera' ? 'on' : ''}" onclick="SETUP.mode='carriera';renderSetup()"><div class="row">${medal('rocket', 52)}<div class="grow"><div class="t">Entra in un partito esistente</div><div class="small muted" style="margin-top:4px">Inizi da militante, consigliere o parlamentare di FdI, PD, M5S, Lega… Fai carriera, diventa ministro, scala il partito o fai una scissione come Vannacci.</div></div></div></div>`;
   if (st === 'Personaggio') {
     body = `<h2>Il tuo personaggio</h2>
     <label class="lbl">Nome e cognome</label><input id="pname" value="${esc(SETUP.player.name)}" placeholder="Es. Andrea Rossi" oninput="SETUP.player.name=this.value">
@@ -265,15 +289,15 @@ function renderSetup() {
   if (st === 'Partito' && SETUP.mode === 'fondatore') {
     const pa = SETUP.party;
     body = `<h2>Il tuo partito</h2>
-    <div class="row mt"><div class="sym big" style="--c:${pa.color}">${esc(pa.symbol)}</div><div class="grow"><b style="font-size:18px">${esc(pa.name || 'Nome del partito')}</b><div class="muted">${esc(pa.short || 'SIGLA')}</div></div></div>
+    <div class="row mt">${emblem(pa.symbol, pa.color, 64)}<div class="grow"><b style="font-size:18px">${esc(pa.name || 'Nome del partito')}</b><div class="muted">${esc(pa.short || 'SIGLA')}</div></div></div>
     <label class="lbl">Nome</label><input value="${esc(pa.name)}" placeholder="Es. Italia Futura" oninput="SETUP.party.name=this.value">
     <label class="lbl">Sigla (max 6 lettere)</label><input value="${esc(pa.short)}" maxlength="6" placeholder="Es. IF" oninput="SETUP.party.short=this.value">
-    <label class="lbl">Simbolo</label><div class="symgrid">${SYMBOLS.map(s => `<button class="${pa.symbol === s ? 'on' : ''}" onclick="SETUP.party.symbol='${s}';renderSetup()">${s}</button>`).join('')}</div>
+    <label class="lbl">Simbolo</label><div class="symgrid">${SYMBOLS.map(s => `<button class="${pa.symbol === s ? 'on' : ''}" onclick="SETUP.party.symbol='${s}';renderSetup()">${icon(s)}</button>`).join('')}</div>
     <label class="lbl">Colore</label><div class="colgrid">${PARTY_COLORS.map(c => `<button class="${pa.color === c ? 'on' : ''}" style="background:${c}" onclick="SETUP.party.color='${c}';renderSetup()"></button>`).join('')}</div>`;
   }
   if (st === 'Partito' && SETUP.mode === 'carriera') {
     body = `<h2>In quale partito entri?</h2>
-    ${PARTIES_DEF.map(p => `<div class="opt ${SETUP.join.party === p.id ? 'on' : ''}" onclick="SETUP.join.party='${p.id}';renderSetup()"><div class="row"><div class="sym" style="--c:${p.color}">${esc(p.short)}</div><div class="grow"><div class="t" style="font-size:15px">${esc(p.name)}</div><div class="small muted">${esc(p.leader)} · ${esc(p.area)} · ${fmt1(p.poll)}% · ${p.seatsC} deputati</div></div></div></div>`).join('')}
+    ${PARTIES_DEF.map(p => `<div class="opt ${SETUP.join.party === p.id ? 'on' : ''}" onclick="SETUP.join.party='${p.id}';renderSetup()"><div class="row">${partyMark(p.id, 44)}<div class="grow"><div class="t" style="font-size:15px">${esc(p.name)}</div><div class="small muted">${esc(p.leader)} · ${esc(p.area)} · ${fmt1(p.poll)}% · ${p.seatsC} deputati</div></div></div></div>`).join('')}
     <label class="lbl">Da quale livello parti</label>
     ${[0, 1, 2, 3].map(r => `<div class="opt ${SETUP.join.rank === r ? 'on' : ''}" onclick="SETUP.join.rank=${r};renderSetup()"><div class="t" style="font-size:15px">${RANKS[r].n}</div><div class="small muted">${RANKS[r].d}${r === 3 ? ' Siedi già in Parlamento nella XIX legislatura.' : ''}</div></div>`).join('')}`;
   }
@@ -283,14 +307,14 @@ function renderSetup() {
     if (!SETUP.quizDone && !SETUP.manual) {
       if (SETUP.qi === undefined) {
         body = `<h2>${SETUP.mode === 'fondatore' ? 'Le idee del partito' : 'Le tue idee'}</h2><p class="muted">${SETUP.mode === 'fondatore' ? 'Da qui dipendono chi ti vota e con chi potrai allearti.' : 'Partono da quelle del partito: se te ne allontani, il leader ti vedrà come un corpo estraneo, ma potrai costruire una tua corrente.'}</p>
-          <div class="opt on" onclick="SETUP.qi=0;SETUP.answers=[];renderSetup()"><div class="t">📝 Rispondi a 16 domande</div><div class="small muted mt">Consigliato: in un minuto il gioco capisce dove ti collochi.</div></div>
-          <div class="opt" onclick="SETUP.manual=true;renderSetup()"><div class="t">🎚 Imposta a mano</div><div class="small muted mt">Sposti tu gli 8 cursori.</div></div>
-          ${SETUP.mode === 'carriera' ? `<div class="opt" onclick="SETUP.quizDone=true;renderSetup()"><div class="t">🤝 Le stesse del partito</div><div class="small muted mt">Parti in linea con ${esc(PARTIES_DEF.find(p => p.id === SETUP.join.party).short)}.</div></div>` : ''}`;
+          <div class="opt on" onclick="SETUP.qi=0;SETUP.answers=[];renderSetup()"><div class="row">${medal('clipboard', 46)}<div class="grow"><div class="t">Rispondi a 16 domande</div><div class="small muted" style="margin-top:4px">Consigliato: in un minuto il gioco capisce dove ti collochi.</div></div></div></div>
+          <div class="opt" onclick="SETUP.manual=true;renderSetup()"><div class="row">${medal('gear', 46)}<div class="grow"><div class="t">Imposta a mano</div><div class="small muted" style="margin-top:4px">Sposti tu gli 8 cursori.</div></div></div></div>
+          ${SETUP.mode === 'carriera' ? `<div class="opt" onclick="SETUP.quizDone=true;renderSetup()"><div class="row">${medal('hands', 46)}<div class="grow"><div class="t">Le stesse del partito</div><div class="small muted" style="margin-top:4px">Parti in linea con ${esc(PARTIES_DEF.find(p => p.id === SETUP.join.party).short)}.</div></div></div></div>` : ''}`;
       } else body = quizHTML();
     } else {
       const close = PARTIES_DEF.map(p => ({ p, c: clamp(100 - axisDistRaw(tgt, p.ax) * 8, 0, 100) })).sort((a, b) => b.c - a.c);
       body = `<div class="row between"><h2>${SETUP.quizDone ? 'Il tuo profilo' : 'Le tue idee'}</h2><button class="btn sm" onclick="SETUP.quizDone=false;SETUP.manual=false;SETUP.qi=undefined;renderSetup()">Rifai il test</button></div>
-        <div class="card hero mt"><div class="tiny muted">I partiti più vicini a te</div><div class="row wrap mt" style="gap:6px">${close.slice(0, 3).map(x => `<span class="chip" style="--c:${x.p.color}">${esc(x.p.short)} ${Math.round(x.c)}%</span>`).join('')}</div><div class="tiny muted mt">Più sono vicini, più è facile allearsi e prendere i loro elettori.</div></div>
+        <div class="card hero mt"><div class="tiny muted">I partiti più vicini a te</div><div class="row wrap mt" style="gap:6px">${close.slice(0, 3).map(x => `<span class="chip" style="--c:${x.p.color}">${partyMark(x.p.id, 19)}${esc(x.p.short)} ${Math.round(x.c)}%</span>`).join('')}</div><div class="tiny muted mt">Più sono vicini, più è facile allearsi e prendere i loro elettori.</div></div>
         <p class="small muted">Sposta i cursori per ritoccare. Sotto ogni tema trovi cosa significa ogni lato.</p>
         ${AXIS_KEYS.map(k => axisRowHTML(k, tgt[k])).join('')}
         <div class="card mt"><h4>Affinità con tutti i partiti</h4><div id="affinity" class="mt">${affinityHTML(close)}</div></div>`;
@@ -309,12 +333,12 @@ function renderSetup() {
   }
   const last = SETUP.step === steps.length - 1;
   $('#app').innerHTML = `<div class="setup"><div class="body"><div class="steps">${steps.map((s, i) => `<i class="${i <= SETUP.step ? 'on' : ''}"></i>`).join('')}</div>${body}</div>
-    <div class="foot"><button class="btn" onclick="${SETUP.step ? 'SETUP.step--;renderSetup()' : 'showSplash()'}">‹ Indietro</button><button class="btn ${last ? 'gold' : 'pri'} grow" onclick="setupNext()">${last ? 'Inizia la partita 🇮🇹' : 'Avanti ›'}</button></div></div>`;
+    <div class="foot"><button class="btn" onclick="${SETUP.step ? 'SETUP.step--;renderSetup()' : 'showSplash()'}">‹ Indietro</button><button class="btn ${last ? 'gold' : 'pri'} grow" onclick="setupNext()">${last ? 'Inizia la partita' : 'Avanti ›'}</button></div></div>`;
   $('.setup .body').scrollTop = 0;
 }
 function axisDistRaw(a, b) { let s = 0; AXIS_KEYS.forEach(k => { const d = (a[k] || 0) - (b[k] || 0); s += d * d; }); return Math.sqrt(s / AXIS_KEYS.length); }
 function affinityHTML(close) {
-  return close.map(x => `<div class="row" style="margin:6px 0"><span style="width:54px">${`<span class="chip" style="--c:${x.p.color}">${esc(x.p.short)}</span>`}</span><div class="grow">${barH(x.c, 100, pctColor(x.c), true)}</div><b class="small" style="width:40px;text-align:right">${Math.round(x.c)}%</b></div>`).join('');
+  return close.map(x => `<div class="row" style="margin:6px 0"><span style="width:74px">${`<span class="chip" style="--c:${x.p.color}">${partyMark(x.p.id, 19)}${esc(x.p.short)}</span>`}</span><div class="grow">${barH(x.c, 100, pctColor(x.c), true)}</div><b class="small" style="width:40px;text-align:right">${Math.round(x.c)}%</b></div>`).join('');
 }
 function setAx(k, v) {
   const tgt = SETUP.mode === 'fondatore' ? SETUP.party.ax : SETUP.player.ax;
@@ -339,7 +363,7 @@ function setupNext() {
   saveGame('auto');
   setTimeout(() => {
     confetti();
-    openSheet(`<div class="center"><div style="font-size:56px" class="pop">🇮🇹</div><h2 class="mt">Benvenut${G.player.art === 'la' ? 'a' : 'o'} in politica</h2>
+    openSheet(`<div class="center">${medal('flag', 84)}<h2 class="mt">Benvenut${G.player.art === 'la' ? 'a' : 'o'} in politica</h2>
       <p class="muted">${fmtDate(0)}. ${G.mode === 'fondatore' ? `${esc(P('MIO').name)} parte dall’${fmt1(P('MIO').poll)}%. Hai circa 30 settimane prima delle elezioni politiche: fatti conoscere, scrivi il programma, cerca alleati.` : `Sei ${RANKS[G.player.rank].n.toLowerCase()} di ${esc(myParty().name)}. Il leader è ${esc(myParty().leader)}: conquista la sua fiducia, costruisci il tuo seguito e scala il partito.`}</p></div>
       <button class="btn gold block mt" onclick="closeSheet();setTimeout(()=>startTutorial(0),320)">Guida rapida (consigliata)</button><button class="btn block mt" onclick="closeSheet()">Salta, conosco il gioco</button>`);
   }, 300);

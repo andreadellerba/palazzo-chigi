@@ -44,8 +44,8 @@ function renderSwipeVotes() {
   const pr = predictVote(b);
   const groupHere = isLeader() && seatsOf(myPid(), s.h) > 0;
   const effs = b.lawId ? effChipsHTML(effectsOf(getLaw(b.lawId), b.from, b.opt), lawGain(myPid(), getLaw(b.lawId), b.from, b.opt)) : '';
-  replaceSheet(`<div class="row between"><span class="tag o">🗳 Voto ${VOTI.bills.length - pending.length + 1} di ${VOTI.bills.length}</span><button class="btn sm" onclick="VOTI.list=true;renderVotes()">Vista elenco</button></div>
-    <div class="swipe-hint">⬅️ No · ⬆️ Astensione · Sì ➡️</div>
+  replaceSheet(`<div class="row between"><span class="tag o">${icon('vote')} Voto ${VOTI.bills.length - pending.length + 1} di ${VOTI.bills.length}</span><button class="btn sm" onclick="VOTI.list=true;renderVotes()">Vista elenco</button></div>
+    <div class="swipe-hint">← No · ↑ Astensione · Sì →</div>
     <div class="swipe-card" id="swc" style="--vc:${b.proposer === 'GOV' ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa'}">
       ${voteHeadHTML(b)}
       <div class="decide"><div class="small">Il tuo partito vota: <b>${VLAB[st.line]}</b></div>${groupHere ? `<div class="tiny muted mt">Voti tu e il tuo gruppo (${seatsOf(myPid(), s.h)} ${s.h === 'C' ? 'deputati' : 'senatori'}).</div>` : '<div class="tiny muted mt">È il tuo voto personale: contro la linea del partito è dissenso.</div>'}</div>
@@ -87,32 +87,32 @@ function renderElectionNight() {
 
 // ---------- 5. traguardi ----------
 const ACHIEVEMENTS = [
-  { id: 'soglia', ico: '🎯', n: 'Sopra la soglia', d: 'Il tuo partito supera il 3% nei sondaggi', c: () => myParty().poll >= 3 },
-  { id: 'dieci', ico: '📊', n: 'Doppia cifra', d: 'Il tuo partito supera il 10%', c: () => myParty().poll >= 10 },
-  { id: 'venti', ico: '🚀', n: 'Partito di massa', d: 'Il tuo partito supera il 20%', c: () => myParty().poll >= 20 },
-  { id: 'primo', ico: '🥇', n: 'Primo partito', d: 'Il tuo partito è il più votato nei sondaggi', c: () => PIDS().every(id => id === myPid() || P(id).poll < myParty().poll) },
-  { id: 'notorieta', ico: '📣', n: 'Lo conoscono tutti', d: 'Notorietà del partito oltre il 75%', c: () => partyNoto(myPid()) >= 75 },
-  { id: 'parlamento', ico: '🏛', n: 'In Parlamento', d: 'Entri in Parlamento', c: () => !!G.player.parl },
-  { id: 'coalizione', ico: '🤝', n: 'Candidato premier', d: 'Sei il candidato premier di una coalizione', c: () => G.coalitions.some(c => c.cand === 'PLAYER') },
-  { id: 'ministro', ico: '💼', n: 'Al governo', d: 'Diventi ministro', c: () => !!G.player.minister },
-  { id: 'premier', ico: '👑', n: 'Palazzo Chigi', d: 'Diventi Presidente del Consiglio', c: () => isPremier() },
-  { id: 'anno', ico: '🗓', n: 'Un anno a Palazzo Chigi', d: '52 settimane da premier', c: () => G.stats.weeksPremier >= 52 },
-  { id: 'longevo', ico: '🏆', n: 'Governo longevo', d: 'Più di 3 anni da premier', c: () => G.stats.weeksPremier >= 156 },
-  { id: 'leggi5', ico: '📜', n: 'Legislatore', d: '5 tue leggi approvate', c: () => G.stats.laws >= 5 },
-  { id: 'leggi20', ico: '📚', n: 'Riformatore', d: '20 tue leggi approvate', c: () => G.stats.laws >= 20 },
-  { id: 'manovra', ico: '💶', n: 'La prima manovra', d: 'Approvata una tua legge di bilancio', c: () => !!G.flags.playerManovra },
-  { id: 'spread', ico: '📉', n: 'Mercati tranquilli', d: 'Da premier porti lo spread sotto 100', c: () => isPremier() && G.econ.spread < 100 && G.stats.weeksPremier > 10 },
-  { id: 'conti', ico: '✅', n: 'Conti in ordine', d: 'Da premier porti il deficit sotto il 3%', c: () => isPremier() && G.econ.deficit < 3 && G.stats.weeksPremier > 20 },
-  { id: 'crescita', ico: '📈', n: 'Boom economico', d: 'Da premier la crescita supera l’1,2%', c: () => isPremier() && G.econ.pil > 1.2 },
-  { id: 'lavoro', ico: '👷', n: 'Piena occupazione', d: 'Da premier la disoccupazione scende sotto il 5,5%', c: () => isPremier() && G.econ.dis < 5.5 },
-  { id: 'regione', ico: '🗺', n: 'Una regione tua', d: 'Un presidente di Regione del tuo partito', c: () => Object.values(G.regions).some(r => r.gp === myPid()) },
-  { id: 'fama', ico: '🌟', n: 'Celebrità', d: 'Fama oltre 90', c: () => G.player.fama >= 90 },
-  { id: 'tv', ico: '📺', n: 'Volto televisivo', d: '10 interviste in TV', c: () => (G.stats.tv || 0) >= 10 },
-  { id: 'dissidente', ico: '✋', n: 'Spirito libero', d: 'Voti in dissenso dal tuo gruppo', c: () => G.careerLog.some(x => x.dissent) || G.news.some(n => /vota in dissenso/.test(n.t) && n.t.includes(G.player.name)) },
-  { id: 'congresso', ico: '⚔️', n: 'Scalata riuscita', d: 'Vinci il congresso del tuo partito', c: () => G.careerLog.some(x => /Vinci il congresso/.test(x.t)) },
-  { id: 'scissione', ico: '🪓', n: 'Strada tua', d: 'Fondi un partito con una scissione', c: () => G.careerLog.some(x => /Scissione/.test(x.t)) },
-  { id: 'referendum', ico: '✍️', n: 'Democrazia diretta', d: 'Vinci un referendum che hai promosso', c: () => G.referendums.some(r => r.by === 'PLAYER' && r.res && r.res.won) },
-  { id: 'quirinale', ico: '🇮🇹', n: 'Capo dello Stato', d: 'Vieni eletto Presidente della Repubblica', c: () => G.careerLog.some(x => /Presidente della Repubblica/.test(x.t)) },
+  { id: 'soglia', ico: 'target', n: 'Sopra la soglia', d: 'Il tuo partito supera il 3% nei sondaggi', c: () => myParty().poll >= 3 },
+  { id: 'dieci', ico: 'chart', n: 'Doppia cifra', d: 'Il tuo partito supera il 10%', c: () => myParty().poll >= 10 },
+  { id: 'venti', ico: 'rocket', n: 'Partito di massa', d: 'Il tuo partito supera il 20%', c: () => myParty().poll >= 20 },
+  { id: 'primo', ico: 'medal', n: 'Primo partito', d: 'Il tuo partito è il più votato nei sondaggi', c: () => PIDS().every(id => id === myPid() || P(id).poll < myParty().poll) },
+  { id: 'notorieta', ico: 'mega', n: 'Lo conoscono tutti', d: 'Notorietà del partito oltre il 75%', c: () => partyNoto(myPid()) >= 75 },
+  { id: 'parlamento', ico: 'building', n: 'In Parlamento', d: 'Entri in Parlamento', c: () => !!G.player.parl },
+  { id: 'coalizione', ico: 'hands', n: 'Candidato premier', d: 'Sei il candidato premier di una coalizione', c: () => G.coalitions.some(c => c.cand === 'PLAYER') },
+  { id: 'ministro', ico: 'briefcase', n: 'Al governo', d: 'Diventi ministro', c: () => !!G.player.minister },
+  { id: 'premier', ico: 'crown', n: 'Palazzo Chigi', d: 'Diventi Presidente del Consiglio', c: () => isPremier() },
+  { id: 'anno', ico: 'calendar', n: 'Un anno a Palazzo Chigi', d: '52 settimane da premier', c: () => G.stats.weeksPremier >= 52 },
+  { id: 'longevo', ico: 'trophy', n: 'Governo longevo', d: 'Più di 3 anni da premier', c: () => G.stats.weeksPremier >= 156 },
+  { id: 'leggi5', ico: 'doc', n: 'Legislatore', d: '5 tue leggi approvate', c: () => G.stats.laws >= 5 },
+  { id: 'leggi20', ico: 'book', n: 'Riformatore', d: '20 tue leggi approvate', c: () => G.stats.laws >= 20 },
+  { id: 'manovra', ico: 'euro', n: 'La prima manovra', d: 'Approvata una tua legge di bilancio', c: () => !!G.flags.playerManovra },
+  { id: 'spread', ico: 'chartdown', n: 'Mercati tranquilli', d: 'Da premier porti lo spread sotto 100', c: () => isPremier() && G.econ.spread < 100 && G.stats.weeksPremier > 10 },
+  { id: 'conti', ico: 'check', n: 'Conti in ordine', d: 'Da premier porti il deficit sotto il 3%', c: () => isPremier() && G.econ.deficit < 3 && G.stats.weeksPremier > 20 },
+  { id: 'crescita', ico: 'trend', n: 'Boom economico', d: 'Da premier la crescita supera l’1,2%', c: () => isPremier() && G.econ.pil > 1.2 },
+  { id: 'lavoro', ico: 'users', n: 'Piena occupazione', d: 'Da premier la disoccupazione scende sotto il 5,5%', c: () => isPremier() && G.econ.dis < 5.5 },
+  { id: 'regione', ico: 'map', n: 'Una regione tua', d: 'Un presidente di Regione del tuo partito', c: () => Object.values(G.regions).some(r => r.gp === myPid()) },
+  { id: 'fama', ico: 'star', n: 'Celebrità', d: 'Fama oltre 90', c: () => G.player.fama >= 90 },
+  { id: 'tv', ico: 'tv', n: 'Volto televisivo', d: '10 interviste in TV', c: () => (G.stats.tv || 0) >= 10 },
+  { id: 'dissidente', ico: 'hand', n: 'Spirito libero', d: 'Voti in dissenso dal tuo gruppo', c: () => G.careerLog.some(x => x.dissent) || G.news.some(n => /vota in dissenso/.test(n.t) && n.t.includes(G.player.name)) },
+  { id: 'congresso', ico: 'sword', n: 'Scalata riuscita', d: 'Vinci il congresso del tuo partito', c: () => G.careerLog.some(x => /Vinci il congresso/.test(x.t)) },
+  { id: 'scissione', ico: 'split', n: 'Strada tua', d: 'Fondi un partito con una scissione', c: () => G.careerLog.some(x => /Scissione/.test(x.t)) },
+  { id: 'referendum', ico: 'pen', n: 'Democrazia diretta', d: 'Vinci un referendum che hai promosso', c: () => G.referendums.some(r => r.by === 'PLAYER' && r.res && r.res.won) },
+  { id: 'quirinale', ico: 'flag', n: 'Capo dello Stato', d: 'Vieni eletto Presidente della Repubblica', c: () => G.careerLog.some(x => /Presidente della Repubblica/.test(x.t)) },
 ];
 function checkAchievements() {
   G.ach = G.ach || {};
@@ -123,7 +123,7 @@ function checkAchievements() {
 function openAchievements() {
   G.ach = G.ach || {};
   const n = Object.keys(G.ach).length;
-  openSheet(`${head('🏅 Traguardi', `${n} su ${ACHIEVEMENTS.length} sbloccati`)}<div class="ach-grid">${ACHIEVEMENTS.map(a => `<div class="ach ${G.ach[a.id] ? 'on' : ''}"><div class="ai">${G.ach[a.id] ? a.ico : '🔒'}</div><b>${esc(a.n)}</b><div class="tiny muted">${esc(a.d)}</div>${G.ach[a.id] ? `<div class="tiny gold">${fmtDate(G.ach[a.id], true)}</div>` : ''}</div>`).join('')}</div>`);
+  openSheet(`${head('Traguardi', `${n} su ${ACHIEVEMENTS.length} sbloccati`)}<div class="ach-grid">${ACHIEVEMENTS.map(a => `<div class="ach ${G.ach[a.id] ? 'on' : ''}"><div class="ai">${medal(G.ach[a.id] ? a.ico : 'lock', 54, G.ach[a.id] ? '' : '#66729a')}</div><b>${esc(a.n)}</b><div class="tiny muted">${esc(a.d)}</div>${G.ach[a.id] ? `<div class="tiny gold">${fmtDate(G.ach[a.id], true)}</div>` : ''}</div>`).join('')}</div>`);
 }
 function celebrate(list) {
   if (!list || !list.length) return;
@@ -139,7 +139,7 @@ function autoPlan() {
     const recs = recommendedActions().filter(r => r.id !== 'tv' && r.id !== 'dibattito' && r.id !== 'riposo');
     const r = recs[0]; if (!r) break;
     const a = ACTIONS.find(x => x.id === r.id);
-    if (r.id === 'comizio') { if (G.funds < 20 || G.pc < 1) break; doComizioQuiet(r.param); done.push('📣'); continue; }
+    if (r.id === 'comizio') { if (G.funds < 20 || G.pc < 1) break; doComizioQuiet(r.param); done.push('mega'); continue; }
     if (a.custom || !a.run) { markUsed(r.id); continue; }
     if (!spendPC(actionCost(a))) break;
     markUsed(r.id); if (a.funds) G.funds -= a.funds;
@@ -148,7 +148,7 @@ function autoPlan() {
   }
   renderGame();
   if (!done.length) return toast('Niente da pianificare: capitale politico o fondi esauriti');
-  flyResult('🗓', `Settimana pianificata: ${done.join(' ')}`, diffChips(before, snap()), `${done.length} azioni fatte in automatico`);
+  flyResult('calendar', 'Settimana pianificata', diffChips(before, snap()), `${done.length} azioni fatte in automatico`);
 }
 function doComizioQuiet(rid) {
   if (usedThisWeek('comizio') || G.funds < 20 || !spendPC(1)) return;
@@ -164,22 +164,22 @@ function doComizioQuiet(rid) {
 // ---------- 7. la tua storia ----------
 function timelineItems() {
   const items = [];
-  G.careerLog.forEach(x => items.push({ w: x.w, ico: x.ach || (/premier|Presidente del Consiglio/i.test(x.t) ? '👑' : /Elezioni/.test(x.t) ? '🗳' : /Fine del tuo governo/.test(x.t) ? '💥' : /Scissione/.test(x.t) ? '🪓' : /ministr|Ministro/i.test(x.t) ? '💼' : /Elett/.test(x.t) ? '🏛' : '⭐'), t: x.t, k: x.ach ? 'ach' : 'car' }));
-  G.enacted.filter(e => e.by === 'player' || e.by === 'playerparl').forEach(e => { const l = getLaw(e.id); if (l) items.push({ w: e.w, ico: '📜', t: `Legge: ${l.opts[e.to].t}`, k: 'law' }); });
-  (G.electHist || []).forEach(e => items.push({ w: e.w, ico: '🗳', t: `Politiche: ${e.party} ${fmt1(e.vote)}% (${e.seatsC} deputati)`, k: 'vote' }));
+  G.careerLog.forEach(x => items.push({ w: x.w, ico: x.ach || (/premier|Presidente del Consiglio/i.test(x.t) ? 'crown' : /Elezioni/.test(x.t) ? 'vote' : /Fine del tuo governo/.test(x.t) ? 'fire' : /Scissione/.test(x.t) ? 'split' : /ministr|Ministro/i.test(x.t) ? 'briefcase' : /Elett/.test(x.t) ? 'building' : 'star'), t: x.t, k: x.ach ? 'ach' : 'car' }));
+  G.enacted.filter(e => e.by === 'player' || e.by === 'playerparl').forEach(e => { const l = getLaw(e.id); if (l) items.push({ w: e.w, ico: 'doc', t: `Legge: ${l.opts[e.to].t}`, k: 'law' }); });
+  (G.electHist || []).forEach(e => items.push({ w: e.w, ico: 'vote', t: `Politiche: ${e.party} ${fmt1(e.vote)}% (${e.seatsC} deputati)`, k: 'vote' }));
   const seen = new Set();
   return items.filter(x => { const key = x.w + x.t; if (seen.has(key)) return false; seen.add(key); return true; }).sort((a, b) => a.w - b.w);
 }
 function openTimeline() {
   const items = timelineItems();
-  let h = head('📖 La tua storia', `${esc(G.player.name)} · ${fmtDate(0, true)} → ${fmtDate(G.week, true)}`);
+  let h = head('La tua storia', `${esc(G.player.name)} · ${fmtDate(0, true)} → ${fmtDate(G.week, true)}`);
   if (!items.length) h += '<div class="muted center mt2">La tua storia è appena cominciata.</div>';
   let year = null;
   h += '<div class="tl">';
   items.forEach(x => {
     const y = yearOf(x.w);
     if (y !== year) { year = y; h += `<div class="tl-year">${y}</div>`; }
-    h += `<div class="tl-item ${x.k}"><span class="tl-dot">${x.ico}</span><div><div class="tiny muted">${fmtDate(x.w, true)}</div><div class="small">${esc(x.t)}</div></div></div>`;
+    h += `<div class="tl-item ${x.k}"><span class="tl-dot">${emoIcon(x.ico, 17)}</span><div><div class="tiny muted">${fmtDate(x.w, true)}</div><div class="small">${esc(x.t)}</div></div></div>`;
   });
   h += '</div>';
   openSheet(h);

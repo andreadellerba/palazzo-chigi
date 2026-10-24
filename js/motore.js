@@ -271,7 +271,7 @@ function econTick() {
   if (G.gov && G.gov.parties.some(p => (G.gov.sat[p] || 50) < 20)) instab += 15;
   if (G.week > G.cal.election - 6 && G.week <= G.cal.election) instab += 8;
   const ratingAdj = { 'A-': -15, 'BBB+': 0, 'BBB': 15, 'BBB-': 40, 'BB+': 90 }[e.rating] || 0;
-  const sT = 72 + Math.max(0, e.deficit - 3) * 45 + Math.max(0, e.debito - 135) * 1.2 + instab + e.shockSpread + ratingAdj - (G.groups.merc || 0) * (isPremier() ? 0.35 : 0.05) + (e.pde ? 6 : 0);
+  const sT = 72 + Math.max(0, e.deficit - 3) * 45 + Math.max(0, e.debito - 135) * 1.2 + instab + e.shockSpread + ratingAdj - (G.groups.merc || 0) * (isPremier() ? 0.35 : 0.05) - (G.groups.ue || 0) * (isPremier() ? 0.12 : 0.03) + (e.pde ? 6 : 0);
   e.spread += (sT - e.spread) * 0.15 * d.market + gauss() * 3 * d.market;
   e.spread = clamp(e.spread, 30, 900);
 }
@@ -307,7 +307,7 @@ function approvalTick() {
   const hm = Math.max(0, 12 - (G.week - g.start) * 0.4);
   let pc = 6;
   if (g.premier === 'PLAYER') pc = G.player.car; else { const pp = P(g.premierParty); pc = pp ? pp.lCar : 6; }
-  const target = 38 + hm + 3 * (e.pil - 0.7) - 1.5 * (e.dis - 6) - 1.2 * Math.max(0, e.infl - 2) - Math.max(0, e.spread - 200) / 25 + g.popBank + (pc - 6) * 1.2 + (g.tecnico ? 6 : 0);
+  const target = 38 + hm + 3 * (e.pil - 0.7) - 1.5 * (e.dis - 6) - 1.2 * Math.max(0, e.infl - 2) - Math.max(0, e.spread - 200) / 25 + g.popBank + (pc - 6) * 1.2 + (g.tecnico ? 6 : 0) + (g.premier === 'PLAYER' ? ((G.groups.sind || 0) * 0.8 + (G.groups.chiesa || 0) * 0.6 + (G.groups.media || 0) * 0.8) / 100 : 0);
   g.approval += (target - g.approval) * 0.1 + gauss() * 0.4;
   g.approval = clamp(g.approval, 8, 85);
 }
@@ -364,7 +364,9 @@ function snapshot() {
   G.hist.polls.push({ w: G.week, p: polls });
   const e = G.econ;
   G.hist.econ.push({ w: G.week, pil: +e.pil.toFixed(2), deficit: +e.deficit.toFixed(2), debito: +e.debito.toFixed(1), spread: Math.round(e.spread), dis: +e.dis.toFixed(1), infl: +e.infl.toFixed(1), appr: G.gov ? Math.round(G.gov.approval) : null });
+  G.hist.me = G.hist.me || []; G.hist.me.push({ w: G.week, fama: Math.round(G.player.fama), noto: Math.round(partyNoto(myPid())), rap: Math.round(G.player.rap) });
   if (G.hist.polls.length > 600) { G.hist.polls.shift(); G.hist.econ.shift(); }
+  if (G.hist.me.length > 600) G.hist.me.shift();
 }
 
 // ---------- voto regionale ----------
@@ -408,12 +410,12 @@ function billName(b) {
   if (b.type === 'manovra') return b.name || ('Legge di bilancio ' + b.year);
   const l = getLaw(b.lawId); return l.opts[b.opt].t;
 }
-function billTypeName(b) { return { ddl: 'Disegno di legge', dl: 'Decreto-legge', cost: 'Riforma costituzionale', manovra: 'Legge di bilancio' }[b.type]; }
+function billTypeName(b) { if (b.type === 'ddl' && b.proposer !== 'GOV') return 'Proposta di legge'; return { ddl: 'Disegno di legge', dl: 'Decreto-legge', cost: 'Riforma costituzionale', manovra: 'Legge di bilancio' }[b.type]; }
 function stageLabel(b) {
   const s = b.stages[b.stage]; if (!s) return 'Concluso';
-  const H = { C: 'Camera', S: 'Senato' };
-  if (s.k === 'comm') return `In commissione al ${H[s.h]}` + (b.stalled ? ' (ferma)' : '');
-  if (s.k === 'aula') return `Voto in aula al ${H[s.h]}` + (s.r ? ` (${s.r}ª lettura)` : '');
+  const H = { C: 'alla Camera', S: 'al Senato' };
+  if (s.k === 'comm') return `In commissione ${H[s.h]}` + (b.stalled ? ' (ferma)' : '');
+  if (s.k === 'aula') return `Voto in aula ${H[s.h]}` + (s.r ? ` (${s.r}ª lettura)` : '');
   if (s.k === 'pausa') return 'Pausa di 3 mesi tra le due letture';
   if (s.k === 'firma') return 'Alla firma del Quirinale';
   return '';
@@ -457,7 +459,8 @@ function computeVote(b, h, opts) {
     else vote = s > 0.15 ? 'yes' : s < -0.15 ? 'no' : 'abst';
     let y = 0, no = 0, a = 0;
     if (vote === 'yes') {
-      const dr = opts.det ? 0 : clamp((0.01 + Math.max(0, -gain) * 0.09) * D().defect * (fid ? 0.3 : 1), 0, 0.4);
+      const frag = G.pacts && G.pacts.some(x => x.fragile && (x.pid === pid || pid === myPid())) ? 0.06 : 0;
+      const dr = opts.det ? 0 : clamp((0.01 + frag + Math.max(0, -gain) * 0.09) * D().defect * (fid ? 0.3 : 1), 0, 0.4);
       const def = opts.det ? 0 : Math.round(n * dr * rnd(0.3, 1.4));
       y = n - def; no = def;
     } else if (vote === 'no') {
@@ -1251,6 +1254,7 @@ function advanceWeek() {
   careerTick();
   calendarTick();
   if (G.gov && isPremier()) { G.stats.weeksPremier++; partnerTick(); }
+  if (typeof powersTick === 'function') powersTick();
   // votazioni della prossima settimana in cui conti tu
   if (G.phase === 'normale') { const up = upcomingVotes(); if (up.length) G._wk.specials.push({ k: 'voti', ids: up }); const mp = ministerProposal(); if (mp) G._wk.specials.push(mp); }
   // eventi casuali
@@ -1273,6 +1277,8 @@ function partnerTick() {
     g.sat[p] = clamp(g.sat[p] + (base - g.sat[p]) * 0.02 + gauss() * 0.8 - (g.approval < 35 ? 0.3 : 0), 0, 100);
     // pressione: sondaggi del partner che calano
     if (P(p).poll < P(p).base0 * 0.8) g.sat[p] -= 0.3 * d.partner;
+    // alleanza nata oltre un veto: il partner resta inquieto
+    if (G.pacts && G.pacts.some(x => x.fragile && x.pid === p)) g.sat[p] -= 0.35;
     const thr = 14 / d.partner;
     if (g.sat[p] < thr) {
       g.lowSat[p] = (g.lowSat[p] || 0) + 1;
@@ -1379,7 +1385,7 @@ function calendarTick() {
 // ============================================================
 const SAVE_PREFIX = 'palazzochigi_';
 function saveGame(slot) { try { localStorage.setItem(SAVE_PREFIX + slot, JSON.stringify(G)); return true; } catch (e) { return false; } }
-function migrate() { if (G.player && !G.player.av && typeof rerollPlayerAvatar === 'function') rerollPlayerAvatar(); G.stats.tv = G.stats.tv || 0; if (G.gov && !G.gov.premierParty) G.gov.premierParty = largestIn(G.gov.parties); G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
+function migrate() { G.pacts = G.pacts || []; if (G.player && !G.player.av && typeof rerollPlayerAvatar === 'function') rerollPlayerAvatar(); G.stats.tv = G.stats.tv || 0; if (G.gov && !G.gov.premierParty) G.gov.premierParty = largestIn(G.gov.parties); G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
 function loadGame(slot) { try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return false; G = JSON.parse(s); migrate(); return true; } catch (e) { return false; } }
 function slotInfo(slot) {
   try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return null; const g = JSON.parse(s); return { name: g.player.name, party: g.parties[g.player.party].short, date: fmtDate(g.week), premier: g.gov && g.gov.premier === 'PLAYER' }; } catch (e) { return null; }

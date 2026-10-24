@@ -39,14 +39,15 @@ function openMinisterProposal(sp) {
   window._mp = sp;
   openSheet(`<div class="evcard"><div class="img">${portrait(sp.name, 76, { party: party || undefined })}</div><div class="tiny gold center" style="font-weight:800">PROPOSTA DAL MINISTERO · ${esc(MIN_BY_ID[sp.min].n.toUpperCase())}</div>
     <h2>${esc(o.t)}</h2>
-    <div class="txt center small">${esc(sp.name)}${party ? ` (${esc(P(party).short)})` : ''}: «Presidente, per migliorare ${m.ico} <b>${m.n.toLowerCase()}</b> propongo questa riforma.»</div>
-    <div class="qcard small mt"><b>Oggi:</b> ${esc(l.opts[cur].t)}<br><b>Diventerebbe:</b> ${esc(o.d)}</div>
+    <div class="txt center small">${esc(sp.name)}${party ? ` (${esc(P(party).short)})` : ''}: «Presidente, per migliorare <b>${m.n.toLowerCase()}</b> propongo questa riforma.»</div>
+    <div class="change mt"><div><span class="tiny muted">OGGI</span><b>${esc(l.opts[cur].t)}</b></div><span class="arrow">${icon('chevron')}</span><div><span class="tiny muted">DIVENTEREBBE</span><b>${esc(o.t)}</b></div></div>
+    <div class="mt">${explainHTML(l, sp.opt)}</div>
     ${effChipsHTML(effs, imp.mine)}
     <div class="row wrap mt" style="gap:4px"><span class="tiny muted">Favorevoli</span>${imp.fav.slice(0, 6).map(partyChip).join('')}</div>
     <div class="row wrap mt" style="gap:4px"><span class="tiny muted">Contrari</span>${imp.contr.slice(0, 6).map(partyChip).join('')}</div>
-    <button class="choice" onclick="answerMinProp('ddl')"><div class="t">📄 Approva come disegno di legge · ⚡3</div><div class="fx"><span class="p">▲ ${esc(sp.name.split(' ').slice(-1)[0])} soddisfatto</span><span class="n">• passa dal Parlamento in qualche settimana</span></div></button>
-    <button class="choice" onclick="answerMinProp('dl')"><div class="t">⚡ Approva come decreto-legge · ⚡5</div><div class="fx"><span class="p">▲ Effetti subito</span><span class="c">▼ Il Quirinale non ama i troppi decreti</span></div></button>
-    <button class="choice" onclick="answerMinProp('no')"><div class="t">✋ Respingi la proposta</div><div class="fx"><span class="c">▼ Il ministro${party ? ' e ' + esc(P(party).short) : ''} si irritano</span></div></button>
+    <button class="choice" onclick="answerMinProp('ddl')"><div class="t">${icon('doc', 16)} Approva come disegno di legge · ⚡3</div><div class="fx"><span class="p">▲ ${esc(sp.name.split(' ').slice(-1)[0])} soddisfatto</span><span class="n">• passa dal Parlamento in qualche settimana</span></div></button>
+    <button class="choice" onclick="answerMinProp('dl')"><div class="t">${icon('bolt', 16)} Approva come decreto-legge · ⚡5</div><div class="fx"><span class="p">▲ Effetti subito</span><span class="c">▼ Il Quirinale non ama i troppi decreti</span></div></button>
+    <button class="choice" onclick="answerMinProp('no')"><div class="t">${icon('hand', 16)} Respingi la proposta</div><div class="fx"><span class="c">▼ Il ministro${party ? ' e ' + esc(P(party).short) : ''} si irritano</span></div></button>
     <button class="btn sm block mt" onclick="openLaw('${l.id}',${sp.opt})">Vedi tutti i pro e contro</button></div>`, { locked: true });
 }
 function answerMinProp(kind) {
@@ -58,11 +59,11 @@ function answerMinProp(kind) {
     if (kind === 'dl') G.groups.quir -= 2;
     proposeBill(sp.lawId, sp.opt, kind, 'GOV', 'C');
     if (party && G.gov.sat[party] !== undefined && party !== myPid()) G.gov.sat[party] = clamp(G.gov.sat[party] + 5, 0, 100);
-    closeSheet(); flyResult('🗂', kind === 'dl' ? 'Decreto approvato' : 'Disegno di legge in Parlamento', [{ t: party && party !== myPid() ? `${P(party).short} soddisfatta` : 'Ministro soddisfatto', g: true }]);
+    closeSheet(); flyResult('folder', kind === 'dl' ? 'Decreto approvato' : 'Disegno di legge in Parlamento', [{ t: party && party !== myPid() ? `${P(party).short} soddisfatta` : 'Ministro soddisfatto', g: true }]);
   } else {
     G.flags.rejected = G.flags.rejected || {}; G.flags.rejected[sp.lawId + ':' + sp.opt] = G.week + 26;
     if (party && G.gov.sat[party] !== undefined && party !== myPid()) G.gov.sat[party] = clamp(G.gov.sat[party] - 4, 0, 100);
-    closeSheet(); flyResult('✋', 'Proposta respinta', [{ t: party && party !== myPid() ? `${P(party).short} irritata` : 'Ministro deluso', g: false }]);
+    closeSheet(); flyResult('hand', 'Proposta respinta', [{ t: party && party !== myPid() ? `${P(party).short} irritata` : 'Ministro deluso', g: false }]);
   }
   doneQueue();
 }
@@ -72,33 +73,28 @@ function pendingVoteIds() { return upcomingVotes(); }
 function notifications() {
   const out = [];
   const pv = pendingVoteIds();
-  if (pv.length) out.push({ ico: '🗳', t: `Devi votare ${pv.length} ${pv.length > 1 ? 'provvedimenti' : 'provvedimento'}`, sub: 'Si vota in aula questa settimana', on: 'openVotesNow()', u: 2 });
-  if (G.queue.length) out.push({ ico: '⚠️', t: `${G.queue.length} ${G.queue.length > 1 ? 'decisioni' : 'decisione'} in attesa`, sub: 'Imprevisti e scelte da fare', on: 'processQueue()', u: 2 });
-  if (G.phase === 'formazione') out.push({ ico: '🏛', t: 'Consultazioni in corso', sub: 'Va formato il governo', on: 'openFormation()', u: 2 });
-  if (G.flags.manovraDue && isPremier()) out.push({ ico: '💶', t: `Presenta la manovra ${G.flags.manovraDue}`, sub: 'Entro metà ottobre', on: `openManovra(${G.flags.manovraDue})`, u: 2 });
+  if (pv.length) out.push({ ico: 'vote', t: `Devi votare ${pv.length} ${pv.length > 1 ? 'provvedimenti' : 'provvedimento'}`, sub: 'Si vota in aula questa settimana', on: 'openVotesNow()', u: 2 });
+  if (G.queue.length) out.push({ ico: 'alert', t: `${G.queue.length} ${G.queue.length > 1 ? 'decisioni' : 'decisione'} in attesa`, sub: 'Imprevisti e scelte da fare', on: 'processQueue()', u: 2 });
+  if (G.phase === 'formazione') out.push({ ico: 'building', t: 'Consultazioni in corso', sub: 'Va formato il governo', on: 'openFormation()', u: 2 });
+  if (G.flags.manovraDue && isPremier()) out.push({ ico: 'euro', t: `Presenta la manovra ${G.flags.manovraDue}`, sub: 'Entro metà ottobre', on: `openManovra(${G.flags.manovraDue})`, u: 2 });
   if (isPremier()) {
-    G.bills.filter(b => !b.dead && b.proposer === 'GOV' && b.stages[b.stage] && b.stages[b.stage].k === 'aula').forEach(b => { if (!predictVote(b).passed) out.push({ ico: '🔴', t: `«${billName(b)}» rischia la bocciatura`, sub: 'Valuta la fiducia', on: "goTab('aula')", u: 1 }); });
-    G.bills.filter(b => !b.dead && b.type === 'dl' && b.proposer === 'GOV' && b.deadline - G.week <= 3).forEach(b => out.push({ ico: '⏳', t: `Il decreto «${billName(b)}» scade presto`, sub: weeksLeft(b.deadline), on: "goTab('aula')", u: 1 }));
-    G.gov.parties.forEach(p => { if (p !== myPid() && G.gov.sat[p] < 30) out.push({ ico: '🔥', t: `${P(p).leader} è scontento`, sub: `${P(p).short} può aprire la crisi`, on: "openAction('vertice')", u: 1 }); });
+    G.bills.filter(b => !b.dead && b.proposer === 'GOV' && b.stages[b.stage] && b.stages[b.stage].k === 'aula').forEach(b => { if (!predictVote(b).passed) out.push({ ico: 'alert', t: `«${billName(b)}» rischia la bocciatura`, sub: 'Valuta la fiducia', on: "goTab('aula')", u: 1 }); });
+    G.bills.filter(b => !b.dead && b.type === 'dl' && b.proposer === 'GOV' && b.deadline - G.week <= 3).forEach(b => out.push({ ico: 'clock', t: `Il decreto «${billName(b)}» scade presto`, sub: weeksLeft(b.deadline), on: "goTab('aula')", u: 1 }));
+    G.gov.parties.forEach(p => { if (p !== myPid() && G.gov.sat[p] < 30) out.push({ ico: 'fire', t: `${P(p).leader} è scontento`, sub: `${P(p).short} può aprire la crisi`, on: "openAction('vertice')", u: 1 }); });
   }
   redMetrics().forEach(r => out.push({ ico: METRICS[r.k].ico, t: r.t, sub: 'Tocca per vedere le leggi che aiutano', on: `openAdvice('${r.k}')`, u: isPremier() ? 1 : 0 }));
-  if (isLeader() && !G.program && G.cal.election - G.week < 30 && G.cal.election > G.week) out.push({ ico: '📋', t: 'Manca il programma elettorale', sub: 'Mettilo insieme dalle leggi', on: 'openProgram()', u: 1 });
-  if (isLeader() && !coalitionOf(myPid()) && G.cal.election - G.week < 24 && G.cal.election - G.week > 6) out.push({ ico: '🤝', t: 'Corri da solo', sub: 'Cerca alleati prima del deposito delle liste', on: "UI.partiti='alleanze';goTab('partiti')", u: 0 });
-  if (!isLeader() && G.player.rank >= 3 && G.player.rank < 6 && G.player.fama >= 28 && G.player.rap >= 30 && !usedThisWeek('promo')) out.push({ ico: '📈', t: 'Puoi chiedere un incarico', sub: 'Hai fama e fiducia del leader', on: "openAction('promo')", u: 0 });
-  if (!isLeader() && G.player.rank >= 3 && G.player.seguito >= 30 && G.player.fama >= 35) out.push({ ico: '⚔️', t: 'Puoi sfidare il leader', sub: 'Congresso del partito', on: "openAction('congresso')", u: 0 });
-  if (G.pc >= pcMax() && G.phase === 'normale') out.push({ ico: '⚡', t: 'Capitale politico al massimo', sub: 'Usalo prima di andare avanti', on: "goTab('home')", u: 0 });
-  if (G.player.stress > 75) out.push({ ico: '😮‍💨', t: 'Sei molto stressato', sub: 'Un weekend di riposo ti aiuta', on: "openAction('riposo')", u: 0 });
+  if (isLeader() && !G.program && G.cal.election - G.week < 30 && G.cal.election > G.week) out.push({ ico: 'clipboard', t: 'Manca il programma elettorale', sub: 'Mettilo insieme dalle leggi', on: 'openProgram()', u: 1 });
+  if (isLeader() && !coalitionOf(myPid()) && G.cal.election - G.week < 24 && G.cal.election - G.week > 6) out.push({ ico: 'hands', t: 'Corri da solo', sub: 'Cerca alleati prima del deposito delle liste', on: "UI.partiti='alleanze';goTab('partiti')", u: 0 });
+  if (!isLeader() && G.player.rank >= 3 && G.player.rank < 6 && G.player.fama >= 28 && G.player.rap >= 30 && !usedThisWeek('promo')) out.push({ ico: 'trend', t: 'Puoi chiedere un incarico', sub: 'Hai fama e fiducia del leader', on: "openAction('promo')", u: 0 });
+  if (!isLeader() && G.player.rank >= 3 && G.player.seguito >= 30 && G.player.fama >= 35) out.push({ ico: 'sword', t: 'Puoi sfidare il leader', sub: 'Congresso del partito', on: "openAction('congresso')", u: 0 });
+  if (G.pc >= pcMax() && G.phase === 'normale') out.push({ ico: 'bolt', t: 'Capitale politico al massimo', sub: 'Usalo prima di andare avanti', on: "goTab('home')", u: 0 });
+  if (G.player.stress > 75) out.push({ ico: 'sun', t: 'Sei molto stressato', sub: 'Un weekend di riposo ti aiuta', on: "openAction('riposo')", u: 0 });
   return out.sort((a, b) => b.u - a.u);
 }
 function urgentCount() { return notifications().filter(n => n.u >= 1).length; }
 function openNotifications() {
   const list = notifications();
-  openSheet(`${head('🔔 Notifiche')}${list.length ? `<div class="list">${list.map(n => `<div class="li click" onclick="closeSheet();${n.on}"><span class="nico ${n.u >= 2 ? 'u2' : n.u ? 'u1' : ''}">${n.ico}</span><div class="grow"><b class="small">${esc(n.t)}</b><div class="tiny muted">${esc(n.sub)}</div></div><span class="dim">›</span></div>`).join('')}</div>` : '<div class="muted center mt2">Tutto tranquillo. 🎉</div>'}`);
-}
-function todoHTML() {
-  const list = notifications().slice(0, 4);
-  if (!list.length) return '';
-  return `<div class="sec"><h4>Da fare ora</h4></div><div class="card tight"><div class="list">${list.map(n => `<div class="li click" onclick="${n.on}"><span class="nico ${n.u >= 2 ? 'u2' : n.u ? 'u1' : ''}">${n.ico}</span><div class="grow"><b class="small">${esc(n.t)}</b><div class="tiny muted">${esc(n.sub)}</div></div><span class="btn sm">Vai</span></div>`).join('')}</div></div>`;
+  openSheet(`${head('Notifiche')}${list.length ? `<div class="list">${list.map(n => `<div class="li click" onclick="closeSheet();${n.on}"><span class="nico ${n.u >= 2 ? 'u2' : n.u ? 'u1' : ''}">${emoIcon(n.ico, 19)}</span><div class="grow"><b class="small">${esc(n.t)}</b><div class="tiny muted">${esc(n.sub)}</div></div>${icon('chevron', 16)}</div>`).join('')}</div>` : `<div class="center mt2">${medal('check', 64)}<div class="muted mt">Tutto tranquillo: nessuna urgenza.</div></div>`}`);
 }
 function openVotesNow() {
   const ids = pendingVoteIds();
@@ -124,11 +120,6 @@ function recommendedActions() {
   if (!isLeader()) add('territorio', 'Seguito interno');
   return recs.slice(0, 3);
 }
-function recHTML() {
-  const recs = recommendedActions();
-  if (!recs.length) return '';
-  return `<div class="sec"><h4>Consigliate per te</h4></div><div class="actions">${recs.map((r, i) => { const a = ACTIONS.find(x => x.id === r.id); return `<button class="act" style="--ac:${ACT_COLORS[(i * 3) % ACT_COLORS.length]}" onclick="quickAction('${r.id}','${r.param || ''}')"><span class="c">${actionCost(a) ? '⚡' + actionCost(a) : ''}</span><span class="i">${a.ico}</span>${esc(a.n)}<span class="tiny muted" style="font-weight:500">${esc(r.why)}</span></button>`; }).join('')}</div>`;
-}
 function quickAction(id, param) {
   if (id === 'comizio' && param) return doComizio(param);
   if (id === 'tv') return openTV();
@@ -147,7 +138,7 @@ function diffChips(a, b) {
 function flyResult(ico, title, chips, text) {
   const el = document.createElement('div');
   el.className = 'fly';
-  el.innerHTML = `<div class="fly-in"><div class="row"><span style="font-size:30px">${ico}</span><div class="grow"><b>${esc(title)}</b>${text ? `<div class="tiny muted">${esc(text)}</div>` : ''}</div></div>${chips && chips.length ? `<div class="row wrap mt" style="gap:5px">${chips.map((c, i) => `<span class="eff ${c.g ? 'g' : 'b'}" style="animation-delay:${150 + i * 90}ms">${esc(c.t)}</span>`).join('')}</div>` : ''}</div>`;
+  el.innerHTML = `<div class="fly-in"><div class="row">${medal(ico, 46)}<div class="grow"><b>${esc(title)}</b>${text ? `<div class="tiny muted">${esc(text)}</div>` : ''}</div></div>${chips && chips.length ? `<div class="row wrap mt" style="gap:5px">${chips.map((c, i) => `<span class="eff ${c.g ? 'g' : 'b'}" style="animation-delay:${150 + i * 90}ms">${esc(c.t)}</span>`).join('')}</div>` : ''}</div>`;
   el.onclick = () => el.remove();
   document.body.appendChild(el);
   vib(15);

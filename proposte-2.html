@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Proposte · seconda serie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Playfair+Display:wght@700;900&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a1024; --card: #101a3a; --line: rgba(214,178,94,.18); --line2: rgba(214,178,94,.34); --cream: #f3e6c4; --oro: #d6b25e; --oro2: #ecd08a; --muted: #9aa6c4; --text: #eef1f8; font-variant-numeric: lining-nums; }
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body { margin: 0; color: var(--text); font-family: "DM Sans", sans-serif; padding: max(env(safe-area-inset-top), 20px) 16px 70px; background: radial-gradient(120% 40% at 50% 0%, #1d2d5c, #0a1024 70%) fixed, var(--bg); }
+h1 { font-family: "Playfair Display"; font-weight: 900; font-size: 34px; text-align: center; margin: 14px 0 6px; color: var(--cream); }
+.lead { text-align: center; color: var(--muted); font-size: 14.5px; max-width: 520px; margin: 0 auto 6px; line-height: 1.5; }
+.how { max-width: 420px; margin: 14px auto 0; padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line2); background: rgba(214,178,94,.08); font-size: 13.5px; line-height: 1.5; text-align: center; }
+.how b { color: var(--oro2); }
+h2 { display: flex; align-items: center; gap: 12px; max-width: 420px; margin: 46px auto 6px; font-family: "Playfair Display"; font-weight: 900; font-size: 26px; color: var(--cream); }
+h2::before, h2::after { content: ''; flex: 1; height: 1.5px; background: linear-gradient(90deg, transparent, var(--oro)); }
+h2::after { background: linear-gradient(90deg, var(--oro), transparent); }
+.sub { text-align: center; color: var(--muted); font-size: 13.5px; max-width: 420px; margin: 0 auto 16px; }
+.wrap { max-width: 420px; margin: 0 auto; display: grid; gap: 14px; }
+.item { background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.012)), var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 14px; }
+.item .hd { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.code { flex: none; display: inline-grid; place-items: center; min-width: 40px; height: 30px; padding: 0 10px; border-radius: 999px; background: linear-gradient(135deg, #a8842f, #ecd08a); color: #1a1405; font-weight: 900; font-size: 14px; }
+.item .hd b { font-size: 16px; }
+.item p { margin: 8px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.item p b { color: var(--text); }
+.tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--oro2); border: 1px solid var(--line2); border-radius: 999px; padding: 3px 9px; margin-left: auto; }
+.lic { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.demo { border-radius: 18px; overflow: hidden; border: 1px solid var(--line); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.done { max-width: 420px; margin: 18px auto 0; display: grid; gap: 6px; font-size: 13.5px; color: var(--muted); }
+.done div { display: flex; gap: 8px; align-items: flex-start; }
+.done .lic { width: 18px; height: 18px; color: #34d399; margin-top: 1px; }
+.q { max-width: 420px; margin: 0 auto; display: grid; gap: 10px; }
+.q div { padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255,255,255,.03); font-size: 14px; line-height: 1.45; }
+.q div b { color: var(--oro2); }
+
+/* ---------- H · intestazioni ---------- */
+.h1d { position: relative; height: 150px; background: linear-gradient(180deg, #1b2a55 0%, #0b1226 100%); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; }
+.h1d svg.facade { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); width: 260px; height: 92px; color: rgba(214,178,94,.55); }
+.h1d .t { position: relative; font-family: "Playfair Display"; font-weight: 900; font-size: 26px; color: var(--cream); text-shadow: 0 2px 14px rgba(0,0,0,.6); }
+.h2d { background: #0b1226; padding: 22px 16px; display: flex; justify-content: center; }
+.h2d .plate { padding: 10px 26px; border-radius: 10px; background: linear-gradient(135deg, #8a6a26, #ecd08a 45%, #a8842f 70%, #f3e2a6); color: #2a1e06; font-family: "Playfair Display"; font-weight: 900; font-size: 22px; letter-spacing: .08em; text-transform: uppercase; box-shadow: inset 0 1px 0 rgba(255,255,255,.6), inset 0 -2px 0 rgba(0,0,0,.25), 0 8px 18px rgba(0,0,0,.5); position: relative; }
+.h2d .plate::before, .h2d .plate::after { content: ''; position: absolute; top: 50%; width: 7px; height: 7px; margin-top: -3.5px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff6d0, #6b5317); }
+.h2d .plate::before { left: 8px; } .h2d .plate::after { right: 8px; }
+.h3d { background: #0b1226; padding: 22px 16px; text-align: center; }
+.h3d .t { display: flex; align-items: center; gap: 12px; font-family: "Playfair Display"; font-weight: 900; font-size: 24px; color: var(--cream); }
+.h3d .t::before, .h3d .t::after { content: ''; flex: 1; height: 1.5px; background: linear-gradient(90deg, transparent, var(--oro)); }
+.h3d .t::after { background: linear-gradient(90deg, var(--oro), transparent); }
+
+/* ---------- K · card ---------- */
+.k1 { margin: 14px; padding: 16px 16px 18px; background: #f2e8cf; color: #2b2112; border-radius: 6px; position: relative; box-shadow: 0 10px 24px rgba(0,0,0,.45); font-family: "DM Sans"; background-image: radial-gradient(rgba(120,90,40,.12) 1px, transparent 1px); background-size: 6px 6px; }
+.k1 .kk { font-family: "Special Elite", monospace; font-size: 11px; letter-spacing: .1em; color: #7a5b22; }
+.k1 h4 { margin: 6px 0 4px; font-family: "Playfair Display"; font-weight: 900; font-size: 20px; }
+.k1 .stampx { position: absolute; right: 14px; bottom: 12px; transform: rotate(-12deg); border: 3px solid #b3263a; color: #b3263a; font-family: "Playfair Display"; font-weight: 900; font-size: 13px; padding: 3px 8px; border-radius: 6px; letter-spacing: .1em; }
+.k2 { margin: 26px 14px 14px; position: relative; background: #1a2a57; border-radius: 4px 14px 14px 14px; padding: 16px; border: 1px solid var(--line2); }
+.k2::before { content: 'PENSIONI'; position: absolute; top: -20px; left: -1px; height: 20px; padding: 0 12px; border-radius: 8px 8px 0 0; background: #fb923c; color: #2a1405; font-size: 10.5px; font-weight: 900; letter-spacing: .1em; display: grid; place-items: center; }
+.k2 h4 { margin: 0 0 4px; font-family: "Playfair Display"; font-size: 18px; color: var(--cream); }
+.k3 { margin: 14px auto; width: 190px; border-radius: 18px; padding: 10px; background: linear-gradient(160deg, #e2001a, #7a0010); box-shadow: 0 14px 26px rgba(0,0,0,.5); color: #fff; text-align: center; }
+.k3 .in { border-radius: 12px; border: 2px solid rgba(255,255,255,.6); padding: 12px 8px; background: rgba(0,0,0,.12); }
+.k3 .logo { width: 64px; height: 64px; border-radius: 50%; background: #fff; margin: 0 auto; display: grid; place-items: center; color: #e2001a; font-family: "Playfair Display"; font-weight: 900; font-size: 22px; }
+.k3 h4 { margin: 8px 0 2px; font-family: "Playfair Display"; font-size: 17px; }
+.k3 .st { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 8px; font-size: 11px; }
+.k3 .st div { background: rgba(255,255,255,.14); border-radius: 8px; padding: 4px; }
+.k3 .st b { display: block; font-size: 15px; }
+.k4 { margin: 14px; display: flex; background: #f3e6c4; color: #2a1e06; border-radius: 14px; overflow: hidden; position: relative; }
+.k4 .l { padding: 12px 14px; flex: 1; }
+.k4 .l b { font-family: "Playfair Display"; font-size: 17px; display: block; }
+.k4 .r { width: 74px; border-left: 2px dashed rgba(42,30,6,.35); display: grid; place-items: center; font-family: "Playfair Display"; font-weight: 900; font-size: 20px; }
+.k4::before, .k4::after { content: ''; position: absolute; right: 64px; width: 18px; height: 18px; border-radius: 50%; background: var(--card); }
+.k4::before { top: -9px; } .k4::after { bottom: -9px; }
+
+/* ---------- E · carte evento ---------- */
+.e1 { margin: 14px; background: #f3ecdc; color: #1b1712; border-radius: 6px; padding: 12px 14px 14px; box-shadow: 0 10px 24px rgba(0,0,0,.45); }
+.e1 .m { font-family: "Playfair Display"; font-weight: 900; font-size: 22px; text-align: center; border-bottom: 3px double #1b1712; padding-bottom: 2px; }
+.e1 .hl { font-family: "Playfair Display"; font-weight: 900; font-size: 21px; line-height: 1.1; margin-top: 10px; text-align: center; }
+.e1 .cols { columns: 2; column-gap: 12px; font-size: 11px; line-height: 1.35; margin-top: 8px; color: #4b4134; }
+.e2 { position: relative; height: 170px; background: linear-gradient(180deg, #2b3d72, #0b1226); overflow: hidden; }
+.e2 .face { position: absolute; left: 50%; top: 18px; width: 90px; height: 90px; margin-left: -45px; border-radius: 50%; background: radial-gradient(circle at 50% 38%, #f6d0b6 0 32%, transparent 33%), radial-gradient(circle at 50% 120%, #1f2a44 0 52%, transparent 53%), #24345f; }
+.e2 .lt { position: absolute; left: 0; right: 0; bottom: 14px; }
+.e2 .lt .a { display: inline-block; background: #d61f26; color: #fff; font-weight: 900; font-size: 11px; letter-spacing: .12em; padding: 4px 10px; }
+.e2 .lt .b { background: rgba(255,255,255,.95); color: #111; font-weight: 800; font-size: 14px; padding: 6px 10px; }
+.e2 .live { position: absolute; top: 10px; right: 10px; color: #fff; font-size: 11px; font-weight: 900; letter-spacing: .1em; display: flex; gap: 5px; align-items: center; }
+.e2 .live i { width: 8px; height: 8px; border-radius: 50%; background: #ff3b3b; animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .2; } }
+.e3 { padding: 22px 16px; background: radial-gradient(120% 80% at 50% 0%, #2b3d72, #0b1226 70%); text-align: center; }
+.e3 .ring { width: 86px; height: 86px; border-radius: 50%; margin: 0 auto; background: radial-gradient(circle at 50% 38%, #f6d0b6 0 32%, transparent 33%), radial-gradient(circle at 50% 120%, #15803d 0 52%, transparent 53%), #24345f; box-shadow: 0 0 0 0 rgba(214,178,94,.6); animation: ring 1.4s infinite; }
+@keyframes ring { 70% { box-shadow: 0 0 0 18px rgba(214,178,94,0); } }
+.e3 .n { font-family: "Playfair Display"; font-weight: 900; font-size: 20px; margin-top: 12px; }
+.e3 .s { color: var(--muted); font-size: 12px; }
+.e3 .btns { display: flex; justify-content: center; gap: 40px; margin-top: 16px; }
+.e3 .btns span { width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; color: #fff; }
+.e4 { padding: 14px; background: #0e1530; display: grid; gap: 8px; }
+.e4 .msg { max-width: 82%; padding: 8px 11px; border-radius: 14px 14px 14px 4px; background: #1d2a55; font-size: 12.5px; line-height: 1.35; }
+.e4 .msg b { display: block; font-size: 11px; color: var(--oro2); }
+.e4 .me { justify-self: end; border-radius: 14px 14px 4px 14px; background: linear-gradient(135deg, #a8842f, #ecd08a); color: #1a1405; }
+.e4 .opts { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.e4 .opts span { font-size: 11.5px; font-weight: 800; padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line2); color: var(--oro2); }
+.e5 { margin: 14px; padding: 12px; border-radius: 16px; background: #0f1420; border: 1px solid #263045; }
+.e5 .u { display: flex; gap: 8px; align-items: center; }
+.e5 .u i { width: 34px; height: 34px; border-radius: 50%; background: #e2001a; flex: none; }
+.e5 .u b { font-size: 13px; } .e5 .u span { color: var(--muted); font-size: 12px; }
+.e5 .t { font-size: 13.5px; margin: 8px 0; line-height: 1.4; }
+.e5 .r { display: flex; gap: 18px; color: var(--muted); font-size: 12px; }
+
+/* ---------- M · movimento ---------- */
+.mdemo { height: 120px; display: grid; place-items: center; background: #0b1226; position: relative; overflow: hidden; }
+.m1 .pg { width: 120px; height: 80px; background: #16224b; border: 1px solid var(--line2); border-radius: 8px; transform-origin: left center; animation: turn 2.6s infinite ease-in-out; display: grid; place-items: center; color: var(--oro2); font-family: "Playfair Display"; font-weight: 900; }
+@keyframes turn { 0%, 30% { transform: perspective(500px) rotateY(0); } 60%, 100% { transform: perspective(500px) rotateY(-100deg); opacity: .2; } }
+.m2 .stp { border: 4px solid #34d399; color: #34d399; font-family: "Playfair Display"; font-weight: 900; font-size: 24px; padding: 6px 14px; border-radius: 10px; letter-spacing: .08em; animation: stamp 2.4s infinite cubic-bezier(.2,.9,.3,1.4); }
+@keyframes stamp { 0% { transform: rotate(-8deg) scale(3); opacity: 0; } 25%, 85% { transform: rotate(-8deg) scale(1); opacity: 1; } 100% { opacity: 0; } }
+.m3 .num { font-family: "Playfair Display"; font-weight: 900; font-size: 46px; color: var(--cream); display: flex; overflow: hidden; height: 56px; }
+.m3 .num span { display: block; animation: roll 3s infinite; }
+@keyframes roll { 0%, 20% { transform: translateY(0); } 45%, 100% { transform: translateY(-56px); } }
+.m3 .num span i { display: block; height: 56px; font-style: normal; }
+.m4 .card { width: 110px; height: 76px; border-radius: 12px; position: relative; transform-style: preserve-3d; animation: flip 3s infinite; }
+.m4 .card div { position: absolute; inset: 0; border-radius: 12px; display: grid; place-items: center; backface-visibility: hidden; font-weight: 900; }
+.m4 .card .f { background: linear-gradient(135deg, #a8842f, #ecd08a); color: #1a1405; font-family: "Playfair Display"; }
+.m4 .card .b { background: #16224b; border: 1px solid var(--line2); color: var(--cream); transform: rotateY(180deg); font-size: 12px; text-align: center; padding: 6px; }
+@keyframes flip { 0%, 30% { transform: rotateY(0); } 50%, 100% { transform: rotateY(180deg); } }
+.m5 svg circle { animation: seat 2.4s infinite; }
+@keyframes seat { 0% { fill: #2a3350; } 40%, 100% { fill: var(--c); } }
+
+/* ---------- B · sfondi ---------- */
+.bd { height: 110px; border-radius: 14px; display: flex; align-items: flex-end; padding: 10px; font-weight: 800; font-size: 13px; }
+.b1 { background: radial-gradient(120% 70% at 50% -10%, #1d2d5c, #0a1024 70%); }
+.b2 { background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.07) 42%, transparent 46%), linear-gradient(160deg, transparent 55%, rgba(214,178,94,.12) 57%, transparent 61%), radial-gradient(circle at 30% 20%, #2a2f3d, #12141b 70%); }
+.b3 { background: #f2e8cf; color: #2b2112; background-image: radial-gradient(rgba(120,90,40,.12) 1px, transparent 1px); background-size: 6px 6px; }
+.b4 { background: linear-gradient(180deg, rgba(31,164,99,.18), transparent 30%), linear-gradient(0deg, rgba(229,72,77,.16), transparent 30%), #0a1024; }
+
+/* ---------- N · menu ---------- */
+.nav { margin: 12px; display: flex; gap: 4px; padding: 5px; border-radius: 30px; background: rgba(9,14,32,.92); border: 1px solid var(--line2); }
+.nav span { flex: 1; height: 42px; border-radius: 999px; display: grid; place-items: center; }
+.nav .on { flex: 0 0 auto; padding: 0 14px; display: flex; gap: 6px; align-items: center; font-size: 11px; font-weight: 900; letter-spacing: .05em; }
+.n1 .on { background: #ffd60a; color: #111; } .n1 span { color: #38bdf8; } .n1 span:nth-child(3) { color: #22c55e; } .n1 span:nth-child(4) { color: #a78bfa; } .n1 span:nth-child(5) { color: #f472b6; } .n1 span:nth-child(2) { color: #fb923c; }
+.n2 span { color: var(--oro); } .n2 .on { background: linear-gradient(135deg, #a8842f, #ecd08a); color: #1a1405; }
+.n3 { background: transparent; border: 0; justify-content: space-around; }
+.n3 span { flex: none; width: 46px; height: 46px; border: 2px solid var(--oro); background: radial-gradient(circle at 30% 25%, #2b3d72, #111a38); color: var(--oro2); }
+.n3 .on { width: 56px; height: 56px; padding: 0; justify-content: center; box-shadow: 0 0 16px rgba(214,178,94,.6); }
+
+/* ---------- G e X ---------- */
+.gi { display: flex; gap: 12px; align-items: flex-start; }
+.gi .mi { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; color: var(--oro2); background: radial-gradient(circle at 30% 25%, #2b3d72, #111a38); border: 2px solid var(--oro); }
+.gi .mi .lic { width: 21px; height: 21px; }
+.ex { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px; }
+.ex span { font-size: 11.5px; font-weight: 700; padding: 4px 9px; border-radius: 999px; background: rgba(255,255,255,.05); border: 1px solid var(--line); color: var(--cream); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></symbol>
+  <symbol id="i-bus" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="13" rx="2"/><path d="M4 11h16M7 20v-3M17 20v-3"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4Z"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10Z"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2Z"/><path d="M4 19V5"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-hist" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></symbol>
+  <symbol id="i-build" viewBox="0 0 24 24"><path d="M3 9l9-5 9 5"/><path d="M5.5 10.5v7M9.8 10.5v7M14.2 10.5v7M18.5 10.5v7"/><path d="M3 20.5h18"/></symbol>
+  <symbol id="i-news" viewBox="0 0 24 24"><rect x="3" y="4" width="15" height="16" rx="2"/><path d="M18 8h3v10a2 2 0 0 1-2 2M7 8h7M7 12h7M7 16h4"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+  <symbol id="i-chain" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+</defs></svg>
+
+<h1>Proposte · seconda serie</h1>
+<div class="lead">Lo stile Palazzo (S1 · T1 · I2 · A1 · R4 · C1) ora è su tutte le pagine. Qui sotto le idee per il passo successivo: grafica, gioco e imprevisti. Tutto si può mescolare.</div>
+<div class="how">Scrivimi i codici che ti piacciono, per esempio <b>H1 K3 E3 M2 G2 G6 X9</b>. Puoi anche scrivere «tutti i G» o «E2 ma più colorato».</div>
+
+<div class="done">
+  <div><svg class="lic"><use href="#i-target"/></svg><span><b>Già fatto in questo aggiornamento:</b> stile Palazzo ovunque, icone a linea al posto delle emoji, loghi veri dei partiti, editor dell’avatar, Paese e poteri spiegati, trattativa di alleanza (anche oltre i veti), avviso sui ministri già scelti, spiegazioni chiare per tutte le 75 leggi, fiducia spiegata, 30 nuovi imprevisti.</span></div>
+</div>
+
+<!-- ======================= GRAFICA ======================= -->
+<h2>Intestazioni</h2>
+<div class="sub">Ogni pagina con la sua “stanza”, invece di titoli tutti uguali</div>
+<div class="wrap">
+  <div class="item"><div class="hd"><span class="code">H1</span><b>Affresco della stanza</b><span class="tag">consigliato</span></div>
+    <div class="demo h1d"><svg class="facade" viewBox="0 0 260 92" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 88h240M20 88V40h220v48M20 40l110-30 110 30"/><path d="M40 88V52M62 88V52M84 88V52M106 88V52M154 88V52M176 88V52M198 88V52M220 88V52"/><rect x="118" y="60" width="24" height="28" rx="12"/><path d="M60 40v-6h140v6"/></svg><div class="t">Palazzo</div></div>
+    <p>In cima a ogni pagina un disegno a linee dorate del luogo: la facciata di <b>Palazzo Chigi</b>, l’emiciclo di <b>Montecitorio</b> per l’Aula, gli scaffali della <b>biblioteca</b> per le Leggi, il profilo dell’Italia, la <b>Borsa</b> per i Conti. Scorrendo il disegno si rimpicciolisce.</p></div>
+  <div class="item"><div class="hd"><span class="code">H2</span><b>Targa in ottone</b></div>
+    <div class="demo h2d"><div class="plate">Aula</div></div>
+    <p>Il titolo inciso su una targa come quelle sulle porte dei palazzi romani, con le viti. Molto “istituzionale”.</p></div>
+  <div class="item"><div class="hd"><span class="code">H3</span><b>Solo titolo con barre</b><span class="tag">attuale</span></div>
+    <div class="demo h3d"><div class="t">Aula</div></div>
+    <p>Quello di adesso: pulito e veloce. Si può tenere per le sezioni interne e usare H1 o H2 solo in cima.</p></div>
+</div>
+
+<h2>Card</h2>
+<div class="sub">Forme diverse per oggetti diversi: si capisce cosa stai guardando senza leggere</div>
+<div class="wrap">
+  <div class="item"><div class="hd"><span class="code">K1</span><b>Pergamena per le leggi</b></div>
+    <div class="demo" style="background:#0b1226"><div class="k1"><div class="kk">LEGGE N. 214 · CAMERA DEI DEPUTATI</div><h4>Salario minimo a 9 € l’ora</h4><div style="font-size:12.5px;line-height:1.4">Paga minima per legge in tutti i contratti.</div><span class="stampx">APPROVATA</span></div></div>
+    <p>Ogni legge è un foglio di carta con il numero e il timbro: <b>APPROVATA</b>, <b>RESPINTA</b> o <b>IN ESAME</b>. Il timbro cade con l’animazione quando passa.</p></div>
+  <div class="item"><div class="hd"><span class="code">K2</span><b>Fascicolo con linguetta</b></div>
+    <div class="demo" style="background:#0b1226;padding-top:4px"><div class="k2"><h4>Pensione anticipata</h4><div style="font-size:12.5px;color:#9aa6c4">Oggi: regole attuali · 3 riforme possibili</div></div></div>
+    <p>Le leggi come cartelline d’ufficio: la linguetta colorata dice subito la categoria (Pensioni arancio, Sanità rosso, Fisco verde…).</p></div>
+  <div class="item"><div class="hd"><span class="code">K3</span><b>Figurina del partito</b><span class="tag">consigliato</span></div>
+    <div class="demo" style="background:#0b1226"><div class="k3"><div class="in"><div class="logo">PD</div><h4>Partito Democratico</h4><div style="font-size:11px;opacity:.85">Elly Schlein</div><div class="st"><div><b>20,6%</b>sondaggi</div><div><b>+12</b>rapporto</div><div><b>68</b>deputati</div><div><b>41%</b>affinità</div></div></div></div></div>
+    <p>Nella pagina Partiti ogni partito è una figurina nel suo colore, con logo, leader e quattro numeri. Si scorrono come carte; toccandola si gira e mostra le idee.</p></div>
+  <div class="item"><div class="hd"><span class="code">K4</span><b>Biglietto per le azioni</b></div>
+    <div class="demo" style="background:#101a3a"><div class="k4"><div class="l"><b>Comizio in Campania</b><span style="font-size:12px">Radicamento ▲ · Fama +1</span></div><div class="r"><svg class="lic" style="width:18px;height:18px"><use href="#i-bolt"/></svg>1</div></div></div>
+    <p>Quando scegli un’azione appare come un biglietto da strappare: a destra il costo, a sinistra cosa ottieni. Lo strappo conferma.</p></div>
+</div>
+
+<h2>Imprevisti</h2>
+<div class="sub">Ogni tipo di imprevisto arriva in un formato diverso</div>
+<div class="wrap">
+  <div class="item"><div class="hd"><span class="code">E1</span><b>Prima pagina</b></div>
+    <div class="demo" style="background:#0b1226"><div class="e1"><div class="m">IL QUOTIDIANO DI ROMA</div><div class="hl">Ryanair minaccia: via 20 rotte dal Sud</div><div class="cols">La compagnia irlandese chiede di abolire l’addizionale comunale. I governatori di Calabria e Sicilia chiedono al governo di intervenire entro la settimana. Albergatori in allarme per la stagione estiva.</div></div></div>
+    <p>Economia, aziende e politica arrivano come un giornale: titolo grande, due colonne, poi le scelte.</p></div>
+  <div class="item"><div class="hd"><span class="code">E2</span><b>Edizione straordinaria</b><span class="tag">consigliato</span></div>
+    <div class="demo e2"><div class="face"></div><div class="live"><i></i>IN DIRETTA</div><div class="lt"><span class="a">EDIZIONE STRAORDINARIA</span><div class="b">Scossa di magnitudo 4.6 ai Campi Flegrei</div></div></div>
+    <p>Calamità e crisi gravi come un telegiornale interrotto: banda rossa, scritta che scorre, il volto del conduttore. Hai un tempo limitato per decidere.</p></div>
+  <div class="item"><div class="hd"><span class="code">E3</span><b>Telefonata in arrivo</b><span class="tag">consigliato</span></div>
+    <div class="demo e3"><div class="ring"></div><div class="n">Matteo Salvini</div><div class="s">Lega · chiamata in arrivo</div><div class="btns"><span style="background:#e5484d"><svg class="lic"><use href="#i-phone"/></svg></span><span style="background:#22b86e"><svg class="lic"><use href="#i-phone"/></svg></span></div></div>
+    <p>Alleati e avversari ti <b>chiamano</b>: rispondi o rifiuti. Se rispondi, il leader ti parla in prima persona e scegli la risposta come in un dialogo.</p></div>
+  <div class="item"><div class="hd"><span class="code">E4</span><b>Chat del partito</b></div>
+    <div class="demo e4"><div class="msg"><b>Capogruppo</b>Domani in aula c’è il voto sulla flat tax. Metà dei nostri è contraria.</div><div class="msg"><b>Portavoce</b>I giornali ci chiedono una linea entro le 18.</div><div class="opts"><span>Libertà di voto</span><span>Tutti per il no</span></div></div>
+    <p>Le questioni interne (correnti, voti, candidature) arrivano come una chat del gruppo: messaggi brevi e due risposte rapide.</p></div>
+  <div class="item"><div class="hd"><span class="code">E5</span><b>Post sui social</b></div>
+    <div class="demo" style="background:#0b1226"><div class="e5"><div class="u"><i></i><div><b>Elly Schlein</b> <span>@ellyesse · 2 min</span></div></div><div class="t">«Il governo taglia la sanità e chiama riforma un regalo ai soliti noti.»</div><div class="r"><span>12.400 ♥</span><span>3.100 condivisioni</span></div></div></div>
+    <p>Gli attacchi degli avversari arrivano come post: rispondi con un post, con un’intervista o lasci correre. Il contatore cresce mentre decidi.</p></div>
+</div>
+
+<h2>Movimento</h2>
+<div class="sub">Animazioni brevi che danno peso alle decisioni (si possono spegnere)</div>
+<div class="wrap">
+  <div class="grid2">
+    <div class="item"><div class="hd"><span class="code">M1</span><b>Pagina che gira</b></div><div class="demo mdemo m1"><div class="pg">Leggi</div></div><p>Cambiando scheda la pagina gira come un registro.</p></div>
+    <div class="item"><div class="hd"><span class="code">M2</span><b>Timbro</b></div><div class="demo mdemo m2"><div class="stp">APPROVATA</div></div><p>Leggi e voti chiusi con un timbro che cade.</p></div>
+    <div class="item"><div class="hd"><span class="code">M3</span><b>Numeri che scorrono</b></div><div class="demo mdemo m3"><div class="num"><span><i>27</i><i>29</i></span>%</div></div><p>Sondaggi e consenso cambiano come un tabellone.</p></div>
+    <div class="item"><div class="hd"><span class="code">M4</span><b>Carta che si gira</b></div><div class="demo mdemo m4"><div class="card"><div class="f">IMPREVISTO</div><div class="b">Sciopero generale dei trasporti</div></div></div><p>L’imprevisto arriva coperto e si gira.</p></div>
+  </div>
+  <div class="item"><div class="hd"><span class="code">M5</span><b>Emiciclo che si accende</b></div>
+    <div class="demo mdemo m5"><svg width="220" height="100" viewBox="0 0 220 100"><g id="seats"></g></svg></div>
+    <p>Durante ogni voto i seggi si colorano uno alla volta, verde sì e rosso no, con il conteggio che sale. Già presente nei risultati: si estende a tutte le votazioni.</p></div>
+</div>
+
+<h2>Sfondi e menu</h2>
+<div class="wrap">
+  <div class="grid2">
+    <div class="item"><div class="hd"><span class="code">B1</span><b>Notte blu</b></div><div class="bd b1">attuale</div></div>
+    <div class="item"><div class="hd"><span class="code">B2</span><b>Marmo scuro</b></div><div class="bd b2">venature oro</div></div>
+    <div class="item"><div class="hd"><span class="code">B3</span><b>Carta, di giorno</b></div><div class="bd b3">modalità chiara</div></div>
+    <div class="item"><div class="hd"><span class="code">B4</span><b>Tricolore</b></div><div class="bd b4">sfumature discrete</div></div>
+  </div>
+  <div class="item"><div class="hd"><span class="code">N1</span><b>Pillola colorata</b><span class="tag">attuale</span></div><div class="demo" style="background:#0b1226"><div class="nav n1"><span class="on"><svg class="lic" style="width:18px;height:18px"><use href="#i-build"/></svg>PALAZZO</span><span><svg class="lic"><use href="#i-book"/></svg></span><span><svg class="lic"><use href="#i-globe"/></svg></span><span><svg class="lic"><use href="#i-users"/></svg></span><span><svg class="lic"><use href="#i-target"/></svg></span></div></div></div>
+  <div class="item"><div class="hd"><span class="code">N2</span><b>Pillola oro</b></div><div class="demo" style="background:#0b1226"><div class="nav n2"><span class="on"><svg class="lic" style="width:18px;height:18px"><use href="#i-build"/></svg>PALAZZO</span><span><svg class="lic"><use href="#i-book"/></svg></span><span><svg class="lic"><use href="#i-globe"/></svg></span><span><svg class="lic"><use href="#i-users"/></svg></span><span><svg class="lic"><use href="#i-target"/></svg></span></div></div></div>
+  <div class="item"><div class="hd"><span class="code">N3</span><b>Medaglioni</b></div><div class="demo" style="background:#0b1226"><div class="nav n3"><span><svg class="lic"><use href="#i-book"/></svg></span><span><svg class="lic"><use href="#i-globe"/></svg></span><span class="on"><svg class="lic"><use href="#i-build"/></svg></span><span><svg class="lic"><use href="#i-users"/></svg></span><span><svg class="lic"><use href="#i-target"/></svg></span></div></div></div>
+</div>
+
+<!-- ======================= GIOCO ======================= -->
+<h2>Gioco</h2>
+<div class="sub">Più persone, più racconto, decisioni più veloci</div>
+<div class="wrap">
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-users"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G1</span><b>Il tuo staff</b></div><p>Scegli <b>portavoce, capo di gabinetto, sondaggista e spin doctor</b>: ognuno ha un’abilità (interviste migliori, più capitale politico, sondaggi precisi, meno gaffe) e ogni tanto ti dà un consiglio o combina un guaio.</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-phone"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G2</span><b>Telefonate e dialoghi</b></div><p>Leader, ministri e il Quirinale ti chiamano. Dialoghi brevi con 2-3 risposte; ricordano cosa hai detto e lo usano dopo («Mi avevi promesso…»).</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-heart"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G3</span><b>Debiti e favori</b></div><p>Ogni leader tiene il conto: se ti fa un favore (un voto, un ministero) poi lo chiede indietro, e se lo tradisci se lo ricorda per anni. Si vede nella sua figurina.</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-build"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G4</span><b>Consiglio dei ministri</b></div><p>Da premier, ogni settimana una riunione: due o tre ministri portano una proposta ciascuno, tu approvi, rinvii o bocci con un gesto. Il ministro reagisce.</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-globe"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G5</span><b>Vertici internazionali</b></div><p>Consiglio europeo, G7, NATO, visite a Washington: trattative a turni con altri capi di governo, foto di gruppo, accordi su migranti, difesa, energia e conti.</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-bus"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G6</span><b>Campagna elettorale sul campo</b></div><p>Nelle ultime 8 settimane un tour sulla mappa: scegli le tappe, il pullman si sposta, ogni comizio ha un piccolo evento (contestazione, folla, gaffe). Gran finale con il confronto TV.</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-chat"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G7</span><b>Social e reazioni</b></div><p>Un feed con i post dei leader che reagiscono alle tue mosse, i trend del giorno e i tuoi follower che crescono. Un post sbagliato diventa un caso.</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-mic"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G8</span><b>Giornalisti con un nome</b></div><p>Una decina di giornalisti ricorrenti (amici, ostili, imparziali). Ti ricordano, ti fanno domande sulle tue promesse, possono anticipare uno scandalo.</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-target"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G9</span><b>Obiettivi del mese</b></div><p>Tre missioni a tempo («porta lo spread sotto 120», «fai approvare 2 leggi», «vinci in Liguria») con premi in capitale politico e fama.</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-clock"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G10</span><b>Crisi a tempo</b></div><p>Nelle emergenze un conto alla rovescia reale: decidi in 20 secondi o decide il tuo staff al posto tuo (e non sempre bene).</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-cal"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G11</span><b>La settimana in tre momenti</b></div><p>Mattina, pomeriggio e sera: ogni azione occupa un momento, così pianificare diventa un piccolo puzzle (comizio al mattino, TV la sera).</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-hist"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G12</span><b>Scenari storici</b></div><p>Partite che iniziano in un momento vero: <b>1994</b> (la discesa in campo), <b>2011</b> (spread a 575), <b>2018</b> (governo gialloverde), <b>2022</b> (prima premier donna).</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-book"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G13</span><b>Come ti ricorderanno</b></div><p>A fine partita un libro di storia: titolo («Il premier della flat tax»), le tre leggi più importanti, i numeri dell’economia, il giudizio degli storici.</p></div></div></div>
+  <div class="item"><div class="gi"><span class="mi"><svg class="lic"><use href="#i-eye"/></svg></span><div><div class="hd" style="margin:0"><span class="code">G14</span><b>Vita privata</b></div><p>Famiglia, salute, tempo libero: weekend saltati, vacanze sotto i riflettori, paparazzi. Pesa sullo stress e sull’immagine.</p></div></div></div>
+</div>
+
+<!-- ======================= IMPREVISTI ======================= -->
+<h2>Altri imprevisti</h2>
+<div class="sub">Famiglie di imprevisti da aggiungere (alcune già iniziate)</div>
+<div class="wrap">
+  <div class="item"><div class="hd"><span class="code">X1</span><b>Grandi aziende</b><span class="tag">iniziato</span></div><p>Crisi, investimenti e scontri con il governo.</p><div class="ex"><span>TIM e la rete</span><span>Autostrade</span><span>ex Ilva</span><span>Stellantis</span><span>Monte dei Paschi</span><span>Poste</span><span>Ferrovie</span><span>Mediaset e RAI</span></div></div>
+  <div class="item"><div class="hd"><span class="code">X2</span><b>Catene di conseguenze</b><span class="tag">consigliato</span></div><p>Una scelta di oggi torna dopo settimane: un condono porta un’inchiesta, una nomina sbagliata uno scandalo, una promessa non mantenuta una piazza.</p><div class="ex"><span>condono → inchiesta</span><span>nomina → scandalo</span><span>promessa → sciopero</span></div></div>
+  <div class="item"><div class="hd"><span class="code">X3</span><b>Esteri</b></div><p>Il mondo bussa alla porta.</p><div class="ex"><span>dazi USA</span><span>Ucraina</span><span>Medio Oriente</span><span>crisi del gas</span><span>migranti dalla Libia</span><span>ostaggi italiani</span><span>G7 in Italia</span></div></div>
+  <div class="item"><div class="hd"><span class="code">X4</span><b>Il partito</b></div><p>Correnti, fuoriusciti, tesorieri, congressi, candidature contese, sondaggi interni.</p><div class="ex"><span>fronda in Senato</span><span>sindaco ribelle</span><span>tesoriere indagato</span><span>europarlamentare che lascia</span></div></div>
+  <div class="item"><div class="hd"><span class="code">X5</span><b>Calendario vero</b></div><p>Gli appuntamenti fissi dell’anno con le loro scelte.</p><div class="ex"><span>Sanremo a febbraio</span><span>25 aprile e 1° maggio</span><span>maturità</span><span>esodo estivo</span><span>Meeting di Rimini</span><span>Natale e bonus</span></div></div>
+  <div class="item"><div class="hd"><span class="code">X6</span><b>Sport e orgoglio</b></div><p>Momenti positivi da cavalcare (o da non sbagliare).</p><div class="ex"><span>finale degli Europei</span><span>tennis a Torino</span><span>Giro d’Italia</span><span>Olimpiadi</span></div></div>
+  <div class="item"><div class="hd"><span class="code">X7</span><b>Tecnologia e sicurezza</b><span class="tag">iniziato</span></div><p>Il lato nuovo della politica.</p><div class="ex"><span>attacco hacker alla sanità</span><span>blackout</span><span>IA e lavoro</span><span>deepfake</span><span>dati rubati</span></div></div>
+  <div class="item"><div class="hd"><span class="code">X8</span><b>Natura ed emergenze</b></div><p>Le crisi che misurano un governo.</p><div class="ex"><span>terremoto</span><span>alluvione</span><span>Campi Flegrei</span><span>siccità</span><span>Etna</span><span>caldo record</span></div></div>
+  <div class="item"><div class="hd"><span class="code">X9</span><b>Opposizione e piazze</b><span class="tag">iniziato</span></div><p>Già in gioco: piazze unite, attacchi in TV, mozioni contro i ministri, ostruzionismo, question time. Si possono aggiungere referendum lampo e occupazioni.</p></div>
+  <div class="item"><div class="hd"><span class="code">X10</span><b>Imprevisti a scelta multipla di persone</b></div><p>Lo stesso fatto chiede una persona: chi mandi a gestire l’alluvione? Chi va in TV a difendere la manovra? Ogni nome ha pro e contro.</p></div>
+</div>
+
+<h2>Domande</h2>
+<div class="sub">Le stesse te le faccio anche in chat</div>
+<div class="q">
+  <div><b>1.</b> Più <b>racconto</b> (telefonate, dialoghi, persone con un nome) o più <b>gestione</b> (numeri, tabelle, mappe)?</div>
+  <div><b>2.</b> Quali persone vuoi intorno: staff, leader che ricordano i favori, giornalisti ricorrenti, famiglia?</div>
+  <div><b>3.</b> Quanto deve durare una settimana di gioco: un minuto con poche scelte forti, o più tempo con tante azioni?</div>
+  <div><b>4.</b> Il tono degli imprevisti: seri e realistici, con un filo di ironia, o un mix?</div>
+</div>
+
+<script>
+// emiciclo animato per M5
+(function () {
+  const g = document.getElementById('seats'); if (!g) return;
+  const cols = ['#e2001a', '#e2001a', '#6aa84f', '#f4c20d', '#2a9df4', '#1f4fa8', '#1f4fa8', '#0b7a3e'];
+  let n = 0, h = '';
+  [34, 50, 66, 82].forEach((r, ri) => { const k = 9 + ri * 4; for (let j = 0; j < k; j++) { const a = Math.PI - j * Math.PI / (k - 1); const x = 110 + r * Math.cos(a), y = 92 - r * Math.sin(a); const c = j / k < 0.55 ? '#34d399' : '#ff6b6b'; h += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.6" style="--c:${c};animation-delay:${(n++ * 0.03).toFixed(2)}s"/>`; } });
+  g.innerHTML = h;
+})();
+</script>
+</body>
+</html>

@@ -7,10 +7,10 @@
 // ============================================================
 
 const LAW_CATS = {
-  Pensioni: '👴', Lavoro: '🛠', Fisco: '💶', Welfare: '🤝', Famiglia: '👶', Sanità: '🏥', Diritti: '⚖️',
-  Immigrazione: '🌊', Giustizia: '🏛', Sicurezza: '🚓', Istituzioni: '🇮🇹', Scuola: '🏫', Università: '🎓',
-  Ambiente: '🌳', Energia: '⚡', Infrastrutture: '🌉', Economia: '🏭', Difesa: '🎖', Europa: '🇪🇺', Territorio: '🗺',
-  Agricoltura: '🌾', Cultura: '🎭',
+  Pensioni: 'hourglass', Lavoro: 'briefcase', Fisco: 'coin', Welfare: 'hand', Famiglia: 'baby', Sanità: 'hospital', Diritti: 'scales',
+  Immigrazione: 'wave', Giustizia: 'gavel', Sicurezza: 'shield', Istituzioni: 'building', Scuola: 'book', Università: 'cap',
+  Ambiente: 'leaf', Energia: 'bolt', Infrastrutture: 'bridge', Economia: 'factory', Difesa: 'helmet', Europa: 'eu', Territorio: 'map',
+  Agricoltura: 'wheat', Cultura: 'mask',
 };
 
 const LAWS = [];

@@ -306,5 +306,5 @@ const RANKS = [
 ];
 
 // Simboli disponibili per il tuo partito
-const SYMBOLS = ['★', '✦', '⚑', '❖', '☀', '✪', '⬢', '❂', '✿', '⚘', '♜', '⚖', '🕊', '🌳', '🔥', '🦅', '🌿', '🛡', '⚙', '🏛'];
+const SYMBOLS = ['star', 'sparkle', 'flag', 'shield', 'sun', 'crown', 'leaf', 'dove', 'fire', 'bolt', 'scales', 'building', 'globe', 'hands', 'rocket', 'target', 'key', 'bulb', 'wheat', 'medal'];
 const PARTY_COLORS = ['#7b2ff7', '#ff5a1f', '#00a88f', '#e91e63', '#3f51b5', '#009688', '#ff9800', '#795548', '#9c27b0', '#00bcd4', '#8bc34a', '#c62828'];
