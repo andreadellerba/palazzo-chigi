@@ -403,6 +403,7 @@ function storyTick() {
   fixCoalitions();
   memoryAfterVotes(G._wk.votes);
   staffTick();
+  if (typeof sfideTick === "function") sfideTick();
   summitTick();
   chainTick();
   callTick();

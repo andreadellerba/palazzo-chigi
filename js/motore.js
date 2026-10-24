@@ -85,7 +85,7 @@ function leaderName(pid) { return pid === myPid() && isLeader() ? G.player.name 
 
 // ---------- leggi ----------
 function getLaw(id) { return LAW_BY_ID[id] || (G.customLaws || []).find(l => l.id === id); }
-function allLaws() { return LAWS.concat(G.customLaws || []); }
+function allLaws() { return LAWS.filter(l => !l.sfida || (G.sfide && G.sfide[l.sfida])).concat(G.customLaws || []); }
 function curOpt(id) { const l = getLaw(id); return l.opts[G.laws[id]]; }
 function prefPos(pid, law) {
   if (law.pp && law.pp[pid] !== undefined && !(pid === myPid() && isLeader() && G.mode === 'fondatore')) return law.pp[pid];

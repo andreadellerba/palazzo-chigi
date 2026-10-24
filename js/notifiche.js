@@ -82,6 +82,7 @@ function notifications() {
     G.bills.filter(b => !b.dead && b.type === 'dl' && b.proposer === 'GOV' && b.deadline - G.week <= 3).forEach(b => out.push({ ico: 'clock', t: `Il decreto «${billName(b)}» scade presto`, sub: weeksLeft(b.deadline), on: "goTab('aula')", u: 1 }));
     G.gov.parties.forEach(p => { if (p !== myPid() && G.gov.sat[p] < 30) out.push({ ico: 'fire', t: `${P(p).leader} è scontento`, sub: `${P(p).short} può aprire la crisi`, on: "openAction('vertice')", u: 1 }); });
   }
+  if (typeof SFIDE !== "undefined") SFIDE.filter(s => sfidaAperta(s)).forEach(s => out.push({ ico: s.i, t: `Sfida aperta: ${s.n}`, sub: s.peso, on: `openLaw('${s.law}')`, u: 1 }));
   redMetrics().forEach(r => out.push({ ico: METRICS[r.k].ico, t: r.t, sub: 'Tocca per vedere le leggi che aiutano', on: `openAdvice('${r.k}')`, u: isPremier() ? 1 : 0 }));
   if (isLeader() && !G.program && G.cal.election - G.week < 30 && G.cal.election > G.week) out.push({ ico: 'clipboard', t: 'Manca il programma elettorale', sub: 'Mettilo insieme dalle leggi', on: 'openProgram()', u: 1 });
   if (isLeader() && !coalitionOf(myPid()) && G.cal.election - G.week < 24 && G.cal.election - G.week > 6) out.push({ ico: 'hands', t: 'Corri da solo', sub: 'Cerca alleati prima del deposito delle liste', on: "UI.partiti='alleanze';goTab('partiti')", u: 0 });
