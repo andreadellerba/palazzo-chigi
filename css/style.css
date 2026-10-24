@@ -374,3 +374,30 @@ h3 { font-family: "DM Sans", sans-serif; font-weight: 800; font-size: 16px; }
 .splash { padding-top: calc(var(--top-gap) + 40px) !important; }
 .fly, .toast-wrap { top: calc(var(--top-gap) + 14px); }
 .timer i { animation-delay: var(--delay, 0s); }
+
+/* ===================== TITOLI DI SEZIONE COME IL CALENDARIO DI LAURERA ===================== */
+.sec { position: relative; justify-content: center; margin: 26px 0 14px; min-height: 34px; }
+.sec h4 { display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; background: none !important; clip-path: none !important; padding: 0 !important; color: var(--text) !important; font-family: "Bebas Neue", sans-serif; font-size: 26px; letter-spacing: 2px; }
+.sec h4::before, .sec h4::after { content: ''; flex: 1; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--tc)); }
+.sec h4::after { background: linear-gradient(90deg, var(--tc), transparent); }
+.sec > :not(h4) { position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 1; box-shadow: 0 0 0 6px var(--bg); }
+/* niente righe che allargano la pagina */
+.todo { grid-template-columns: minmax(0, 1fr); }
+.todo-i, .todo-i .grow { min-width: 0; }
+.content { overflow-x: hidden; }
+/* niente contorno azzurro di Safari sui pulsanti toccati */
+button:focus, button:focus-visible, .tbtn:focus { outline: none !important; box-shadow: none; }
+.tabs-mobile2 .tbtn.active:focus { box-shadow: 0 0 18px color-mix(in srgb, var(--tc) 55%, transparent) !important; }
+
+/* ===================== SCHEDE DI VOTO CHIARE ===================== */
+.vh { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.house { display: inline-flex; align-items: center; height: 30px; padding: 0 14px; border-radius: 999px; font-family: "Bebas Neue", sans-serif; font-size: 17px; letter-spacing: 1.5px; color: #111; }
+.house.c { background: #38bdf8; } .house.s { background: #f472b6; }
+.change { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 18px; padding: 10px 12px; }
+.change div { display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.25; }
+.change div:last-child b { color: #ffd60a; }
+.change .arrow { font-size: 20px; color: var(--muted); }
+.verdict { display: flex; flex-wrap: wrap; gap: 6px; }
+.verdict span { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12.5px; font-weight: 800; }
+.verdict .g { background: rgba(46,204,113,.15); color: #6be4a0; } .verdict .b { background: rgba(255,92,92,.15); color: #ff8f8f; } .verdict .n { background: rgba(255,255,255,.07); color: var(--muted); }
+.decide { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line2); }

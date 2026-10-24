@@ -391,6 +391,33 @@ h3 { font-family: "DM Sans", sans-serif; font-weight: 800; font-size: 16px; }
 .fly, .toast-wrap { top: calc(var(--top-gap) + 14px); }
 .timer i { animation-delay: var(--delay, 0s); }
 
+/* ===================== TITOLI DI SEZIONE COME IL CALENDARIO DI LAURERA ===================== */
+.sec { position: relative; justify-content: center; margin: 26px 0 14px; min-height: 34px; }
+.sec h4 { display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; background: none !important; clip-path: none !important; padding: 0 !important; color: var(--text) !important; font-family: "Bebas Neue", sans-serif; font-size: 26px; letter-spacing: 2px; }
+.sec h4::before, .sec h4::after { content: ''; flex: 1; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--tc)); }
+.sec h4::after { background: linear-gradient(90deg, var(--tc), transparent); }
+.sec > :not(h4) { position: absolute; right: 0; top: 50%; transform: translateY(-50%); z-index: 1; box-shadow: 0 0 0 6px var(--bg); }
+/* niente righe che allargano la pagina */
+.todo { grid-template-columns: minmax(0, 1fr); }
+.todo-i, .todo-i .grow { min-width: 0; }
+.content { overflow-x: hidden; }
+/* niente contorno azzurro di Safari sui pulsanti toccati */
+button:focus, button:focus-visible, .tbtn:focus { outline: none !important; box-shadow: none; }
+.tabs-mobile2 .tbtn.active:focus { box-shadow: 0 0 18px color-mix(in srgb, var(--tc) 55%, transparent) !important; }
+
+/* ===================== SCHEDE DI VOTO CHIARE ===================== */
+.vh { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.house { display: inline-flex; align-items: center; height: 30px; padding: 0 14px; border-radius: 999px; font-family: "Bebas Neue", sans-serif; font-size: 17px; letter-spacing: 1.5px; color: #111; }
+.house.c { background: #38bdf8; } .house.s { background: #f472b6; }
+.change { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 18px; padding: 10px 12px; }
+.change div { display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.25; }
+.change div:last-child b { color: #ffd60a; }
+.change .arrow { font-size: 20px; color: var(--muted); }
+.verdict { display: flex; flex-wrap: wrap; gap: 6px; }
+.verdict span { display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12.5px; font-weight: 800; }
+.verdict .g { background: rgba(46,204,113,.15); color: #6be4a0; } .verdict .b { background: rgba(255,92,92,.15); color: #ff8f8f; } .verdict .n { background: rgba(255,255,255,.07); color: var(--muted); }
+.decide { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line2); }
+
 </style>
 </head>
 <body>
@@ -5899,40 +5926,53 @@ function billChangeText(b) {
   if (b.type === 'manovra') { const c = budgetSum('c', b.measures); return `Manovra con ${b.measures.length} misure, saldo ${c > 0 ? '+' : ''}${fmt1(c)} miliardi di deficit.`; }
   const l = getLaw(b.lawId); return `<b>Oggi:</b> ${esc(l.opts[b.from].t)}<br><b>Diventerebbe:</b> ${esc(l.opts[b.opt].d)}`;
 }
+// intestazione chiara di un voto: Camera o Senato, chi lo propone, cosa cambia, effetti
+function voteHeadHTML(b) {
+  const s = b.stages[b.stage], cam = s.h === 'C';
+  const mine = b.lawId ? lawGain(myPid(), getLaw(b.lawId), b.from, b.opt) : 0;
+  const effs = b.lawId ? effectsOf(getLaw(b.lawId), b.from, b.opt) : [];
+  const pr = predictVote(b);
+  return `<div class="vh"><span class="house ${cam ? 'c' : 's'}">🏛 ${cam ? 'CAMERA' : 'SENATO'}${s.r ? ` · ${s.r}ª LETTURA` : ''}</span>${proposerLabel(b)}</div>
+    <h3 style="margin-top:10px">${esc(billName(b))}</h3>
+    <div class="tiny muted">${billTypeName(b)}${b.lawId ? ' · ' + esc(getLaw(b.lawId).nome) : ''}</div>
+    <div class="change mt"><div><span class="tiny muted">OGGI</span><b>${b.lawId ? esc(getLaw(b.lawId).opts[b.from].t) : 'Bilancio in vigore'}</b></div><span class="arrow">➜</span><div><span class="tiny muted">DIVENTEREBBE</span><b>${b.lawId ? esc(getLaw(b.lawId).opts[b.opt].t) : esc(billName(b))}</b></div></div>
+    ${effs.length ? effChipsHTML(effs) : ''}
+    <div class="verdict mt"><span class="${mine > 0.2 ? 'g' : mine < -0.2 ? 'b' : 'n'}">${mine > 0.2 ? '👍 In linea con le tue idee' : mine < -0.2 ? '👎 Contro le tue idee' : '😐 Neutra per le tue idee'}</span><span class="${pr.passed ? 'g' : 'b'}">${pr.passed ? '✓ Previsione: passa' : '✗ Previsione: bocciata'}</span></div>
+    <button class="btn sm mt" onclick="openBill(${b.id})">⚖️ Tutti i pro e contro</button>`;
+}
 function renderVotes() {
-  const seg = (id, field, val) => `<div class="seg mt">${['yes', 'abst', 'no'].map(v => `<button class="${val === v ? 'on' : ''}" onclick="VOTI.sel[${id}].${field}='${v}';${field === 'group' ? `VOTI.sel[${id}].me='${v}';` : ''}renderVotes()">${VLAB[v]}</button>`).join('')}</div>`;
-  let h = `<div class="center"><div style="font-size:44px" class="pop">🗳</div><div class="tiny gold" style="font-weight:800">AULA · SETTIMANA DEL ${fmtDate(G.week + 1, true).toUpperCase()}</div><h2 class="mt">Votazioni in arrivo</h2><p class="small muted">Decidi come votare. Il voto si tiene nei prossimi giorni: lo vedrai nella rassegna della settimana.</p></div>`;
+  const sh = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null, keep = sh ? sh.scrollTop : 0;
+  const seg = (id, field, val) => `<div class="seg mt">${['yes', 'abst', 'no'].map(v => `<button class="${val === v ? 'on' : ''}" onclick="VOTI.sel[${id}].${field}='${v}';${field === 'group' ? `VOTI.sel[${id}].me='${v}';` : ''}renderVotes()">${v === 'yes' ? '✓ ' : v === 'no' ? '✗ ' : '– '}${VLAB[v]}</button>`).join('')}</div>`;
+  let h = `<div class="center"><div style="font-size:40px" class="pop">🗳</div><h2 class="mt">Votazioni in arrivo</h2><div class="tiny gold" style="font-weight:800">SI VOTA NELLA SETTIMANA DEL ${fmtDate(G.week + 1, true).toUpperCase()}</div></div>`;
   if (!VOTI.bills.some(id => isPremier() && G.bills.find(x => x.id === id).proposer === 'GOV')) h += '<button class="btn block mt" onclick="VOTI.done={};renderSwipeVotes()">👆 Vota a scorrimento</button>';
   VOTI.bills.forEach(id => {
-    const b = G.bills.find(x => x.id === id), s = b.stages[b.stage], H = s.h === 'C' ? 'Camera' : 'Senato';
+    const b = G.bills.find(x => x.id === id), s = b.stages[b.stage];
     const st = VOTI.sel[id];
     const govB = b.proposer === 'GOV', myGov = isPremier() && govB;
     const groupHere = isLeader() && seatsOf(myPid(), s.h) > 0;
     const meHere = G.player.parl === s.h;
-    const pr = predictVote(b);
-    h += `<div class="card vote-card" style="--vc:${govB ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa'}">
-      <div class="row between"><span class="tag">${billTypeName(b)} · ${H}${s.r ? ` · ${s.r}ª lettura` : ''}</span>${proposerLabel(b)}</div>
-      <h3 style="margin-top:8px">${esc(billName(b))}</h3>
-      <div class="qcard small mt">${billChangeText(b)}</div>
-      <div class="row between mt"><button class="btn sm" onclick="openBill(${id})">⚖️ Pro e contro</button><span class="small">Previsione: <b class="${pr.passed ? 'good' : 'bad'}">${pr.passed ? 'passa' : 'bocciata'}</b></span></div>`;
+    h += `<div class="card vote-card" style="--vc:${govB ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa'}">${voteHeadHTML(b)}<div class="decide">`;
     if (myGov) {
-      h += `<div class="small mt">È un provvedimento del tuo governo: la maggioranza voterà sì.</div>${b.type !== 'cost' ? `<button class="btn block mt ${st.fid ? 'gold' : ''}" onclick="VOTI.sel[${id}].fid=!VOTI.sel[${id}].fid;renderVotes()">${st.fid ? '✓ Porrai la fiducia (⚡3)' : 'Porre la questione di fiducia · ⚡3'}</button><div class="tiny muted mt">Con la fiducia gli alleati devono votare sì (o far cadere il governo), ma si irritano un po’.</div>` : ''}`;
+      h += `<div class="small"><b>È una legge del tuo governo:</b> la tua maggioranza vota Sì.</div>`;
+      if (b.type !== 'cost') h += `<button class="btn block mt ${st.fid ? 'gold' : ''}" onclick="VOTI.sel[${id}].fid=!VOTI.sel[${id}].fid;renderVotes()">${st.fid ? '✓ Porrai la fiducia' : '🔒 Porre la fiducia'} · ⚡3</button><div class="effs"><span class="eff g">▲ Gli alleati devono votare Sì</span><span class="eff b">▼ Alleati un po’ irritati</span><span class="eff b">▼ Se la perdi, cade il governo</span></div>`;
     } else {
-      h += `<div class="small mt">Linea del partito: <b>${VLAB[st.line]}</b>${isLeader() ? ' (in base alle vostre idee)' : ` (decisa da ${esc(myParty().leader)})`}</div>`;
-      if (groupHere) h += `<div class="tiny muted mt" style="font-weight:700">${meHere ? 'TU E IL TUO GRUPPO' : 'IL TUO GRUPPO'} (${seatsOf(myPid(), s.h)} ${s.h === 'C' ? 'deputati' : 'senatori'}) VOTA:</div>${seg(id, 'group', st.group)}`;
+      h += `<div class="small">Il tuo partito ${isLeader() ? 'per le sue idee' : `(${esc(myParty().leader)})`} vota: <b>${VLAB[st.line]}</b></div>`;
+      if (groupHere) h += `<div class="tiny muted mt" style="font-weight:800">${meHere ? 'TU E IL TUO GRUPPO' : 'IL TUO GRUPPO'} · ${seatsOf(myPid(), s.h)} ${s.h === 'C' ? 'DEPUTATI' : 'SENATORI'}</div>${seg(id, 'group', st.group)}`;
       else if (meHere) {
-        h += `<div class="tiny muted mt" style="font-weight:700">IL TUO VOTO PERSONALE:</div>${seg(id, 'me', st.me)}`;
+        h += `<div class="tiny muted mt" style="font-weight:800">IL TUO VOTO</div>${seg(id, 'me', st.me)}`;
         if (st.me !== st.line) {
           const heavy = govB && inGov(myPid()) && (b.fiducia || b.type === 'manovra');
-          h += `<div class="pc-list c mt"><h5>⚠️ Voti in dissenso dal partito</h5><div class="pc-item"><span class="k">TU</span><span>Rapporto con ${esc(myParty().leader)} −${heavy ? 20 : 8}</span></div><div class="pc-item"><span class="k">TU</span><span>${heavy ? 'Voto contro il governo: rischi un richiamo formale' : 'I giornali ne parleranno'}</span></div></div><div class="pc-list p mt"><h5>✅ Ma…</h5><div class="pc-item"><span class="k">TU</span><span>Notorietà +${heavy ? 5 : 3}, la tua corrente ti segue (+${heavy ? 4 : 2}% seguito)</span></div></div>`;
+          h += `<div class="effs"><span class="eff b">▼ Rapporto col leader −${heavy ? 20 : 8}</span><span class="eff g">▲ Notorietà +${heavy ? 5 : 3}</span><span class="eff g">▲ Seguito +${heavy ? 4 : 2}%</span></div>`;
         }
       }
-      if (isLeader() && govB && inGov(myPid()) && st.group !== 'yes') h += `<div class="small bad mt">Sei in maggioranza: votare contro un provvedimento del governo irrita il premier e gli alleati.</div>`;
+      if (isLeader() && govB && inGov(myPid()) && st.group !== 'yes') h += `<div class="effs"><span class="eff b">▼ Voti contro il tuo governo: alleati irritati</span></div>`;
     }
-    h += `</div>`;
+    h += `</div></div>`;
   });
   h += `<button class="btn gold block mt" onclick="confirmVotes()">Conferma i voti</button>`;
   replaceSheet(h);
+  const sh2 = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null;
+  if (sh2) sh2.scrollTop = keep;
 }
 function confirmVotes() {
   let fidCost = 0;
@@ -6243,12 +6283,8 @@ function renderSwipeVotes() {
   replaceSheet(`<div class="row between"><span class="tag o">🗳 Voto ${VOTI.bills.length - pending.length + 1} di ${VOTI.bills.length}</span><button class="btn sm" onclick="VOTI.list=true;renderVotes()">Vista elenco</button></div>
     <div class="swipe-hint">⬅️ No · ⬆️ Astensione · Sì ➡️</div>
     <div class="swipe-card" id="swc" style="--vc:${b.proposer === 'GOV' ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa'}">
-      <div class="row between"><span class="tag">${billTypeName(b)} · ${s.h === 'C' ? 'Camera' : 'Senato'}</span>${proposerLabel(b)}</div>
-      <h2 style="margin-top:10px">${esc(billName(b))}</h2>
-      <div class="qcard small mt">${billChangeText(b)}</div>${effs}
-      <div class="row between small mt"><span>Linea del partito: <b>${VLAB[st.line]}</b></span><span>Previsione: <b class="${pr.passed ? 'good' : 'bad'}">${pr.passed ? 'passa' : 'bocciata'}</b></span></div>
-      ${groupHere ? `<div class="tiny muted mt">Voti tu e il tuo gruppo (${seatsOf(myPid(), s.h)} seggi).</div>` : '<div class="tiny muted mt">È il tuo voto personale: contro la linea è dissenso.</div>'}
-      <button class="btn sm mt" onclick="openBill(${id})">⚖️ Pro e contro</button>
+      ${voteHeadHTML(b)}
+      <div class="decide"><div class="small">Il tuo partito vota: <b>${VLAB[st.line]}</b></div>${groupHere ? `<div class="tiny muted mt">Voti tu e il tuo gruppo (${seatsOf(myPid(), s.h)} ${s.h === 'C' ? 'deputati' : 'senatori'}).</div>` : '<div class="tiny muted mt">È il tuo voto personale: contro la linea del partito è dissenso.</div>'}</div>
     </div>
     <div class="row mt2" style="justify-content:center;gap:18px"><button class="swbtn no" onclick="swipeVote('no')">✗</button><button class="swbtn ab" onclick="swipeVote('abst')">–</button><button class="swbtn si" onclick="swipeVote('yes')">✓</button></div>`);
   makeSwipe(document.getElementById('swc'), { right: { label: 'SÌ', cb: () => swipeVote('yes') }, left: { label: 'NO', cb: () => swipeVote('no') }, up: { label: 'ASTENSIONE', cb: () => swipeVote('abst') } });

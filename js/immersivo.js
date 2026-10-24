@@ -47,12 +47,8 @@ function renderSwipeVotes() {
   replaceSheet(`<div class="row between"><span class="tag o">🗳 Voto ${VOTI.bills.length - pending.length + 1} di ${VOTI.bills.length}</span><button class="btn sm" onclick="VOTI.list=true;renderVotes()">Vista elenco</button></div>
     <div class="swipe-hint">⬅️ No · ⬆️ Astensione · Sì ➡️</div>
     <div class="swipe-card" id="swc" style="--vc:${b.proposer === 'GOV' ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa'}">
-      <div class="row between"><span class="tag">${billTypeName(b)} · ${s.h === 'C' ? 'Camera' : 'Senato'}</span>${proposerLabel(b)}</div>
-      <h2 style="margin-top:10px">${esc(billName(b))}</h2>
-      <div class="qcard small mt">${billChangeText(b)}</div>${effs}
-      <div class="row between small mt"><span>Linea del partito: <b>${VLAB[st.line]}</b></span><span>Previsione: <b class="${pr.passed ? 'good' : 'bad'}">${pr.passed ? 'passa' : 'bocciata'}</b></span></div>
-      ${groupHere ? `<div class="tiny muted mt">Voti tu e il tuo gruppo (${seatsOf(myPid(), s.h)} seggi).</div>` : '<div class="tiny muted mt">È il tuo voto personale: contro la linea è dissenso.</div>'}
-      <button class="btn sm mt" onclick="openBill(${id})">⚖️ Pro e contro</button>
+      ${voteHeadHTML(b)}
+      <div class="decide"><div class="small">Il tuo partito vota: <b>${VLAB[st.line]}</b></div>${groupHere ? `<div class="tiny muted mt">Voti tu e il tuo gruppo (${seatsOf(myPid(), s.h)} ${s.h === 'C' ? 'deputati' : 'senatori'}).</div>` : '<div class="tiny muted mt">È il tuo voto personale: contro la linea del partito è dissenso.</div>'}</div>
     </div>
     <div class="row mt2" style="justify-content:center;gap:18px"><button class="swbtn no" onclick="swipeVote('no')">✗</button><button class="swbtn ab" onclick="swipeVote('abst')">–</button><button class="swbtn si" onclick="swipeVote('yes')">✓</button></div>`);
   makeSwipe(document.getElementById('swc'), { right: { label: 'SÌ', cb: () => swipeVote('yes') }, left: { label: 'NO', cb: () => swipeVote('no') }, up: { label: 'ASTENSIONE', cb: () => swipeVote('abst') } });

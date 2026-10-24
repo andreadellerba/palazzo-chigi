@@ -1034,40 +1034,53 @@ function billChangeText(b) {
   if (b.type === 'manovra') { const c = budgetSum('c', b.measures); return `Manovra con ${b.measures.length} misure, saldo ${c > 0 ? '+' : ''}${fmt1(c)} miliardi di deficit.`; }
   const l = getLaw(b.lawId); return `<b>Oggi:</b> ${esc(l.opts[b.from].t)}<br><b>Diventerebbe:</b> ${esc(l.opts[b.opt].d)}`;
 }
+// intestazione chiara di un voto: Camera o Senato, chi lo propone, cosa cambia, effetti
+function voteHeadHTML(b) {
+  const s = b.stages[b.stage], cam = s.h === 'C';
+  const mine = b.lawId ? lawGain(myPid(), getLaw(b.lawId), b.from, b.opt) : 0;
+  const effs = b.lawId ? effectsOf(getLaw(b.lawId), b.from, b.opt) : [];
+  const pr = predictVote(b);
+  return `<div class="vh"><span class="house ${cam ? 'c' : 's'}">🏛 ${cam ? 'CAMERA' : 'SENATO'}${s.r ? ` · ${s.r}ª LETTURA` : ''}</span>${proposerLabel(b)}</div>
+    <h3 style="margin-top:10px">${esc(billName(b))}</h3>
+    <div class="tiny muted">${billTypeName(b)}${b.lawId ? ' · ' + esc(getLaw(b.lawId).nome) : ''}</div>
+    <div class="change mt"><div><span class="tiny muted">OGGI</span><b>${b.lawId ? esc(getLaw(b.lawId).opts[b.from].t) : 'Bilancio in vigore'}</b></div><span class="arrow">➜</span><div><span class="tiny muted">DIVENTEREBBE</span><b>${b.lawId ? esc(getLaw(b.lawId).opts[b.opt].t) : esc(billName(b))}</b></div></div>
+    ${effs.length ? effChipsHTML(effs) : ''}
+    <div class="verdict mt"><span class="${mine > 0.2 ? 'g' : mine < -0.2 ? 'b' : 'n'}">${mine > 0.2 ? '👍 In linea con le tue idee' : mine < -0.2 ? '👎 Contro le tue idee' : '😐 Neutra per le tue idee'}</span><span class="${pr.passed ? 'g' : 'b'}">${pr.passed ? '✓ Previsione: passa' : '✗ Previsione: bocciata'}</span></div>
+    <button class="btn sm mt" onclick="openBill(${b.id})">⚖️ Tutti i pro e contro</button>`;
+}
 function renderVotes() {
-  const seg = (id, field, val) => `<div class="seg mt">${['yes', 'abst', 'no'].map(v => `<button class="${val === v ? 'on' : ''}" onclick="VOTI.sel[${id}].${field}='${v}';${field === 'group' ? `VOTI.sel[${id}].me='${v}';` : ''}renderVotes()">${VLAB[v]}</button>`).join('')}</div>`;
-  let h = `<div class="center"><div style="font-size:44px" class="pop">🗳</div><div class="tiny gold" style="font-weight:800">AULA · SETTIMANA DEL ${fmtDate(G.week + 1, true).toUpperCase()}</div><h2 class="mt">Votazioni in arrivo</h2><p class="small muted">Decidi come votare. Il voto si tiene nei prossimi giorni: lo vedrai nella rassegna della settimana.</p></div>`;
+  const sh = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null, keep = sh ? sh.scrollTop : 0;
+  const seg = (id, field, val) => `<div class="seg mt">${['yes', 'abst', 'no'].map(v => `<button class="${val === v ? 'on' : ''}" onclick="VOTI.sel[${id}].${field}='${v}';${field === 'group' ? `VOTI.sel[${id}].me='${v}';` : ''}renderVotes()">${v === 'yes' ? '✓ ' : v === 'no' ? '✗ ' : '– '}${VLAB[v]}</button>`).join('')}</div>`;
+  let h = `<div class="center"><div style="font-size:40px" class="pop">🗳</div><h2 class="mt">Votazioni in arrivo</h2><div class="tiny gold" style="font-weight:800">SI VOTA NELLA SETTIMANA DEL ${fmtDate(G.week + 1, true).toUpperCase()}</div></div>`;
   if (!VOTI.bills.some(id => isPremier() && G.bills.find(x => x.id === id).proposer === 'GOV')) h += '<button class="btn block mt" onclick="VOTI.done={};renderSwipeVotes()">👆 Vota a scorrimento</button>';
   VOTI.bills.forEach(id => {
-    const b = G.bills.find(x => x.id === id), s = b.stages[b.stage], H = s.h === 'C' ? 'Camera' : 'Senato';
+    const b = G.bills.find(x => x.id === id), s = b.stages[b.stage];
     const st = VOTI.sel[id];
     const govB = b.proposer === 'GOV', myGov = isPremier() && govB;
     const groupHere = isLeader() && seatsOf(myPid(), s.h) > 0;
     const meHere = G.player.parl === s.h;
-    const pr = predictVote(b);
-    h += `<div class="card vote-card" style="--vc:${govB ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa'}">
-      <div class="row between"><span class="tag">${billTypeName(b)} · ${H}${s.r ? ` · ${s.r}ª lettura` : ''}</span>${proposerLabel(b)}</div>
-      <h3 style="margin-top:8px">${esc(billName(b))}</h3>
-      <div class="qcard small mt">${billChangeText(b)}</div>
-      <div class="row between mt"><button class="btn sm" onclick="openBill(${id})">⚖️ Pro e contro</button><span class="small">Previsione: <b class="${pr.passed ? 'good' : 'bad'}">${pr.passed ? 'passa' : 'bocciata'}</b></span></div>`;
+    h += `<div class="card vote-card" style="--vc:${govB ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa'}">${voteHeadHTML(b)}<div class="decide">`;
     if (myGov) {
-      h += `<div class="small mt">È un provvedimento del tuo governo: la maggioranza voterà sì.</div>${b.type !== 'cost' ? `<button class="btn block mt ${st.fid ? 'gold' : ''}" onclick="VOTI.sel[${id}].fid=!VOTI.sel[${id}].fid;renderVotes()">${st.fid ? '✓ Porrai la fiducia (⚡3)' : 'Porre la questione di fiducia · ⚡3'}</button><div class="tiny muted mt">Con la fiducia gli alleati devono votare sì (o far cadere il governo), ma si irritano un po’.</div>` : ''}`;
+      h += `<div class="small"><b>È una legge del tuo governo:</b> la tua maggioranza vota Sì.</div>`;
+      if (b.type !== 'cost') h += `<button class="btn block mt ${st.fid ? 'gold' : ''}" onclick="VOTI.sel[${id}].fid=!VOTI.sel[${id}].fid;renderVotes()">${st.fid ? '✓ Porrai la fiducia' : '🔒 Porre la fiducia'} · ⚡3</button><div class="effs"><span class="eff g">▲ Gli alleati devono votare Sì</span><span class="eff b">▼ Alleati un po’ irritati</span><span class="eff b">▼ Se la perdi, cade il governo</span></div>`;
     } else {
-      h += `<div class="small mt">Linea del partito: <b>${VLAB[st.line]}</b>${isLeader() ? ' (in base alle vostre idee)' : ` (decisa da ${esc(myParty().leader)})`}</div>`;
-      if (groupHere) h += `<div class="tiny muted mt" style="font-weight:700">${meHere ? 'TU E IL TUO GRUPPO' : 'IL TUO GRUPPO'} (${seatsOf(myPid(), s.h)} ${s.h === 'C' ? 'deputati' : 'senatori'}) VOTA:</div>${seg(id, 'group', st.group)}`;
+      h += `<div class="small">Il tuo partito ${isLeader() ? 'per le sue idee' : `(${esc(myParty().leader)})`} vota: <b>${VLAB[st.line]}</b></div>`;
+      if (groupHere) h += `<div class="tiny muted mt" style="font-weight:800">${meHere ? 'TU E IL TUO GRUPPO' : 'IL TUO GRUPPO'} · ${seatsOf(myPid(), s.h)} ${s.h === 'C' ? 'DEPUTATI' : 'SENATORI'}</div>${seg(id, 'group', st.group)}`;
       else if (meHere) {
-        h += `<div class="tiny muted mt" style="font-weight:700">IL TUO VOTO PERSONALE:</div>${seg(id, 'me', st.me)}`;
+        h += `<div class="tiny muted mt" style="font-weight:800">IL TUO VOTO</div>${seg(id, 'me', st.me)}`;
         if (st.me !== st.line) {
           const heavy = govB && inGov(myPid()) && (b.fiducia || b.type === 'manovra');
-          h += `<div class="pc-list c mt"><h5>⚠️ Voti in dissenso dal partito</h5><div class="pc-item"><span class="k">TU</span><span>Rapporto con ${esc(myParty().leader)} −${heavy ? 20 : 8}</span></div><div class="pc-item"><span class="k">TU</span><span>${heavy ? 'Voto contro il governo: rischi un richiamo formale' : 'I giornali ne parleranno'}</span></div></div><div class="pc-list p mt"><h5>✅ Ma…</h5><div class="pc-item"><span class="k">TU</span><span>Notorietà +${heavy ? 5 : 3}, la tua corrente ti segue (+${heavy ? 4 : 2}% seguito)</span></div></div>`;
+          h += `<div class="effs"><span class="eff b">▼ Rapporto col leader −${heavy ? 20 : 8}</span><span class="eff g">▲ Notorietà +${heavy ? 5 : 3}</span><span class="eff g">▲ Seguito +${heavy ? 4 : 2}%</span></div>`;
         }
       }
-      if (isLeader() && govB && inGov(myPid()) && st.group !== 'yes') h += `<div class="small bad mt">Sei in maggioranza: votare contro un provvedimento del governo irrita il premier e gli alleati.</div>`;
+      if (isLeader() && govB && inGov(myPid()) && st.group !== 'yes') h += `<div class="effs"><span class="eff b">▼ Voti contro il tuo governo: alleati irritati</span></div>`;
     }
-    h += `</div>`;
+    h += `</div></div>`;
   });
   h += `<button class="btn gold block mt" onclick="confirmVotes()">Conferma i voti</button>`;
   replaceSheet(h);
+  const sh2 = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null;
+  if (sh2) sh2.scrollTop = keep;
 }
 function confirmVotes() {
   let fidCost = 0;

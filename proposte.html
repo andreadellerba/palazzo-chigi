@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Proposte di stile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=DM+Sans:wght@400;500;700;800&family=Playfair+Display:wght@700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #07090f; --text: #eef1f8; --muted: #8f9bb8; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: "DM Sans", sans-serif; padding: max(env(safe-area-inset-top), 18px) 14px 60px; }
+h1 { font-family: "Bebas Neue"; font-size: 40px; letter-spacing: 1px; margin: 10px 0 4px; text-align: center; }
+.lead { text-align: center; color: var(--muted); font-size: 14px; max-width: 520px; margin: 0 auto 20px; }
+.label { display: flex; align-items: baseline; gap: 10px; margin: 34px auto 8px; max-width: 380px; }
+.label b { font-family: "Bebas Neue"; font-size: 30px; letter-spacing: 1px; }
+.label span { color: var(--muted); font-size: 13px; }
+.code { display: inline-grid; place-items: center; min-width: 38px; height: 30px; padding: 0 9px; border-radius: 999px; background: #fff; color: #000; font-weight: 800; font-size: 14px; }
+.phone { width: 100%; max-width: 380px; margin: 0 auto; border-radius: 34px; overflow: hidden; border: 6px solid #1d212b; box-shadow: 0 30px 60px rgba(0,0,0,.6); }
+.desc { max-width: 380px; margin: 10px auto 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+.row { display: flex; align-items: center; gap: 10px; }
+.grow { flex: 1; min-width: 0; }
+.mixgrid { display: grid; gap: 12px; max-width: 380px; margin: 0 auto; }
+.mix { background: #10141e; border: 1px solid #1f2533; border-radius: 22px; padding: 14px; }
+.mix .row.top { margin-bottom: 10px; }
+.mix .row.top b { font-size: 15px; }
+.av { width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #f6d0b6 0 30%, transparent 31%), radial-gradient(circle at 50% 110%, #7b2ff7 0 45%, transparent 46%), #2a2f45; flex: none; }
+/* icone a linea */
+.ico { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ========== STILE 1 · PALAZZO (istituzionale) ========== */
+.s1 { background: radial-gradient(120% 60% at 50% 0%, #1b2a55, #0b1226 70%); padding: 18px 16px 22px; font-family: "DM Sans"; }
+.s1 .top { display: flex; justify-content: space-between; align-items: center; }
+.s1 .date { font-family: "Playfair Display"; font-weight: 900; font-size: 22px; }
+.s1 .role { color: #d6b25e; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.s1 .hero { margin-top: 14px; padding: 16px; border-radius: 20px; background: linear-gradient(160deg, rgba(214,178,94,.16), rgba(255,255,255,.02)); border: 1px solid rgba(214,178,94,.35); text-align: center; }
+.s1 .hero h2 { font-family: "Playfair Display"; font-weight: 900; font-size: 26px; margin: 8px 0 2px; }
+.s1 .stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 12px; border-top: 1px solid rgba(214,178,94,.25); padding-top: 12px; }
+.s1 .stats div { font-family: "Playfair Display"; font-size: 22px; font-weight: 900; }
+.s1 .stats small { display: block; font-family: "DM Sans"; font-size: 10.5px; color: #c7b07a; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; }
+.s1 .t { display: flex; align-items: center; gap: 10px; margin: 20px 0 12px; font-family: "Playfair Display"; font-weight: 900; font-size: 19px; color: #f3e6c4; }
+.s1 .t::before, .s1 .t::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #d6b25e); }
+.s1 .t::after { background: linear-gradient(90deg, #d6b25e, transparent); }
+.s1 .todo { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 14px; background: rgba(255,255,255,.04); border-left: 3px solid #d6b25e; margin-bottom: 8px; font-weight: 700; font-size: 14px; }
+.s1 .carousel { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 4px; }
+.s1 .medal { flex: none; width: 70px; text-align: center; font-size: 11.5px; font-weight: 700; color: #e7dcc0; }
+.s1 .medal i { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 6px; border-radius: 50%; color: #d6b25e; background: radial-gradient(circle at 30% 25%, #2b3d72, #121b38); border: 2px solid #d6b25e; box-shadow: 0 6px 16px rgba(0,0,0,.4); }
+.s1 .medal i .ico { width: 26px; height: 26px; }
+.s1 .law { margin-top: 10px; padding: 14px; border-radius: 16px; background: rgba(255,255,255,.04); border: 1px solid rgba(214,178,94,.25); }
+.s1 .law b { font-family: "Playfair Display"; font-size: 17px; }
+.s1 .chips span { display: inline-block; margin: 6px 4px 0 0; padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; border: 1px solid; }
+.g { color: #6be4a0; border-color: rgba(46,204,113,.45) !important; background: rgba(46,204,113,.1); }
+.b { color: #ff8f8f; border-color: rgba(255,92,92,.45) !important; background: rgba(255,92,92,.1); }
+.s1 .cta { margin-top: 16px; padding: 15px; border-radius: 999px; text-align: center; font-weight: 800; color: #1a1405; background: linear-gradient(135deg, #a8842f, #e3c071); }
+
+/* ========== STILE 2 · NOTTE LAURERA (sport, neon) ========== */
+.s2 { background: #0a0a0c; padding: 18px 16px 22px; position: relative; }
+.s2 .big { font-family: "Anton"; font-size: 44px; line-height: .95; text-transform: uppercase; text-align: center; }
+.s2 .big span { color: transparent; -webkit-text-stroke: 1.5px #e8ff00; }
+.s2 .hero { margin-top: 14px; padding: 14px; border-radius: 22px; background: rgba(255,255,255,.05); border: .5px solid rgba(255,255,255,.18); backdrop-filter: blur(20px); }
+.s2 .bars div { margin-top: 9px; font-size: 12px; font-weight: 700; color: #cfd3dc; }
+.s2 .bars i { display: block; height: 8px; border-radius: 99px; margin-top: 4px; background: rgba(255,255,255,.08); overflow: hidden; }
+.s2 .bars i::after { content: ''; display: block; height: 100%; width: var(--w); border-radius: 99px; background: var(--c); box-shadow: 0 0 12px var(--c); }
+.s2 .t { font-family: "Anton"; font-size: 26px; text-transform: uppercase; text-align: center; margin: 22px 0 12px; letter-spacing: .5px; }
+.s2 .t span { color: transparent; -webkit-text-stroke: 1.2px var(--c, #e8ff00); }
+.s2 .pillrow { display: flex; align-items: center; gap: 12px; padding: 8px 14px 8px 8px; margin-bottom: 9px; border-radius: 999px; background: #15161b; border: .5px solid rgba(255,255,255,.14); font-weight: 800; font-size: 14px; }
+.s2 .pillrow i { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: #0a0a0c; flex: none; box-shadow: 0 0 14px var(--c); }
+.s2 .pillrow .k { margin-left: auto; color: #e8ff00; font-size: 12px; }
+.s2 .law { padding: 14px; border-radius: 22px; background: #15161b; border: .5px solid rgba(255,255,255,.14); }
+.s2 .law b { font-family: "Anton"; font-size: 20px; text-transform: uppercase; }
+.s2 .chips span { display: inline-block; margin: 6px 4px 0 0; padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 800; border: 1px solid; }
+.s2 .cta { margin-top: 16px; padding: 15px; border-radius: 999px; text-align: center; font-weight: 900; color: #0a0a0c; background: #e8ff00; box-shadow: 0 0 22px rgba(232,255,0,.5); text-transform: uppercase; letter-spacing: .05em; }
+
+/* ========== STILE 3 · TRICOLORE POP (giocoso) ========== */
+.s3 { background: linear-gradient(180deg, #102a1e 0%, #0e1320 35%, #2a0f14 100%); padding: 18px 16px 22px; }
+.s3 .hero { padding: 16px; border-radius: 28px; background: #fff; color: #111; text-align: center; box-shadow: 0 8px 0 #1fa463, 0 16px 0 #e5484d; margin-bottom: 26px; }
+.s3 .hero h2 { font-family: "Bebas Neue"; font-size: 32px; margin: 6px 0 0; letter-spacing: 1px; }
+.s3 .nums { display: flex; justify-content: space-around; margin-top: 8px; }
+.s3 .nums div { font-family: "Bebas Neue"; font-size: 30px; }
+.s3 .nums small { display: block; font-family: "DM Sans"; font-size: 11px; font-weight: 800; color: #666; }
+.s3 .t { font-family: "Bebas Neue"; font-size: 30px; text-align: center; letter-spacing: 1px; margin: 18px 0 10px; }
+.s3 .t::after { content: ''; display: block; width: 60px; height: 5px; margin: 4px auto 0; border-radius: 3px; background: linear-gradient(90deg, #1fa463 33%, #fff 33% 66%, #e5484d 66%); }
+.s3 .tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.s3 .tile { padding: 14px 12px; border-radius: 24px; background: var(--c); color: #111; font-weight: 800; font-size: 14px; box-shadow: 0 6px 0 rgba(0,0,0,.35); }
+.s3 .tile i { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 16px; background: rgba(255,255,255,.55); font-size: 26px; margin-bottom: 8px; font-style: normal; }
+.s3 .law { margin-top: 12px; padding: 14px; border-radius: 24px; background: #fff; color: #111; box-shadow: 0 6px 0 rgba(0,0,0,.35); }
+.s3 .law b { font-family: "Bebas Neue"; font-size: 24px; }
+.s3 .chips span { display: inline-block; margin: 6px 4px 0 0; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+.s3 .chips .g { background: #d6f5e3; color: #0f7a40; } .s3 .chips .b { background: #ffe0e0; color: #b42328; }
+.s3 .cta { margin-top: 18px; padding: 16px; border-radius: 22px; text-align: center; font-family: "Bebas Neue"; font-size: 24px; letter-spacing: 1px; color: #fff; background: #1fa463; box-shadow: 0 6px 0 #0d5c35; }
+
+/* ========== STILE 4 · iOS PULITO (impostazioni iPhone) ========== */
+.s4 { background: #000; padding: 18px 14px 22px; font-family: "DM Sans"; }
+.s4 .lg { font-size: 32px; font-weight: 800; letter-spacing: -.5px; }
+.s4 .grp { margin-top: 16px; border-radius: 14px; background: #1c1c1e; overflow: hidden; }
+.s4 .gh { color: #8e8e93; font-size: 12.5px; text-transform: uppercase; letter-spacing: .03em; margin: 22px 0 6px 14px; }
+.s4 .li { display: flex; align-items: center; gap: 12px; padding: 11px 14px; font-size: 15.5px; position: relative; }
+.s4 .li + .li::before { content: ''; position: absolute; left: 56px; right: 0; top: 0; height: .5px; background: #38383a; }
+.s4 .li i { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: var(--c); color: #fff; flex: none; }
+.s4 .li i .ico { width: 18px; height: 18px; }
+.s4 .li .v { margin-left: auto; color: #8e8e93; }
+.s4 .li .v::after { content: ' ›'; color: #5a5a5e; font-size: 18px; }
+.s4 .kp { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.s4 .kp div { background: #1c1c1e; border-radius: 14px; padding: 10px 8px; font-size: 20px; font-weight: 800; text-align: center; }
+.s4 .kp small { display: block; color: #8e8e93; font-size: 10.5px; font-weight: 600; }
+.s4 .chips span { display: inline-block; margin: 6px 4px 0 0; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; border: 1px solid; }
+.s4 .cta { margin-top: 18px; padding: 15px; border-radius: 14px; text-align: center; font-weight: 700; font-size: 17px; background: #0a84ff; }
+
+/* ========== STILE 5 · PRIMA PAGINA (giornale) ========== */
+.s5 { background: #e9e1cf; color: #1b1712; padding: 18px 16px 22px; font-family: "DM Sans"; }
+.s5 .mast { font-family: "Playfair Display"; font-weight: 900; font-size: 30px; text-align: center; border-bottom: 3px double #1b1712; padding-bottom: 4px; }
+.s5 .sub { text-align: center; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; margin: 4px 0 12px; }
+.s5 .head { font-family: "Playfair Display"; font-weight: 900; font-size: 24px; line-height: 1.1; text-align: center; }
+.s5 .cols { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid #1b1712; border-bottom: 1px solid #1b1712; margin-top: 12px; }
+.s5 .cols div { text-align: center; padding: 8px 2px; font-family: "Playfair Display"; font-weight: 900; font-size: 20px; }
+.s5 .cols div + div { border-left: 1px solid #1b1712; }
+.s5 .cols small { display: block; font-family: "DM Sans"; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.s5 .t { font-family: "Playfair Display"; font-weight: 900; font-size: 18px; text-transform: uppercase; letter-spacing: .08em; text-align: center; margin: 18px 0 8px; border-top: 1px solid #1b1712; border-bottom: 1px solid #1b1712; padding: 4px 0; }
+.s5 .ticket { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 8px; background: #f7f1e3; border: 1.5px dashed #1b1712; border-radius: 6px; font-weight: 700; font-size: 14px; }
+.s5 .ticket i { font-style: normal; font-size: 20px; }
+.s5 .ticket .k { margin-left: auto; font-family: "Playfair Display"; font-weight: 900; }
+.s5 .law { padding: 12px; background: #f7f1e3; border: 1px solid #1b1712; }
+.s5 .law b { font-family: "Playfair Display"; font-size: 18px; }
+.s5 .chips span { display: inline-block; margin: 6px 4px 0 0; padding: 2px 8px; border: 1px solid #1b1712; font-size: 11.5px; font-weight: 700; }
+.s5 .stamp { display: inline-block; margin-top: 14px; padding: 6px 14px; border: 3px solid #b42328; color: #b42328; font-family: "Bebas Neue"; font-size: 22px; letter-spacing: 2px; transform: rotate(-4deg); }
+
+/* ========== COMPONENTI DA MESCOLARE ========== */
+.tt1 { display: flex; align-items: center; gap: 10px; font-family: "Bebas Neue"; font-size: 26px; letter-spacing: 2px; }
+.tt1::before, .tt1::after { content: ''; flex: 1; height: 2px; background: linear-gradient(90deg, transparent, #ffd60a); }
+.tt1::after { background: linear-gradient(90deg, #ffd60a, transparent); }
+.tt2 { font-family: "Anton"; font-size: 34px; text-transform: uppercase; text-align: center; line-height: 1; }
+.tt2 span { color: transparent; -webkit-text-stroke: 1.3px #38bdf8; }
+.tt3 { font-size: 12.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #8f9bb8; }
+.tt4 { font-family: "Playfair Display"; font-weight: 900; font-size: 22px; text-align: center; }
+.icons { display: flex; gap: 12px; flex-wrap: wrap; }
+.i1 { font-size: 30px; }
+.i2 { color: var(--c); }
+.i2 .ico { width: 30px; height: 30px; }
+.i3 { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; background: color-mix(in srgb, var(--c) 30%, #10141e); border: 2px solid var(--c); }
+.i4 { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--c); color: #fff; }
+.i4 .ico { width: 24px; height: 24px; }
+.i5 { width: 48px; height: 48px; border-radius: 16px; display: grid; place-items: center; font-size: 26px; background: linear-gradient(150deg, var(--c), color-mix(in srgb, var(--c) 40%, #000)); box-shadow: 0 6px 14px color-mix(in srgb, var(--c) 45%, transparent); }
+.dock { display: flex; justify-content: space-around; padding: 10px; border-radius: 26px; background: rgba(255,255,255,.06); border: .5px solid rgba(255,255,255,.18); }
+.dock div { text-align: center; font-size: 11px; font-weight: 700; color: #cfd3dc; }
+.dock i { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 16px; font-size: 26px; font-style: normal; background: linear-gradient(150deg, var(--c), color-mix(in srgb, var(--c) 35%, #000)); margin-bottom: 4px; }
+.swipeA { position: relative; height: 120px; }
+.swipeA div { position: absolute; inset: 0; border-radius: 22px; padding: 14px; background: linear-gradient(160deg, #23305a, #151d33); border: 1px solid rgba(255,255,255,.12); }
+.swipeA div:nth-child(1) { transform: rotate(-4deg) translateY(6px); opacity: .5; }
+.swipeA div:nth-child(2) { transform: rotate(3deg) translateY(3px); opacity: .7; }
+.ringsR { display: flex; justify-content: space-around; }
+.ringsR div { width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; font-family: "Bebas Neue"; font-size: 20px; background: conic-gradient(var(--c) calc(var(--v) * 1%), rgba(255,255,255,.08) 0); position: relative; }
+.ringsR div::before { content: ''; position: absolute; inset: 7px; border-radius: 50%; background: #10141e; }
+.ringsR div span { position: relative; }
+.bigN { display: flex; justify-content: space-around; text-align: center; }
+.bigN b { font-family: "Anton"; font-size: 34px; color: var(--c); display: block; line-height: 1; }
+.bigN small { font-size: 11px; color: #8f9bb8; font-weight: 700; }
+.spark { display: flex; align-items: flex-end; gap: 3px; height: 34px; }
+.spark i { width: 7px; border-radius: 3px; background: var(--c); }
+.ctaA { padding: 15px; border-radius: 999px; text-align: center; font-weight: 800; background: linear-gradient(135deg, #3b5bff, #7c3aed 60%, #db2777); }
+.ctaB { padding: 15px; border-radius: 999px; text-align: center; font-weight: 900; color: #0a0a0c; background: #e8ff00; text-transform: uppercase; }
+.ctaC { display: flex; justify-content: center; }
+.ctaC div { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; font-size: 30px; background: radial-gradient(circle at 35% 30%, #4f6bff, #1d2fa8); box-shadow: 0 0 0 6px rgba(79,107,255,.2), 0 10px 24px rgba(0,0,0,.5); }
+.ctaD { padding: 14px; border-radius: 18px; display: flex; align-items: center; justify-content: space-between; font-weight: 800; background: #fff; color: #111; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="tv" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 3l4 3 4-3"/></symbol>
+  <symbol id="mega" viewBox="0 0 24 24"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1Z"/><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/></symbol>
+  <symbol id="phone" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/></symbol>
+  <symbol id="cup" viewBox="0 0 24 24"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V9Z"/><path d="M16 11h2a2 2 0 0 1 0 4h-2M8 3v3M12 3v3"/></symbol>
+  <symbol id="coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M15 9.5a3 3 0 1 0 0 5M8 11h5M8 13h5"/></symbol>
+  <symbol id="vote" viewBox="0 0 24 24"><path d="M4 13h16v7H4z"/><path d="M8 13l3-8 6 2-2 6"/></symbol>
+  <symbol id="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/></symbol>
+  <symbol id="doc" viewBox="0 0 24 24"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+</svg>
+
+<h1>Proposte di stile</h1>
+<p class="lead">Cinque stili completi applicati alla stessa schermata, poi i singoli pezzi da mescolare. Rispondimi con i codici, per esempio: <b>«Stile 2 con T1, I5, A3, R1, C1»</b>.</p>
+
+<!-- ===== STILE 1 ===== -->
+<div class="label"><span class="code">S1</span><b>Palazzo</b><span>istituzionale, blu notte e oro</span></div>
+<div class="phone"><div class="s1">
+  <div class="top"><div><div class="date">29 gennaio 2027</div><div class="role">Leader di Italia Domani</div></div><span style="font-size:22px">🔔</span></div>
+  <div class="hero"><div class="av" style="margin:0 auto"></div><h2>Andrea Rossi</h2><div class="role">Opposizione</div>
+    <div class="stats"><div>7,4%<small>Sondaggio</small></div><div>41%<small>Notorietà</small></div><div>43%<small>Governo</small></div><div>38<small>Fama</small></div></div></div>
+  <div class="t">Da fare ora</div>
+  <div class="todo">🗳 Devi votare 2 provvedimenti</div><div class="todo">📋 Manca il programma</div>
+  <div class="t">Azioni</div>
+  <div class="carousel">
+    <div class="medal"><i><svg class="ico"><use href="#tv"/></svg></i>Intervista</div><div class="medal"><i><svg class="ico"><use href="#mega"/></svg></i>Comizio</div><div class="medal"><i><svg class="ico"><use href="#phone"/></svg></i>Social</div><div class="medal"><i><svg class="ico"><use href="#cup"/></svg></i>Incontro</div><div class="medal"><i><svg class="ico"><use href="#coin"/></svg></i>Fondi</div>
+  </div>
+  <div class="t">Leggi</div>
+  <div class="law"><b>Quota 41 per tutti</b><div class="chips"><span class="b">Deficit ▲▲</span><span class="b">Spread ▲</span><span class="g">Consenso ▲▲</span></div></div>
+  <div class="cta">Settimana successiva ›</div>
+</div></div>
+<p class="desc">Titoli con grazie (Playfair) e linee dorate, icone a linea color oro, azioni come <b>medaglie rotonde</b> in un carosello che scorre. Elegante e “da Palazzo”.</p>
+
+<!-- ===== STILE 2 ===== -->
+<div class="label"><span class="code">S2</span><b>Notte Laurera</b><span>sportivo, nero e neon</span></div>
+<div class="phone"><div class="s2">
+  <div class="big">Palazzo <span>Chigi</span></div>
+  <div class="hero"><div class="row"><div class="av"></div><div class="grow"><b style="font-size:18px">Andrea Rossi</b><div style="color:#e8ff00;font-size:12px;font-weight:800">LEADER · OPPOSIZIONE</div></div></div>
+    <div class="bars"><div>Sondaggio 7,4%<i style="--w:37%;--c:#a78bfa"></i></div><div>Notorietà 41%<i style="--w:41%;--c:#22d3ee"></i></div><div>Governo 43%<i style="--w:43%;--c:#ffd60a"></i></div></div></div>
+  <div class="t" style="--c:#ff2d3d">Da fare <span>ora</span></div>
+  <div class="pillrow" style="--c:#ff2d3d"><i>🗳</i>Devi votare 2 provvedimenti<span class="k">›</span></div>
+  <div class="t" style="--c:#38bdf8">Le tue <span>azioni</span></div>
+  <div class="pillrow" style="--c:#38bdf8"><i><svg class="ico"><use href="#tv"/></svg></i>Intervista TV<span class="k">⚡1</span></div>
+  <div class="pillrow" style="--c:#fb923c"><i><svg class="ico"><use href="#mega"/></svg></i>Comizio in regione<span class="k">⚡1</span></div>
+  <div class="pillrow" style="--c:#22c55e"><i><svg class="ico"><use href="#cup"/></svg></i>Incontro con un leader<span class="k">⚡1</span></div>
+  <div class="t" style="--c:#e8ff00">Le <span>leggi</span></div>
+  <div class="law"><b>Quota 41 per tutti</b><div class="chips"><span class="b">Deficit ▲▲</span><span class="b">Spread ▲</span><span class="g">Consenso ▲▲</span></div></div>
+  <div class="cta">Settimana successiva</div>
+</div></div>
+<p class="desc">Lo stesso linguaggio di Laurera: titoli Anton con una parola contornata, vetro scuro, <b>azioni come pillole larghe</b> con il cerchio colorato a sinistra, barre luminose al posto degli anelli.</p>
+
+<!-- ===== STILE 3 ===== -->
+<div class="label"><span class="code">S3</span><b>Tricolore Pop</b><span>giocoso, colori pieni</span></div>
+<div class="phone"><div class="s3">
+  <div class="hero"><div class="av" style="margin:0 auto"></div><h2>Andrea Rossi</h2><div class="nums"><div>7,4%<small>sondaggio</small></div><div>41%<small>notorietà</small></div><div>43%<small>governo</small></div></div></div>
+  <div class="t">Azioni</div>
+  <div class="tiles">
+    <div class="tile" style="--c:#7dd3fc"><i>📺</i>Intervista TV</div><div class="tile" style="--c:#fdba74"><i>📣</i>Comizio</div>
+    <div class="tile" style="--c:#c4b5fd"><i>📱</i>Social</div><div class="tile" style="--c:#86efac"><i>☕</i>Incontro</div>
+  </div>
+  <div class="t">Leggi</div>
+  <div class="law"><b>Quota 41 per tutti</b><div class="chips"><span class="b">Deficit ▲▲</span><span class="b">Spread ▲</span><span class="g">Consenso ▲▲</span></div></div>
+  <div class="cta">Settimana successiva ▸</div>
+</div></div>
+<p class="desc">Schede bianche con ombre “a gradino” verde e rossa, <b>tessere grandi a due colonne</b> con emoji in un riquadro, titoli Bebas con il tricolore sotto. Il più leggero da leggere.</p>
+
+<!-- ===== STILE 4 ===== -->
+<div class="label"><span class="code">S4</span><b>iOS pulito</b><span>come le Impostazioni dell’iPhone</span></div>
+<div class="phone"><div class="s4">
+  <div class="lg">Palazzo</div>
+  <div class="kp"><div>7,4%<small>Sondaggio</small></div><div>41%<small>Notorietà</small></div><div>43%<small>Governo</small></div><div>38<small>Fama</small></div></div>
+  <div class="gh">Da fare ora</div>
+  <div class="grp"><div class="li"><i style="--c:#ff3b30"><svg class="ico"><use href="#vote"/></svg></i>Vota 2 provvedimenti<span class="v">2</span></div><div class="li"><i style="--c:#ff9500"><svg class="ico"><use href="#doc"/></svg></i>Programma elettorale<span class="v"></span></div></div>
+  <div class="gh">Azioni</div>
+  <div class="grp"><div class="li"><i style="--c:#0a84ff"><svg class="ico"><use href="#tv"/></svg></i>Intervista TV<span class="v">⚡1</span></div><div class="li"><i style="--c:#ff9f0a"><svg class="ico"><use href="#mega"/></svg></i>Comizio in regione<span class="v">⚡1</span></div><div class="li"><i style="--c:#30d158"><svg class="ico"><use href="#cup"/></svg></i>Incontro con un leader<span class="v">⚡1</span></div><div class="li"><i style="--c:#bf5af2"><svg class="ico"><use href="#sun"/></svg></i>Weekend di riposo<span class="v"></span></div></div>
+  <div class="gh">Leggi</div>
+  <div class="grp"><div class="li" style="display:block"><b>Quota 41 per tutti</b><div class="chips"><span class="b">Deficit ▲▲</span><span class="b">Spread ▲</span><span class="g">Consenso ▲▲</span></div></div></div>
+  <div class="cta">Settimana successiva</div>
+</div></div>
+<p class="desc">Ordinato e familiare: elenchi raggruppati come nelle Impostazioni, <b>icone bianche in quadratini colorati</b>, niente decorazioni. Il più chiaro, il meno “spettacolare”.</p>
+
+<!-- ===== STILE 5 ===== -->
+<div class="label"><span class="code">S5</span><b>Prima pagina</b><span>giornale d’epoca</span></div>
+<div class="phone"><div class="s5">
+  <div class="mast">Il Quotidiano</div><div class="sub">Roma · 29 gennaio 2027 · Edizione del mattino</div>
+  <div class="head">Rossi sfida il governo: «Pronti a guidare il Paese»</div>
+  <div class="cols"><div>7,4%<small>Sondaggio</small></div><div>41%<small>Notorietà</small></div><div>43%<small>Governo</small></div><div>98<small>Spread</small></div></div>
+  <div class="t">Agenda</div>
+  <div class="ticket"><i>📺</i>Intervista a Otto e mezzo<span class="k">⚡1</span></div>
+  <div class="ticket"><i>📣</i>Comizio a Napoli<span class="k">⚡1</span></div>
+  <div class="t">Leggi</div>
+  <div class="law"><b>Quota 41 per tutti</b><div class="chips"><span>Deficit ▲▲</span><span>Spread ▲</span><span>Consenso ▲▲</span></div></div>
+  <div style="text-align:center"><span class="stamp">Avanti</span></div>
+</div></div>
+<p class="desc">Carta, grassetti e righe da quotidiano; azioni come <b>biglietti tratteggiati</b> e timbri. Molto d’atmosfera.</p>
+
+<!-- ===== COMPONENTI ===== -->
+<h1 style="margin-top:50px">Pezzi da mescolare</h1>
+<p class="lead">Ogni pezzo ha un codice: puoi prendere lo stile generale da una proposta e cambiare solo alcune parti.</p>
+<div class="mixgrid">
+  <div class="mix"><div class="row top"><span class="code">T1</span><b>Titoli: barre ai lati</b> <span style="color:#8f9bb8;font-size:12px">(attuale)</span></div><div class="tt1">Azioni</div></div>
+  <div class="mix"><div class="row top"><span class="code">T2</span><b>Titoli: Anton con parola contornata</b></div><div class="tt2">Le tue <span>azioni</span></div></div>
+  <div class="mix"><div class="row top"><span class="code">T3</span><b>Titoli: piccoli, a sinistra</b></div><div class="tt3">Azioni della settimana</div></div>
+  <div class="mix"><div class="row top"><span class="code">T4</span><b>Titoli: con grazie, eleganti</b></div><div class="tt4">Azioni</div></div>
+
+  <div class="mix"><div class="row top"><span class="code">I1</span><b>Icone: emoji semplici</b></div><div class="icons"><span class="i1">📺</span><span class="i1">📣</span><span class="i1">📱</span><span class="i1">☕</span><span class="i1">💰</span></div></div>
+  <div class="mix"><div class="row top"><span class="code">I2</span><b>Icone: a linea colorate</b></div><div class="icons"><span class="i2" style="--c:#38bdf8"><svg class="ico"><use href="#tv"/></svg></span><span class="i2" style="--c:#fb923c"><svg class="ico"><use href="#mega"/></svg></span><span class="i2" style="--c:#a78bfa"><svg class="ico"><use href="#phone"/></svg></span><span class="i2" style="--c:#22c55e"><svg class="ico"><use href="#cup"/></svg></span><span class="i2" style="--c:#facc15"><svg class="ico"><use href="#coin"/></svg></span></div></div>
+  <div class="mix"><div class="row top"><span class="code">I3</span><b>Icone: emoji in cerchi colorati</b></div><div class="icons"><span class="i3" style="--c:#38bdf8">📺</span><span class="i3" style="--c:#fb923c">📣</span><span class="i3" style="--c:#a78bfa">📱</span><span class="i3" style="--c:#22c55e">☕</span><span class="i3" style="--c:#facc15">💰</span></div></div>
+  <div class="mix"><div class="row top"><span class="code">I4</span><b>Icone: bianche in quadratini (iOS)</b></div><div class="icons"><span class="i4" style="--c:#0a84ff"><svg class="ico"><use href="#tv"/></svg></span><span class="i4" style="--c:#ff9f0a"><svg class="ico"><use href="#mega"/></svg></span><span class="i4" style="--c:#bf5af2"><svg class="ico"><use href="#phone"/></svg></span><span class="i4" style="--c:#30d158"><svg class="ico"><use href="#cup"/></svg></span><span class="i4" style="--c:#ffd60a"><svg class="ico"><use href="#coin"/></svg></span></div></div>
+  <div class="mix"><div class="row top"><span class="code">I5</span><b>Icone: emoji su gemma sfumata</b></div><div class="icons"><span class="i5" style="--c:#38bdf8">📺</span><span class="i5" style="--c:#fb923c">📣</span><span class="i5" style="--c:#a78bfa">📱</span><span class="i5" style="--c:#22c55e">☕</span><span class="i5" style="--c:#facc15">💰</span></div></div>
+
+  <div class="mix"><div class="row top"><span class="code">A1</span><b>Azioni: medaglie in carosello</b></div><div class="s1" style="padding:6px;background:none"><div class="carousel"><div class="medal"><i>📺</i>Intervista</div><div class="medal"><i>📣</i>Comizio</div><div class="medal"><i>📱</i>Social</div><div class="medal"><i>☕</i>Incontro</div></div></div></div>
+  <div class="mix"><div class="row top"><span class="code">A2</span><b>Azioni: pillole larghe (Laurera)</b></div><div class="s2" style="padding:0;background:none"><div class="pillrow" style="--c:#38bdf8"><i>📺</i>Intervista TV<span class="k">⚡1</span></div><div class="pillrow" style="--c:#fb923c"><i>📣</i>Comizio<span class="k">⚡1</span></div></div></div>
+  <div class="mix"><div class="row top"><span class="code">A3</span><b>Azioni: tessere grandi a 2 colonne</b></div><div class="s3" style="padding:0;background:none"><div class="tiles"><div class="tile" style="--c:#7dd3fc"><i>📺</i>Intervista</div><div class="tile" style="--c:#fdba74"><i>📣</i>Comizio</div></div></div></div>
+  <div class="mix"><div class="row top"><span class="code">A4</span><b>Azioni: elenco tipo Impostazioni</b></div><div class="s4" style="padding:0;background:none"><div class="grp" style="margin:0"><div class="li"><i style="--c:#0a84ff">📺</i>Intervista TV<span class="v">⚡1</span></div><div class="li"><i style="--c:#ff9f0a">📣</i>Comizio<span class="v">⚡1</span></div></div></div></div>
+  <div class="mix"><div class="row top"><span class="code">A5</span><b>Azioni: dock come la Home dell’iPhone</b></div><div class="dock"><div><i style="--c:#38bdf8">📺</i>TV</div><div><i style="--c:#fb923c">📣</i>Comizio</div><div><i style="--c:#a78bfa">📱</i>Social</div><div><i style="--c:#22c55e">☕</i>Incontro</div></div></div>
+  <div class="mix"><div class="row top"><span class="code">A6</span><b>Azioni: carte da scorrere</b> <span style="color:#8f9bb8;font-size:12px">una alla volta, destra = fai</span></div><div class="swipeA"><div></div><div></div><div><b>📺 Intervista a Otto e mezzo</b><div style="color:#8f9bb8;font-size:12.5px;margin-top:6px">Fama ▲ · Partito ▲ · ⚡1</div><div style="margin-top:14px;font-size:12px;color:#ffd60a">⬅️ salta · fai ➡️</div></div></div></div>
+
+  <div class="mix"><div class="row top"><span class="code">R1</span><b>Indicatori: anelli</b> <span style="color:#8f9bb8;font-size:12px">(attuale)</span></div><div class="ringsR"><div style="--c:#a78bfa;--v:37"><span>7,4%</span></div><div style="--c:#22d3ee;--v:41"><span>41%</span></div><div style="--c:#ffd60a;--v:43"><span>43%</span></div><div style="--c:#f472b6;--v:38"><span>38</span></div></div></div>
+  <div class="mix"><div class="row top"><span class="code">R2</span><b>Indicatori: barre luminose</b></div><div class="s2" style="padding:0;background:none"><div class="bars"><div>Sondaggio 7,4%<i style="--w:37%;--c:#a78bfa"></i></div><div>Notorietà 41%<i style="--w:41%;--c:#22d3ee"></i></div></div></div></div>
+  <div class="mix"><div class="row top"><span class="code">R3</span><b>Indicatori: numeri grandi</b></div><div class="bigN"><div><b style="--c:#a78bfa">7,4%</b><small>Sondaggio</small></div><div><b style="--c:#22d3ee">41%</b><small>Notorietà</small></div><div><b style="--c:#ffd60a">43%</b><small>Governo</small></div></div></div>
+  <div class="mix"><div class="row top"><span class="code">R4</span><b>Indicatori: mini grafico dell’andamento</b></div><div class="row"><div class="grow"><b style="font-family:Bebas Neue;font-size:26px">7,4%</b><div style="font-size:11px;color:#8f9bb8">Sondaggio · ultime 8 settimane</div></div><div class="spark" style="--c:#a78bfa"><i style="height:30%"></i><i style="height:38%"></i><i style="height:35%"></i><i style="height:50%"></i><i style="height:55%"></i><i style="height:62%"></i><i style="height:80%"></i><i style="height:100%"></i></div></div></div>
+
+  <div class="mix"><div class="row top"><span class="code">C1</span><b>Pulsante avanti: pillola sfumata</b> <span style="color:#8f9bb8;font-size:12px">(attuale)</span></div><div class="ctaA">Settimana successiva ›</div></div>
+  <div class="mix"><div class="row top"><span class="code">C2</span><b>Pulsante avanti: neon giallo (Laurera)</b></div><div class="ctaB">Settimana successiva</div></div>
+  <div class="mix"><div class="row top"><span class="code">C3</span><b>Pulsante avanti: bottone tondo grande</b></div><div class="ctaC"><div>▶</div></div></div>
+  <div class="mix"><div class="row top"><span class="code">C4</span><b>Pulsante avanti: barra con data</b></div><div class="ctaD"><span>5 febbraio 2027</span><span>Avanti ›</span></div></div>
+</div>
+</body>
+</html>
