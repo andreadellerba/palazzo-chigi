@@ -138,7 +138,7 @@ function callTick() {
   const sg = (G.memory || []).filter(m => m.kind === 'sgarbo' && G.week - m.w < 20 && G.week - m.w > 2 && G.parties[m.pid]).pop();
   if (sg && chance(0.5)) cands.push({ kind: 'ricordo', pid: sg.pid, t: sg.t });
   // un giornalista
-  if (G.player.fama > 15) { const j = pick(G.journalists); cands.push({ kind: j.rel < -15 ? 'retroscena' : 'esclusiva', j: G.journalists.indexOf(j) }); }
+  if (G.player.fama > 15 && G.journalists) { const j = pick(G.journalists), sc = journalistScenario(j); if (sc) cands.push({ kind: 'giornalista', j: G.journalists.indexOf(j), sc: sc.id, d: sc.d, w: 1.6 }); }
   if (!cands.length) return;
   let tot = cands.reduce((s, c) => s + (c.w || 1), 0), x = Math.random() * tot, c = cands[0];
   for (const k of cands) { x -= (k.w || 1); if (x <= 0) { c = k; break; } }
@@ -171,13 +171,7 @@ function callView(c) {
     { t: 'Era politica, niente di personale', fx: { rel: { [c.pid]: 2 } }, r: '«Per te forse.»' },
     { t: 'Lo rifarei domani', fx: { rel: { [c.pid]: -5 }, my: 0.2 }, run: () => remember(c.pid, 'Ha detto che lo rifarebbe', 0, 'sgarbo'), r: 'Guerra aperta.' }] };
   const j = G.journalists[c.j];
-  if (c.kind === 'esclusiva') return { face: jPortrait(j, 96), who: j.n, sub: j.t, line: `Buongiorno, sono ${j.n} di ${j.t}. Le chiedo un’intervista esclusiva per domani: i lettori vogliono sapere cosa pensa davvero.`, ans: [
-    { t: 'Volentieri, a domani', fx: { fama: 3, stress: 3, my: j.rel < -20 ? -0.3 : 0.3 }, run: () => { j.rel = clamp(j.rel + 8, -100, 100); }, r: 'L’intervista esce in prima pagina.' },
-    { t: 'Non è il momento', fx: {}, run: () => { j.rel = clamp(j.rel - 3, -100, 100); }, r: `${j.n} prende nota.` }] };
-  return { face: jPortrait(j, 96), who: j.n, sub: j.t, line: `Sono ${j.n} di ${j.t}. Domani pubblichiamo un retroscena: nel suo partito c’è chi la accusa di decidere tutto da solo. Vuole commentare?`, ans: [
-    { t: 'Smentisco tutto', fx: { appr: -0.2 }, run: () => { j.rel = clamp(j.rel - 5, -100, 100); }, r: 'Il pezzo esce con la smentita in fondo.' },
-    { t: 'Commento con calma e spiego', fx: { cred: 2 }, run: () => { j.rel = clamp(j.rel + 6, -100, 100); }, r: 'Il pezzo è più equilibrato del previsto.' },
-    { t: 'Se lo pubblica, la querelo', fx: { grp: { media: -6 }, fama: 1 }, run: () => { j.rel = clamp(j.rel - 15, -100, 100); }, r: 'La minaccia di querela diventa la notizia.' }] };
+  return journalistCallView(c.kind === 'giornalista' ? c : { sc: c.kind === 'retroscena' ? 'retroscena' : 'esclusiva', d: {} }, j);
 }
 function openCall(sp) {
   ensureStory();
@@ -197,10 +191,21 @@ function answerCall() {
     ${v.ans.map((a, i) => `<button class="choice" onclick="pickCall(${i})"><div class="t">${esc(a.t)}</div>${fxChips(a.fx)}</button>`).join('')}</div>`);
 }
 function pickCall(i) {
-  const { v } = window._call, a = v.ans[i];
+  const C = window._call, v = C.v, a = v.ans[i];
   applyFx(a.fx); if (a.run) { try { a.run(); } catch (e) { console.error(e); } }
+  if (a.run2) a.run2();
   vib(15);
-  replaceSheet(`<div class="call talk"><div class="bub me">${esc(a.t)}</div><div class="bub">${esc(a.r || '')}</div><button class="btn pri block mt2" onclick="closeSheet();doneQueue()">Riattacca</button></div>`);
+  // la conversazione resta visibile, battuta dopo battuta
+  C.log = (C.log || [{ t: v.line }]).concat([{ me: true, t: a.t }]);
+  const talk = () => C.log.map(x => `<div class="bub ${x.me ? 'me' : ''}">${esc(x.t)}</div>`).join('');
+  const headRow = `<div class="row">${v.face.replace(/width:96px;height:96px/, 'width:54px;height:54px')}<div class="grow"><b>${esc(v.who)}</b><div class="tiny muted">${esc(v.sub)} · in linea</div></div></div>`;
+  if (a.next) {
+    C.log.push({ t: a.next.line }); C.v = Object.assign({}, v, { line: a.next.line, ans: a.next.ans });
+    replaceSheet(`<div class="call talk">${headRow}${talk()}${a.next.ans.map((x, k) => `<button class="choice" onclick="pickCall(${k})"><div class="t">${esc(x.t)}</div>${fxChips(x.fx)}</button>`).join('')}</div>`);
+    return;
+  }
+  if (a.r) C.log.push({ t: a.r });
+  replaceSheet(`<div class="call talk">${headRow}${talk()}${a.head ? `<div class="e-paper mt2"><div class="dt">DOMANI IN EDICOLA</div><div class="hl" style="font-size:19px">${esc(a.head)}</div></div>` : ''}<button class="btn pri block mt2" onclick="closeSheet();doneQueue()">Riattacca</button></div>`);
 }
 
 // ---------- CONSIGLIO DEI MINISTRI (ogni 5 settimane) ----------
