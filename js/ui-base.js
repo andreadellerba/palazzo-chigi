@@ -386,3 +386,12 @@ fixAppHeight();
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { fixAppHeight(); setTimeout(fixAppHeight, 300); } });
 if (window.visualViewport) visualViewport.addEventListener('resize', fixAppHeight);
 [100, 500, 1500].forEach(t => setTimeout(fixAppHeight, t));
+
+// ---------- errori visibili: se qualcosa si rompe sul telefono, lo mostriamo invece di bloccarci in silenzio ----------
+window.addEventListener('error', e => {
+  try {
+    const msg = `${e.message || 'errore'} (${String(e.filename || '').split('/').pop()}:${e.lineno || '?'})`;
+    if (G) { G.flags = G.flags || {}; G.flags.lastError = msg; }
+    toast(`Errore: ${esc(msg)}`, 'bad');
+  } catch (er) { }
+});

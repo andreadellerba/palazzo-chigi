@@ -312,9 +312,17 @@ function showWeekSummary(s, before, auto) {
 }
 function processQueue() {
   if (!G.queue.length) { renderGame(); return; }
-  const item = G.queue[0];
-  if (item.sp) return handleSpecial(item.sp);
-  showEvent(item);
+  const item = G.queue[0], before = layers.length;
+  try { if (item.sp) handleSpecial(item.sp); else showEvent(item); }
+  catch (e) { console.error(e); toast('Errore: ' + esc(e.message), 'bad'); G.flags.lastQueueError = `${item.sp ? item.sp.k + (item.sp.c ? '/' + (item.sp.c.kind || '') + '/' + (item.sp.c.sc || '') : '') : item.id}: ${e.message}`; }
+  // se non si è aperto nulla, l'elemento è difettoso: lo saltiamo invece di bloccare la partita
+  setTimeout(() => {
+    if (G.queue[0] === item && !layers.length) {
+      G.queue.shift(); saveGame('auto'); renderGame();
+      toast('Una decisione non si apriva ed è stata saltata');
+      if (G.queue.length) processQueue();
+    }
+  }, 600);
 }
 function doneQueue() { G.queue.shift(); saveGame('auto'); renderGame(); if (G.phase === 'formazione') { setTimeout(openFormation, 300); return; } if (G.queue.length) setTimeout(processQueue, 300); }
 function showEvent(item) {
