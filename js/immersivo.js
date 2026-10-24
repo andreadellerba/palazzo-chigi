@@ -123,7 +123,7 @@ function checkAchievements() {
 function openAchievements() {
   G.ach = G.ach || {};
   const n = Object.keys(G.ach).length;
-  openSheet(`${head('Traguardi', `${n} su ${ACHIEVEMENTS.length} sbloccati`)}<div class="ach-grid">${ACHIEVEMENTS.map(a => `<div class="ach ${G.ach[a.id] ? 'on' : ''}"><div class="ai">${medal(G.ach[a.id] ? a.ico : 'lock', 54, G.ach[a.id] ? '' : '#66729a')}</div><b>${esc(a.n)}</b><div class="tiny muted">${esc(a.d)}</div>${G.ach[a.id] ? `<div class="tiny gold">${fmtDate(G.ach[a.id], true)}</div>` : ''}</div>`).join('')}</div>`);
+  openSheet(`${head('Traguardi', `${n} su ${ACHIEVEMENTS.length} sbloccati`)}<div class="ach-grid">${ACHIEVEMENTS.map(a => `<div class="ach ${G.ach[a.id] ? 'on' : ''}"><div class="ai">${medal(G.ach[a.id] ? a.ico : 'lock', 54, G.ach[a.id] ? '' : '#6b6764')}</div><b>${esc(a.n)}</b><div class="tiny muted">${esc(a.d)}</div>${G.ach[a.id] ? `<div class="tiny gold">${fmtDate(G.ach[a.id], true)}</div>` : ''}</div>`).join('')}</div>`);
 }
 function celebrate(list) {
   if (!list || !list.length) return;

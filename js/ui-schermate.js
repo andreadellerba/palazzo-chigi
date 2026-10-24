@@ -3,7 +3,7 @@
 // ============================================================
 const SVG = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
 const TABS = [
-  { id: 'home', n: 'Palazzo', c: '#ffd60a', svg: SVG('<path d="M3 9l9-5 9 5"/><path d="M5.5 10.5v7M9.8 10.5v7M14.2 10.5v7M18.5 10.5v7"/><path d="M3 20.5h18"/>') },
+  { id: 'home', n: 'Home', c: '#ffd60a', svg: SVG('<path d="M3 9l9-5 9 5"/><path d="M5.5 10.5v7M9.8 10.5v7M14.2 10.5v7M18.5 10.5v7"/><path d="M3 20.5h18"/>') },
   { id: 'leggi', n: 'Leggi', c: '#fb923c', svg: SVG('<path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/>') },
   { id: 'aula', n: 'Aula', c: '#38bdf8', svg: SVG('<path d="M3 18a9 9 0 0 1 18 0"/><path d="M7.5 18a4.5 4.5 0 0 1 9 0"/><path d="M2 21h20"/>') },
   { id: 'italia', n: 'Italia', c: '#22c55e', svg: SVG('<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z"/><path d="M9 4v14M15 6v14"/>') },
@@ -41,10 +41,11 @@ function tickerHTML() {
   return `<div class="ticker"><span class="lbl">ULTIM’ORA</span><div style="overflow:hidden;flex:1"><div class="run">${items}</div></div></div>`;
 }
 function fabHTML() {
-  if (G.phase === 'fine') return `<button class="fab form" onclick="showSplash()">Partita conclusa · Menu</button>`;
-  if (G.phase === 'formazione') return `<button class="fab form" onclick="openFormation()">${icon('building')} ${G.formation && G.formation.step === 'risultati' ? 'Risultati elettorali' : 'Consultazioni al Quirinale'}</button>`;
-  if (G.queue.length) return `<button class="fab alert" onclick="processQueue()">${icon('alert')} ${G.queue.length} ${G.queue.length > 1 ? 'decisioni' : 'decisione'} in attesa</button>`;
-  return `<button class="fab" onclick="nextWeek()">Settimana successiva <span class="fd">· ${fmtDate(G.week + 1, true)}</span>${icon('chevron')}</button>`;
+  // un cerchio fisso in basso a destra su ogni pagina
+  if (G.phase === 'fine') return `<button class="fab form" onclick="showSplash()" title="Menu iniziale">${icon('door')}</button>`;
+  if (G.phase === 'formazione') return `<button class="fab form" onclick="openFormation()" title="Consultazioni">${icon('building')}</button>`;
+  if (G.queue.length) return `<button class="fab alert" onclick="processQueue()" title="Decisioni in attesa">${icon('alert')}<span class="fbdg">${G.queue.length}</span></button>`;
+  return `<button class="fab" onclick="nextWeek()" title="Settimana successiva">${icon('arrowr')}</button>`;
 }
 function navHTML() {
   const live = typeof pendingVoteIds === 'function' ? pendingVoteIds().length : 0;
@@ -80,8 +81,8 @@ function homeTab() {
   const recs = recommendedActions(), rec = recs.map(r => r.id);
   const acts = availableActions().sort((a, b) => (rec.includes(b.id) && !b.done ? 1 : 0) - (rec.includes(a.id) && !a.done ? 1 : 0) || (a.done ? 1 : 0) - (b.done ? 1 : 0));
   h += sec('Azioni', `<button class="btn sm gold" onclick="autoPlan()">${icon('star')} Pianifica</button>`) +
-    `<div class="medals">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); return `<button class="medal ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''}" style="--ac:${a.ac};animation-delay:${i * 40}ms" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><i>${a.done ? icon('check') : icon(ACT_ICON[a.id] || 'star')}${rec.includes(a.id) && !a.done ? '<em class="rs">★</em>' : ''}${a.cost && !a.done ? `<em class="mc">⚡${a.cost}</em>` : ''}</i><b>${esc(a.n)}</b></button>`; }).join('')}</div>
-    <div class="tiny muted center">Scorri per tutte le azioni · ★ consigliate · una volta a settimana</div>`;
+    `<div class="acts">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="act-t ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${star ? 'rec' : ''}" style="--ac:${a.ac};animation-delay:${i * 25}ms" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai">${a.done ? icon('check') : icon(ACT_ICON[a.id] || a.ico || 'star')}</span><span class="an">${esc(a.n)}</span><span class="ac">${a.done ? 'fatta' : a.cost ? '⚡' + a.cost : 'gratis'}</span>${star ? '<span class="as">★</span>' : ''}</button>`; }).join('')}</div>
+    <div class="tiny muted center mt">★ consigliate · ogni azione una volta a settimana</div>`;
   // alleati (premier)
   if (isPremier() && g.parties.length > 1) h += sec('Alleati') + `<div class="scrollx">${g.parties.filter(x => x !== myPid()).map(x => `<div class="due center" onclick="openParty('${x}')">${leaderPortrait(x, 46)}<b>${esc(P(x).short)}</b><div class="bar thin" style="width:80px"><i style="width:${g.sat[x]}%;--c:${pctColor(g.sat[x])}"></i></div><span class="dw" style="color:${pctColor(g.sat[x])}">${g.sat[x] >= 60 ? 'Soddisfatto' : g.sat[x] >= 35 ? 'Inquieto' : 'Furioso'}</span></div>`).join('')}</div>`;
   // carriera
@@ -292,9 +293,9 @@ function regionColor(rid) {
   const st = G.regions[rid];
   if (UI.map === 'primo') { const s = regionShares(rid); const top = Object.keys(s).sort((a, b) => s[b] - s[a])[0]; return P(top).color; }
   if (UI.map === 'coal') { const s = regionShares(rid); const bl = {}; PIDS().forEach(id => { const c = coalitionOf(id); const k = c ? c.id : id; bl[k] = (bl[k] || 0) + s[id]; }); const top = Object.keys(bl).sort((a, b) => bl[b] - bl[a])[0]; const c = G.coalitions.find(x => x.id === top); return c ? (c.color || '#888') : (G.parties[top] ? P(top).color : '#888'); }
-  if (UI.map === 'mio') { const s = regionShares(rid)[myPid()]; const max = Math.max(...REGIONS_DEF.map(r => regionShares(r.id)[myPid()])); const k = clamp(s / max, 0.08, 1); return `color-mix(in srgb, ${myParty().color} ${Math.round(k * 100)}%, #16224b)`; }
+  if (UI.map === 'mio') { const s = regionShares(rid)[myPid()]; const max = Math.max(...REGIONS_DEF.map(r => regionShares(r.id)[myPid()])); const k = clamp(s / max, 0.08, 1); return `color-mix(in srgb, ${myParty().color} ${Math.round(k * 100)}%, #1f1f22)`; }
   if (UI.map === 'gov') { const gp = st.gp; if (G.parties[gp]) return P(gp).color; return { AUT: '#9aa0b4', CIVD: '#5b7fd1', CIVS: '#d05b62' }[gp] || '#777'; }
-  if (UI.map === 'elez') { const d = st.next - G.week; return d < 30 ? '#d6b25e' : d < 80 ? '#8a7a4a' : '#24305a'; }
+  if (UI.map === 'elez') { const d = st.next - G.week; return d < 30 ? '#ff2d3d' : d < 80 ? '#8a3a40' : '#2a2a2e'; }
   return '#555';
 }
 function italiaTab() {
@@ -311,7 +312,7 @@ function mapLegend() {
   if (UI.map === 'coal') return G.coalitions.map(c => `<span><i class="dot" style="--c:${c.color}"></i>${esc(c.name)}</span>`).join('') + '<span><i class="dot" style="--c:#888"></i>Liste singole</span>';
   if (UI.map === 'mio') return `<span>Più acceso = più forte per ${esc(myParty().short)}</span>`;
   if (UI.map === 'gov') return '<span>Colore del partito del presidente di Regione</span>';
-  return '<span><i class="dot" style="--c:#d6b25e"></i>entro 30 settimane</span><span><i class="dot" style="--c:#8a7a4a"></i>entro 80</span>';
+  return '<span><i class="dot" style="--c:#ff2d3d"></i>entro 30 settimane</span><span><i class="dot" style="--c:#8a3a40"></i>entro 80</span>';
 }
 function openRegion(rid) {
   const r = REGIONS_DEF.find(x => x.id === rid), st = G.regions[rid], s = regionShares(rid);
@@ -390,7 +391,7 @@ function alleanzeHTML() {
   G.coalitions.forEach(c => {
     const s = c.members.reduce((t, m) => t + (G.parties[m] ? P(m).poll : 0), 0);
     const mine = c.members.includes(myPid());
-    h += `<div class="card"><div class="row between"><h3>${esc(c.name)}</h3><b class="gold" style="font-family:var(--serif);font-size:20px">${fmt1(s)}%</b></div><div class="row wrap mt" style="gap:4px">${c.members.map(partyChip).join('')}</div><div class="small muted mt">Candidato premier: ${c.cand === 'PLAYER' ? '<b class="gold">tu</b>' : esc(c.cand || 'primarie da svolgere')}</div>`;
+    h += `<div class="card"><div class="row between"><h3>${esc(c.name)}</h3><b class="gold" style="font-size:20px;font-weight:800">${fmt1(s)}%</b></div><div class="row wrap mt" style="gap:4px">${c.members.map(partyChip).join('')}</div><div class="small muted mt">Candidato premier: ${c.cand === 'PLAYER' ? '<b class="gold">tu</b>' : esc(c.cand || 'primarie da svolgere')}</div>`;
     if (isLeader() && !locked) {
       if (!mine && !myC) { const big = c.members.slice().sort((a, b) => P(b).poll - P(a).poll)[0]; h += `<button class="btn pri block mt" onclick="openDeal('${big}','${c.id}')">${icon('hands')} Tratta per entrare in ${esc(c.name)}</button>`; }
       if (mine) {
@@ -414,7 +415,7 @@ function alleanzeHTML() {
 // ============================================================
 function contiTab() {
   const e = G.econ;
-  const k = (l, v, cls, sub, m, hk) => `<div class="kpi ${m ? 'click' : ''}" ${m ? `onclick="openAdvice('${m}')"` : ''}><div class="l">${l}</div><div class="row between" style="align-items:flex-end"><div class="v ${cls || ''}">${v}</div>${spark(histOf(hk, 12), cls === 'bad' ? '#ff9c9c' : cls === 'good' ? '#7ee8b8' : '#d6b25e', 58, 24)}</div>${sub ? `<div class="tiny muted">${sub}</div>` : ''}${m ? '<div class="tiny gold" style="font-weight:800;margin-top:3px">Come migliorarlo ›</div>' : ''}</div>`;
+  const k = (l, v, cls, sub, m, hk) => `<div class="kpi ${m ? 'click' : ''}" ${m ? `onclick="openAdvice('${m}')"` : ''}><div class="l">${l}</div><div class="row between" style="align-items:flex-end"><div class="v ${cls || ''}">${v}</div>${spark(histOf(hk, 12), cls === 'bad' ? '#ff9c9c' : cls === 'good' ? '#7ee8b8' : '#ff2d3d', 58, 24)}</div>${sub ? `<div class="tiny muted">${sub}</div>` : ''}${m ? '<div class="tiny gold" style="font-weight:800;margin-top:3px">Come migliorarlo ›</div>' : ''}</div>`;
   const red = redMetrics();
   let h = '';
   if (red.length) h += `<div class="card hero" style="--pc:#ff6b6b"><h4>Indicatori in rosso</h4>${red.map(r => `<div class="li click" onclick="openAdvice('${r.k}')"><span class="nico u2">${icon(METRIC_ICON[r.k])}</span><div class="grow small"><b>${esc(r.t)}</b><div class="tiny muted">Le leggi che aiutano</div></div><span class="btn sm">Rimedi</span></div>`).join('')}</div>`;

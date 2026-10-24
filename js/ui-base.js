@@ -150,9 +150,9 @@ function hemicycle(h, opts) {
     const p = pos[i]; if (!p) return;
     const col = pid === 'ALT' ? '#7a7f92' : P(pid).color;
     const gov = G.gov && G.gov.parties.includes(pid);
-    html += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rad}" fill="${opts.empty ? '#2a3350' : col}" data-c="${col}" data-p="${pid}" ${opts.ring && gov ? 'stroke="#fff" stroke-width=".5"' : ''} style="transition-delay:${(i * (opts.slow ? 6 : 2))}ms"/>`;
+    html += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rad}" fill="${opts.empty ? '#333338' : col}" data-c="${col}" data-p="${pid}" ${opts.ring && gov ? 'stroke="#fff" stroke-width=".5"' : ''} style="transition-delay:${(i * (opts.slow ? 6 : 2))}ms"/>`;
   });
-  html += `<text x="100" y="98" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">${seats.length}</text><text x="100" y="106" text-anchor="middle" font-size="5.5" fill="#8f9bb8">maggioranza ${majority(h)}</text></svg>`;
+  html += `<text x="100" y="98" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">${seats.length}</text><text x="100" y="106" text-anchor="middle" font-size="5.5" fill="#8f8a86">maggioranza ${majority(h)}</text></svg>`;
   return html;
 }
 function hemiLegend(h) {
@@ -168,7 +168,7 @@ function animateVote(svg, by) {
     const pid = c.dataset.p; const v = by[pid]; if (!v) return;
     counters[pid] = (counters[pid] || 0) + 1;
     const i = counters[pid];
-    let col = '#4a5270';
+    let col = '#45454b';
     if (i <= v.yes) col = '#22c56b'; else if (i <= v.yes + v.no) col = '#ef4a4f'; else col = '#8a8fa3';
     setTimeout(() => { c.setAttribute('fill', col); }, 30);
   });
@@ -186,11 +186,11 @@ function lineChart(series, o) {
   const X = x => o.pad + (x - xmin) / Math.max(1, xmax - xmin) * (o.w - o.pad - 8);
   const Y = y => 8 + (1 - (y - ymin) / (ymax - ymin)) * (o.h - 26);
   let s = `<svg class="chart" viewBox="0 0 ${o.w} ${o.h}">`;
-  for (let i = 0; i <= 3; i++) { const v = ymin + (ymax - ymin) * i / 3; const y = Y(v); s += `<line x1="${o.pad}" x2="${o.w}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.07)"/><text x="${o.pad - 4}" y="${y + 3}" fill="#5d6987" font-size="9" text-anchor="end">${o.fmt ? o.fmt(v) : Math.round(v)}</text>`; }
+  for (let i = 0; i <= 3; i++) { const v = ymin + (ymax - ymin) * i / 3; const y = Y(v); s += `<line x1="${o.pad}" x2="${o.w}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.07)"/><text x="${o.pad - 4}" y="${y + 3}" fill="#77716d" font-size="9" text-anchor="end">${o.fmt ? o.fmt(v) : Math.round(v)}</text>`; }
   if (o.ref !== undefined && o.ref >= ymin && o.ref <= ymax) s += `<line x1="${o.pad}" x2="${o.w}" y1="${Y(o.ref)}" y2="${Y(o.ref)}" stroke="rgba(255,92,92,.5)" stroke-dasharray="4 3"/>`;
   series.forEach(se => { if (se.pts.length < 2) return; s += `<path class="l" d="${se.pts.map((p, i) => (i ? 'L' : 'M') + X(p[0]).toFixed(1) + ' ' + Y(p[1]).toFixed(1)).join('')}" stroke="${se.color}" style="stroke-width:${se.w || 2}"/>`; });
   const xl = [xmin, Math.round((xmin + xmax) / 2), xmax];
-  xl.forEach(x => { const d = dateOf(x); s += `<text x="${X(x)}" y="${o.h - 4}" fill="#5d6987" font-size="9" text-anchor="middle">${MESI3[d.getMonth()]} ${String(d.getFullYear()).slice(2)}</text>`; });
+  xl.forEach(x => { const d = dateOf(x); s += `<text x="${X(x)}" y="${o.h - 4}" fill="#77716d" font-size="9" text-anchor="middle">${MESI3[d.getMonth()]} ${String(d.getFullYear()).slice(2)}</text>`; });
   return s + '</svg>';
 }
 
@@ -198,7 +198,7 @@ function lineChart(series, o) {
 function confetti(colors) {
   const c = document.createElement('canvas'); c.className = 'confetti'; document.body.appendChild(c);
   const W = c.width = innerWidth * devicePixelRatio, H = c.height = innerHeight * devicePixelRatio; const ctx = c.getContext('2d');
-  colors = colors || ['#1fa463', '#ffffff', '#e5484d', '#d6b25e'];
+  colors = colors || ['#1fa463', '#ffffff', '#e5484d', '#ff2d3d'];
   const ps = Array.from({ length: 160 }, () => ({ x: W / 2 + rnd(-W / 4, W / 4), y: H * 0.35, vx: rnd(-9, 9) * devicePixelRatio, vy: rnd(-22, -6) * devicePixelRatio, s: rnd(5, 11) * devicePixelRatio, c: pick(colors), r: rnd(0, 6), vr: rnd(-0.3, 0.3) }));
   let t = 0;
   (function f() {
@@ -219,7 +219,7 @@ function vib(ms) { try { navigator.vibrate && navigator.vibrate(ms || 15); } cat
 function showSplash() {
   const auto = slotInfo('auto');
   $('#app').innerHTML = `<div class="splash">
-    <div class="logo"><span class="medallion" style="--ms:124px">${icon('building')}</span></div>
+    <div class="logo">${logoChigi(120)}</div>
     <h1>Palazzo Chigi</h1>
     <div class="flag3"><i></i><i></i><i></i></div>
     <div class="sub">Simulatore politico italiano · dati reali a ottobre 2026</div>

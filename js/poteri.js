@@ -210,7 +210,7 @@ function closeDeal() {
   G.pacts = G.pacts || [];
   G.pacts.push({ pid, w: G.week, until: G.cal.election + 30, min: (of.min1 ? 1 : 0) + (of.minKey ? 1 : 0), key: !!of.minKey, vice: !!of.vice, fragile: !!b.override });
   addNews(`Accordo fatto: ${b.kind === 'join' ? `${myParty().short} entra in ${c.name}` : `${p.short} entra in ${c.name}`}${b.override ? ' (nonostante gli storici veti)' : ''}.`, 'mio');
-  confetti([myParty().color, p.color, '#d6b25e']);
+  confetti([myParty().color, p.color, '#ff2d3d']);
   const prom = [of.min1 && 'un ministero', of.minKey && 'un ministero chiave', of.vice && 'la vicepresidenza', of.law && 'una legge bandiera', of.premier && 'la candidatura a premier', of.collegi && 'collegi sicuri', of.fondi && 'fondi per la campagna'].filter(Boolean);
   resultSheet('hands', 'Accordo raggiunto', `${esc(p.leader)} stringe la mano: ${b.kind === 'join' ? `sei in ${esc(c.name)}` : `${esc(p.short)} entra in ${esc(c.name)}`}.${prom.length ? ` Hai promesso ${prom.join(', ')}.` : ''}`);
   DEAL = null; renderGame();

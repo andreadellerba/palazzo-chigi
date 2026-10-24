@@ -655,7 +655,7 @@ function submitManovra() {
   MAN = null;
   closeSheet();
   if (G.queue.length && G.queue[0].sp && G.queue[0].sp.k === 'manovra') G.queue.shift();
-  confetti(['#1fa463', '#d6b25e', '#ffffff']);
+  confetti(['#1fa463', '#ff2d3d', '#ffffff']);
   renderGame();
   resultSheet('euro', 'Manovra varata', 'Ora tocca al Parlamento. La fiducia è già prevista per tutte le votazioni. Bruxelles darà il suo parere a fine novembre.');
   if (G.queue.length) setTimeout(processQueue, 900);
