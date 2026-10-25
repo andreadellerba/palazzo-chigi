@@ -120,7 +120,7 @@ function infoHTML() {
   G.referendums.filter(r => !r.done).forEach(r => dl.push({ w: r.w, i: 'pen', t: 'Referendum' }));
   dl.sort((a, b) => a.w - b.w);
   const on = x => x.i === 'vote' ? "UI.partiti='alleanze';goTab('partiti')" : x.i === 'map' ? "goTab('italia')" : x.i === 'euro' ? "infoExplain('manovra')" : x.i === 'building' ? "infoExplain('quirinale')" : "infoExplain('referendum')";
-  const items = todo.map(n => `<a class="i6 u${n.u}" onclick="${n.on}">${esc(n.t)}</a>`).concat(dl.map(x => `<a class="i6 dl6" onclick="${on(x)}">${esc(x.t)} ${weeksLeft(x.w)}</a>`));
+  const items = todo.map(n => `<a class="i6 u${n.u}" onclick="${n.on}">${esc(n.t)}</a>`).concat(dl.map(x => `<a class="i6 dl6" onclick="${on(x)}">${esc(x.t)} (${(d => d <= 0 ? 'oggi' : d === 1 ? '1 settimana' : d < 9 ? d + ' settimane' : Math.round(d / 4.35) + ' mesi')(x.w - G.week)})</a>`));
   return sec('Info') + `<div class="info6">${items.join('<i class="sep6">·</i>')}</div>`;
 }
 

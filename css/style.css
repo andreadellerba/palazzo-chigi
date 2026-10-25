@@ -1051,3 +1051,4 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .info6 .i6.u2 { color: var(--bad); } .info6 .i6.u1 { color: #ffe14d; } .info6 .i6.dl6 { color: #9a9a9a; }
 .info6 .sep6 { font-style: normal; color: #555; margin: 0 7px; }
 .info6 .i6 { white-space: nowrap; display: inline-block; }
+.info6 { text-align: left; }

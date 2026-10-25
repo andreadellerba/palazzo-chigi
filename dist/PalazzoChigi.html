@@ -1068,6 +1068,7 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .info6 .i6.u2 { color: var(--bad); } .info6 .i6.u1 { color: #ffe14d; } .info6 .i6.dl6 { color: #9a9a9a; }
 .info6 .sep6 { font-style: normal; color: #555; margin: 0 7px; }
 .info6 .i6 { white-space: nowrap; display: inline-block; }
+.info6 { text-align: left; }
 
 </style>
 </head>
@@ -11502,7 +11503,7 @@ function infoHTML() {
   G.referendums.filter(r => !r.done).forEach(r => dl.push({ w: r.w, i: 'pen', t: 'Referendum' }));
   dl.sort((a, b) => a.w - b.w);
   const on = x => x.i === 'vote' ? "UI.partiti='alleanze';goTab('partiti')" : x.i === 'map' ? "goTab('italia')" : x.i === 'euro' ? "infoExplain('manovra')" : x.i === 'building' ? "infoExplain('quirinale')" : "infoExplain('referendum')";
-  const items = todo.map(n => `<a class="i6 u${n.u}" onclick="${n.on}">${esc(n.t)}</a>`).concat(dl.map(x => `<a class="i6 dl6" onclick="${on(x)}">${esc(x.t)} ${weeksLeft(x.w)}</a>`));
+  const items = todo.map(n => `<a class="i6 u${n.u}" onclick="${n.on}">${esc(n.t)}</a>`).concat(dl.map(x => `<a class="i6 dl6" onclick="${on(x)}">${esc(x.t)} (${(d => d <= 0 ? 'oggi' : d === 1 ? '1 settimana' : d < 9 ? d + ' settimane' : Math.round(d / 4.35) + ' mesi')(x.w - G.week)})</a>`));
   return sec('Info') + `<div class="info6">${items.join('<i class="sep6">·</i>')}</div>`;
 }
 
