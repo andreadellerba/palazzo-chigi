@@ -46,8 +46,9 @@ function fastForward() {
   const from = G.week, before = { poll: myParty().poll, appr: G.gov ? G.gov.approval : null, spread: G.econ.spread };
   let s = null, n = 0, auto = [];
   while (n < 8) {
-    auto = runRoutine();
+
     s = advanceWeek(); if (!s) break; n++;
+    auto = runRoutine();
     G.queue = s.specials.map(x => ({ sp: x })).concat(G.queue);
     if (G.queue.length || G.phase !== 'normale' || pendingVoteIds().length || (G.cal.election - G.week <= 3 && G.cal.election > G.week)) break;
   }

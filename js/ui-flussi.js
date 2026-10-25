@@ -273,10 +273,11 @@ function finishInterview() {
 function nextWeek() {
   if (G.phase === 'formazione') return openFormation();
   if (G.queue.length) return processQueue();
-  const auto = runRoutine();
   const before = { poll: myParty().poll, appr: G.gov ? G.gov.approval : null, spread: G.econ.spread };
   const s = advanceWeek();
   if (!s) return;
+  // le azioni ricorrenti partono a inizio settimana, con il capitale politico appena ricaricato
+  const auto = runRoutine();
   // eventi speciali in testa alla coda
   const sp = s.specials.map(x => ({ sp: x }));
   G.queue = sp.concat(G.queue);
@@ -306,7 +307,7 @@ function showWeekSummary(s, before, auto) {
     <div class="grid3 mt">${kpi(esc(myParty().short), fmt1(myParty().poll) + '%', (dPoll >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dPoll)), dPoll >= 0, myParty().color)}
     ${dA !== null ? kpi('Governo', fmt0(G.gov.approval) + '%', (dA >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dA)), dA >= 0, '#ffd60a') : kpi('Fama', fmt0(G.player.fama), null, true, '#a78bfa')}
     ${kpi('Spread', fmt0(G.econ.spread), (dSp >= 0 ? '▲ ' : '▼ ') + fmt0(Math.abs(dSp)), dSp <= 0, '#f472b6')}</div>
-    ${auto && auto.length ? `${sec('Fatto in automatico')}<div class="effs mt">${auto.map(a => `<span class="eff g">${icon(a.ico, 13)} ${esc(a.n)}</span>`).join('')}</div>` : ''}
+    ${auto && auto.length ? `${sec('Fatto in automatico')}<div class="effs mt">${auto.map(a => `<span class="eff ${a.skip ? 'b' : 'g'}">${icon(a.ico, 13)} ${esc(a.n)}</span>`).join('')}</div>` : ''}
     ${votes ? `${sec('Votazioni in aula')}${v0 ? `<div class="card tight">${hemicycle(v0.v.h, { id: 'hemi-week', empty: true, slow: true })}<div class="tiny muted center">${esc(billName(v0.bill))}</div></div>` : ''}<div class="card tight">${votes}</div>` : ''}
     ${rest.length ? `${sec('In breve')}<div class="mt">${rest.slice(0, 4).map(n => `<div class="news-item"><span class="nk-${n.k}">${esc(n.t)}</span></div>`).join('')}</div>${rest.length > 4 ? `<details class="mt"><summary class="small gold">Altre ${rest.length - 4} notizie</summary>${rest.slice(4).map(n => `<div class="news-item"><span class="nk-${n.k}">${esc(n.t)}</span></div>`).join('')}</details>` : ''}` : ''}
     <button class="btn ${G.queue.length ? 'gold' : 'pri'} block mt2" onclick="closeSheet();${G.queue.length ? 'setTimeout(processQueue,280)' : ''}">${G.queue.length ? `Continua · ${G.queue.length} da decidere ›` : 'Continua'}</button>`);
