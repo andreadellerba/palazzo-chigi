@@ -275,7 +275,7 @@ function startSetup() {
     join: { party: 'FDI', rank: 0, ownIdeas: false } };
   renderSetup();
 }
-const SETUP_STEPS = () => SETUP.mode === 'fondatore' ? ['Modalità', 'Personaggio', 'Partito', 'Idee', 'Squadra', 'Difficoltà'] : ['Modalità', 'Personaggio', 'Partito', 'Idee', 'Difficoltà'];
+const SETUP_STEPS = () => SETUP.mode === 'fondatore' ? ['Modalità', 'Personaggio', 'Carattere', 'Partito', 'Idee', 'Squadra', 'Difficoltà'] : ['Modalità', 'Personaggio', 'Carattere', 'Partito', 'Idee', 'Difficoltà'];
 function renderSetup() {
   const steps = SETUP_STEPS(), st = steps[SETUP.step];
   let body = '';
@@ -291,6 +291,7 @@ function renderSetup() {
     <label class="lbl">Da dove vieni</label>
     ${BACKGROUNDS.map(b => `<div class="opt ${SETUP.player.bg === b.id ? 'on' : ''}" onclick="SETUP.player.bg='${b.id}';renderSetup()"><div class="t bgt">${b.n}</div><div class="tiny muted" style="margin-top:3px">Carisma ${b.car} · Competenza ${b.comp} · Integrità ${b.integ} · Fama ${b.fama}</div><div class="small muted" style="margin-top:2px">${b.d}</div></div>`).join('')}`;
   }
+  if (st === 'Carattere' && typeof characterStepHTML === 'function') body = characterStepHTML();
   if (st === 'Partito' && SETUP.mode === 'fondatore') {
     const pa = SETUP.party;
     body = `<h2>Il tuo partito</h2>
@@ -363,6 +364,7 @@ function setupNext() {
   else cfg.join = SETUP.join;
   newGame(cfg);
   if (SETUP.scenario && typeof applyScenario === 'function') { const S = SCENARI.find(s => s.id === SETUP.scenario); if (S && (!S.mode || S.mode === G.mode)) applyScenario(SETUP.scenario); }
+  if (typeof applyCharacter === 'function') applyCharacter(SETUP.player);
   rerollPlayerAvatar();
   UI.tab = 'home';
   renderGame();
