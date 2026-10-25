@@ -880,6 +880,36 @@ html.bru .splash h1 { color: #fff !important; }
 html.bru .splash .sub, html.bru .splash .tiny { color: #cfcfcf !important; }
 html.bru .splash .btn:not(.gold):not(.pri) { border: 2px solid #fff !important; }
 
+/* ============================================================
+   VARIANTE SCURA del brutalista: fondo nero al posto del giallo,
+   il giallo resta per tasti e dettagli; tutto un po' più in basso
+   ============================================================ */
+html.bru { --bg: #000; --top-gap: calc(max(var(--safe-t), 54px) + 34px); }
+html.pwa.bru { --top-gap: calc(var(--safe-t) + 34px); }
+html.bru #app .content { background: #000 !important; border-radius: 0 !important; }
+/* testi che stavano sul giallo: ora bianchi */
+html.bru .topbar .date, html.bru .sec h4, html.bru .content > .tiny, html.bru .content > .small, html.bru .content > p, html.bru .content > .muted, html.bru .content > .center, html.bru .content > .row > .tiny, html.bru .content > .scrollx > .tiny, html.bru .content > .scrollx > .muted, html.bru .content > .row > .muted, html.bru .content > .row > .small { color: #fff !important; }
+html.bru .content > .tiny.muted, html.bru .content > .small.muted, html.bru .content > .scrollx > .muted { color: #bdbdbd !important; }
+html.bru .sec h4::before, html.bru .sec h4::after { background: #ffe14d !important; height: 3px !important; }
+html.bru .sec > :not(h4) { box-shadow: 0 0 0 6px #000; }
+/* card: grigio molto scuro con bordo, ombra gialla dura solo sulle principali */
+html.bru .card, html.bru .kpi, html.bru .act-t, html.bru .folder .fbody, html.bru .bfold .bbody, html.bru .due, html.bru .todo-i, html.bru .grp, html.bru .stf, html.bru .tip, html.bru .qcard, html.bru .tabtip { background: #141414 !important; border: 2px solid #2e2e2e !important; box-shadow: none !important; }
+html.bru .card.hero { border: 2px solid #2e2e2e !important; border-top: 5px solid var(--pc, #ffe14d) !important; box-shadow: 5px 5px 0 #ffe14d !important; }
+html.bru .folder .fbody, html.bru .bfold .bbody { border-top: 5px solid var(--cc, var(--vc, #ffe14d)) !important; }
+/* pillole e tasti sul nero: grigio scuro bordato */
+html.bru .content .pill, html.bru .content .iconbtn, html.bru .content .tag, html.bru .content .fchip, html.bru .content .seg, html.bru .content .btn, html.bru .content input, html.bru .content select, html.bru .content .searchbox input { background: #141414 !important; border: 2px solid #3a3a3a !important; }
+html.bru .content .btn.gold, html.bru .content .btn.pri { background: var(--red) !important; border: 2px solid var(--red) !important; box-shadow: 4px 4px 0 #ffe14d !important; }
+html.bru .content .fchip.on, html.bru .content .seg button.on { background: #ffe14d !important; color: #000 !important; }
+html.bru .content .fchip.on .lic { color: #000; }
+html.bru .card .tag, html.bru .card .btn:not(.gold):not(.pri) { border-color: #555 !important; }
+/* menu in basso e tasti tondi: visibili sul nero */
+html.bru .tabs-mobile2 .tbar { background: #141414 !important; border: 2px solid #3a3a3a !important; box-shadow: none; }
+html.bru .fab, html.bru .fab2 { background: #ffe14d !important; color: #000 !important; border: 2px solid #ffe14d; box-shadow: none !important; }
+html.bru .fab.alert { background: var(--red) !important; color: #fff !important; border-color: var(--red); }
+html.bru .fab2 { background: #141414 !important; color: #ffe14d !important; border-color: #3a3a3a; }
+/* schermata iniziale e intestazione: già neri */
+html.bru .stat { box-shadow: none; }
+
 </style>
 </head>
 <body>
