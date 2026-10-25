@@ -1096,9 +1096,11 @@ const VLAB = { yes: 'Sì', no: 'No', abst: 'Astensione' };
 function openVotes(ids, direct) {
   const bills = ids.map(id => G.bills.find(b => b.id === id)).filter(b => b && !b.dead && b.stages[b.stage] && b.stages[b.stage].k === 'aula' && b.askedAt !== b.stage);
   if (!bills.length) { if (direct) return toast('Hai già votato tutto'); G.queue.shift(); return processQueue(); }
+  // mai due schede di voto una sopra l'altra
+  if (layers.some(x => x.votes)) { const i = layers.findIndex(x => x.votes); while (layers.length > i) closeSheet(); }
   VOTI = { bills: bills.map(b => b.id), sel: {}, direct };
   bills.forEach(b => { const h = b.stages[b.stage].h; const line = isPremier() && b.proposer === 'GOV' ? 'yes' : (G.myVotes[b.id] || partyLine(b, h)); VOTI.sel[b.id] = { group: line, me: line, fid: !!b.fiducia, line }; });
-  openSheet('', { full: true, locked: true });
+  openSheet('', { full: true, locked: true }); layers[layers.length - 1].votes = true;
   const govOwn = bills.some(b => isPremier() && b.proposer === 'GOV');
   if (govOwn) renderVotes(); else renderSwipeVotes();
 }

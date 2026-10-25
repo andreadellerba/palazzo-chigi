@@ -283,7 +283,9 @@ function openBill(id) {
   h += `<div class="mt">${proConHTML(imp)}</div>`;
   { // i tasti che prima stavano sulla card
     const s = b.stages[b.stage] || {}, inAula = s.k === 'aula', btn = [];
-    if (inAula && pendingVoteIds().includes(b.id)) btn.push(`<button class="btn gold block" onclick="closeSheet();openVotes([${b.id}],true)">${icon('vote')} Vota ora</button>`);
+    // se la scheda di voto è già aperta sotto, si torna lì invece di aprirne un'altra (che bloccava quella sotto)
+    const votesOpen = layers.some(x => x.votes);
+    if (inAula && pendingVoteIds().includes(b.id)) btn.push(`<button class="btn gold block" onclick="closeSheet();${votesOpen ? '' : `openVotes([${b.id}],true)`}">${icon('vote')} ${votesOpen ? 'Torna al voto' : 'Vota ora'}</button>`);
     if (isPremier() && b.proposer === 'GOV' && b.type !== 'cost' && inAula) btn.push(`<button class="btn ${b.fiducia ? 'gold' : ''}" onclick="closeSheet();toggleFiducia(${b.id})">${icon('lock')} ${b.fiducia ? 'Togli la fiducia' : 'Porre la fiducia · ⚡3'}</button>`);
     if (isPremier() && b.proposer === 'GOV' && b.type !== 'manovra') btn.push(`<button class="btn" onclick="closeSheet();withdrawBill(${b.id})">Ritira</button>`);
     if (isLeader() && !inGov(myPid()) && b.proposer === 'GOV') btn.push(`<button class="btn" onclick="closeSheet();doObstr(${b.id})">${icon('hand')} Ostruzionismo · ⚡2</button>`);

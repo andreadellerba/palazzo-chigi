@@ -55,7 +55,9 @@ function renderSwipeVotes() {
   makeSwipe(document.getElementById('swc'), { right: { label: 'SÌ', cb: () => swipeVote('yes') }, left: { label: 'NO', cb: () => swipeVote('no') }, up: { label: 'ASTENSIONE', cb: () => swipeVote('abst') } });
 }
 function swipeVote(v) {
-  const pending = VOTI.bills.filter(id => !VOTI.done[id]); const id = pending[0]; if (id === undefined) return;
+  // se non resta niente da votare (scheda già confermata) si chiude invece di restare bloccati
+  if (!VOTI || !VOTI.done) { closeSheet(); renderGame(); return; }
+  const pending = VOTI.bills.filter(id => !VOTI.done[id]); const id = pending[0]; if (id === undefined) { closeSheet(); renderGame(); return; }
   const st = VOTI.sel[id]; st.group = v; st.me = v; VOTI.done[id] = true; vib(15);
   renderSwipeVotes();
 }

@@ -7052,7 +7052,9 @@ function openBill(id) {
   h += `<div class="mt">${proConHTML(imp)}</div>`;
   { // i tasti che prima stavano sulla card
     const s = b.stages[b.stage] || {}, inAula = s.k === 'aula', btn = [];
-    if (inAula && pendingVoteIds().includes(b.id)) btn.push(`<button class="btn gold block" onclick="closeSheet();openVotes([${b.id}],true)">${icon('vote')} Vota ora</button>`);
+    // se la scheda di voto è già aperta sotto, si torna lì invece di aprirne un'altra (che bloccava quella sotto)
+    const votesOpen = layers.some(x => x.votes);
+    if (inAula && pendingVoteIds().includes(b.id)) btn.push(`<button class="btn gold block" onclick="closeSheet();${votesOpen ? '' : `openVotes([${b.id}],true)`}">${icon('vote')} ${votesOpen ? 'Torna al voto' : 'Vota ora'}</button>`);
     if (isPremier() && b.proposer === 'GOV' && b.type !== 'cost' && inAula) btn.push(`<button class="btn ${b.fiducia ? 'gold' : ''}" onclick="closeSheet();toggleFiducia(${b.id})">${icon('lock')} ${b.fiducia ? 'Togli la fiducia' : 'Porre la fiducia · ⚡3'}</button>`);
     if (isPremier() && b.proposer === 'GOV' && b.type !== 'manovra') btn.push(`<button class="btn" onclick="closeSheet();withdrawBill(${b.id})">Ritira</button>`);
     if (isLeader() && !inGov(myPid()) && b.proposer === 'GOV') btn.push(`<button class="btn" onclick="closeSheet();doObstr(${b.id})">${icon('hand')} Ostruzionismo · ⚡2</button>`);
@@ -8404,9 +8406,11 @@ const VLAB = { yes: 'Sì', no: 'No', abst: 'Astensione' };
 function openVotes(ids, direct) {
   const bills = ids.map(id => G.bills.find(b => b.id === id)).filter(b => b && !b.dead && b.stages[b.stage] && b.stages[b.stage].k === 'aula' && b.askedAt !== b.stage);
   if (!bills.length) { if (direct) return toast('Hai già votato tutto'); G.queue.shift(); return processQueue(); }
+  // mai due schede di voto una sopra l'altra
+  if (layers.some(x => x.votes)) { const i = layers.findIndex(x => x.votes); while (layers.length > i) closeSheet(); }
   VOTI = { bills: bills.map(b => b.id), sel: {}, direct };
   bills.forEach(b => { const h = b.stages[b.stage].h; const line = isPremier() && b.proposer === 'GOV' ? 'yes' : (G.myVotes[b.id] || partyLine(b, h)); VOTI.sel[b.id] = { group: line, me: line, fid: !!b.fiducia, line }; });
-  openSheet('', { full: true, locked: true });
+  openSheet('', { full: true, locked: true }); layers[layers.length - 1].votes = true;
   const govOwn = bills.some(b => isPremier() && b.proposer === 'GOV');
   if (govOwn) renderVotes(); else renderSwipeVotes();
 }
@@ -9840,7 +9844,9 @@ function renderSwipeVotes() {
   makeSwipe(document.getElementById('swc'), { right: { label: 'SÌ', cb: () => swipeVote('yes') }, left: { label: 'NO', cb: () => swipeVote('no') }, up: { label: 'ASTENSIONE', cb: () => swipeVote('abst') } });
 }
 function swipeVote(v) {
-  const pending = VOTI.bills.filter(id => !VOTI.done[id]); const id = pending[0]; if (id === undefined) return;
+  // se non resta niente da votare (scheda già confermata) si chiude invece di restare bloccati
+  if (!VOTI || !VOTI.done) { closeSheet(); renderGame(); return; }
+  const pending = VOTI.bills.filter(id => !VOTI.done[id]); const id = pending[0]; if (id === undefined) { closeSheet(); renderGame(); return; }
   const st = VOTI.sel[id]; st.group = v; st.me = v; VOTI.done[id] = true; vib(15);
   renderSwipeVotes();
 }
