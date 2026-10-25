@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Le tue scelte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root { --bg: #0a1024; --card: #101a3a; --line: rgba(214,178,94,.18); --line2: rgba(214,178,94,.34); --cream: #f3e6c4; --oro: #d6b25e; --oro2: #ecd08a; --muted: #9aa6c4; --text: #eef1f8; --good: #34d399; --bad: #ff6b6b; font-variant-numeric: lining-nums; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: var(--bg); }
+body { margin: 0; color: var(--text); font-family: "DM Sans", sans-serif; padding: max(env(safe-area-inset-top), 20px) 16px 120px; background: radial-gradient(120% 40% at 50% 0%, #1d2d5c, #0a1024 70%) fixed, var(--bg); }
+h1 { font-family: "Playfair Display"; font-weight: 900; font-size: 32px; text-align: center; margin: 14px 0 6px; color: var(--cream); }
+.lead { text-align: center; color: var(--muted); font-size: 14.5px; max-width: 520px; margin: 0 auto; line-height: 1.5; }
+.lead b { color: var(--oro2); }
+.diag { max-width: 460px; margin: 18px auto 0; padding: 14px; border-radius: 18px; border: 1px solid rgba(255,107,107,.35); background: rgba(255,107,107,.07); font-size: 13.5px; line-height: 1.5; }
+.diag b { color: #ffb4b4; } .diag ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); }
+h2 { display: flex; align-items: center; gap: 12px; max-width: 460px; margin: 40px auto 14px; font-family: "Playfair Display"; font-weight: 900; font-size: 24px; color: var(--cream); }
+h2::before, h2::after { content: ''; flex: 1; height: 1.5px; background: linear-gradient(90deg, transparent, var(--oro)); }
+h2::after { background: linear-gradient(90deg, var(--oro), transparent); }
+.wrap { max-width: 460px; margin: 0 auto; display: grid; gap: 14px; }
+.q { background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.012)), var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 14px; transition: border-color .2s; }
+.q.done { border-color: var(--line2); }
+.q .hd { display: flex; align-items: flex-start; gap: 10px; }
+.num { flex: none; display: inline-grid; place-items: center; min-width: 34px; height: 28px; padding: 0 8px; border-radius: 999px; background: linear-gradient(135deg, #a8842f, #ecd08a); color: #1a1405; font-weight: 900; font-size: 13px; }
+.q.done .num { background: linear-gradient(135deg, #1f8a5f, #34d399); color: #04130c; }
+.q .t { font-weight: 800; font-size: 15.5px; line-height: 1.35; }
+.lvl { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; border-radius: 999px; padding: 2px 8px; margin-top: 6px; border: 1px solid var(--line2); color: var(--oro2); }
+.lvl.bug { color: #ffb4b4; border-color: rgba(255,107,107,.4); }
+.lvl.rad { color: #c4a5ff; border-color: rgba(196,165,255,.4); }
+.lvl.easy { color: #8be3c0; border-color: rgba(52,211,153,.4); }
+.q p { margin: 8px 0 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+.opts { display: grid; gap: 8px; margin-top: 12px; }
+.opt { display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%; padding: 11px 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255,255,255,.03); color: var(--text); font: inherit; font-size: 14px; line-height: 1.4; cursor: pointer; }
+.opt .k { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 12px; border: 1.5px solid var(--line2); color: var(--oro2); }
+.opt.on { border-color: var(--oro); background: rgba(214,178,94,.12); }
+.opt.on .k { background: var(--oro); color: #1a1405; border-color: var(--oro); }
+.opt.keep { color: var(--muted); }
+textarea { width: 100%; min-height: 90px; margin-top: 10px; border-radius: 14px; border: 1px solid var(--line2); background: rgba(255,255,255,.04); color: var(--text); font: inherit; font-size: 15px; padding: 10px 12px; }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 16px max(env(safe-area-inset-bottom), 12px); background: rgba(10,16,36,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
+.bar .in { max-width: 460px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
+.prog { flex: 1; } .prog small { color: var(--muted); font-size: 12px; } .prog b { font-size: 15px; }
+.track { height: 5px; border-radius: 3px; background: rgba(255,255,255,.08); margin-top: 5px; overflow: hidden; } .track i { display: block; height: 100%; background: linear-gradient(90deg, #a8842f, #ecd08a); width: 0; transition: width .3s; }
+.btn { border: 0; border-radius: 999px; padding: 12px 18px; font: inherit; font-weight: 800; font-size: 14.5px; background: linear-gradient(135deg, #a8842f, #ecd08a); color: #1a1405; cursor: pointer; }
+.toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%) translateY(20px); opacity: 0; background: #1b2650; border: 1px solid var(--line2); padding: 10px 16px; border-radius: 999px; font-size: 14px; font-weight: 700; transition: .25s; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateX(-50%); }
+</style>
+</head>
+<body>
+<h1>Cosa cambiare</h1>
+<p class="lead">Ho analizzato il gioco. Per ogni domanda <b>tocca una risposta</b> (puoi saltarle). Alla fine premi <b>Copia</b> e incollami il testo in chat: le tue scelte restano salvate anche se chiudi la pagina.</p>
+<div class="diag"><b>Perché all’opposizione è così difficile (l’ho verificato nel codice)</b>
+<ul>
+<li>Quando il governo va bene, i partiti di maggioranza guadagnano circa <b>3 volte di più</b> di quanto guadagna l’opposizione quando il governo va male.</li>
+<li>Un alleato di governo vota la sfiducia solo se la sua soddisfazione scende <b>sotto 12 su 100</b>, ma nei governi del computer resta stabile intorno a 58: in pratica non succede mai.</li>
+<li>Dall’opposizione non hai nessuna mossa per mettere in difficoltà gli alleati del governo, e i governi del computer quasi non subiscono scandali né logoramento.</li>
+<li>La spinta delle tue azioni (TV, social, comizi) cala dell’8% ogni settimana e oltre un certo livello non sale più.</li>
+</ul></div>
+<div id="list"></div>
+<h2>Altro</h2>
+<div class="wrap"><div class="q"><div class="t">Qualcosa che non ho chiesto?</div><p>Bug che hai visto, idee tue, cose che ti danno fastidio.</p><textarea id="note" placeholder="Scrivi qui…"></textarea></div></div>
+<div class="bar"><div class="in"><div class="prog"><small>Risposte</small> <b id="cnt">0</b><div class="track"><i id="trk"></i></div></div><button class="btn" onclick="copyAll()">Copia le scelte</button></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const K = 'easy', B = 'bug', R = 'rad', M = '';
+const LV = { easy: 'Semplice', bug: 'Bug o falla', rad: 'Cambio radicale', '': 'Meccanica' };
+const KEEP = 'Lascia com’è';
+const QS = [
+  ['Opposizione e bilanciamento', [
+    [M, 'Quando il governo va male, quanto deve guadagnare l’opposizione?', 'Oggi chi governa bene guadagna circa il triplo di quanto guadagna l’opposizione quando il governo va male.', ['Simmetrico: l’opposizione guadagna quanto perde il governo', 'A metà strada', 'Guadagna di più soprattutto il primo partito d’opposizione', KEEP]],
+    [B, 'La mozione di sfiducia: come deve funzionare?', 'Oggi in pratica non passa mai.', ['Si prepara nel tempo: raccogli le adesioni settimana dopo settimana e vedi il conteggio', 'Gli alleati scontenti votano sì molto prima (sotto 30 su 100) e ci sono i franchi tiratori', 'Aggiungi la sfiducia al singolo ministro, più facile da far passare', 'Tutte e tre']],
+    [M, 'Che mosse vuoi per logorare il governo dall’opposizione?', 'Oggi ci sono solo TV, piazza e sfiducia.', ['«Lavora ai fianchi» un alleato del governo con incontri riservati che lo rendono scontento', 'Ostruzionismo in aula: rallenti le leggi del governo', 'Commissione d’inchiesta che può far emergere scandali', 'Tutte e tre']],
+    [B, 'I governi del computer devono logorarsi?', 'Oggi l’economia e gli scandali li toccano pochissimo.', ['Sì: scandali, liti tra alleati, ministri indagati anche per loro', 'Sì: dopo 2 anni il gradimento cala da solo (usura del potere)', 'Entrambe', KEEP]],
+    [M, 'Dopo aver governato, all’opposizione:', '', ['Parti più basso ma risali in fretta se chi è venuto dopo governa male (effetto rimpianto)', 'Il primo partito d’opposizione ha più spazio in TV e nei giornali', 'Entrambe', KEEP]],
+    [M, 'La spinta delle azioni (TV, social, comizi) svanisce in fretta. Cosa preferisci?', '', ['Dura di più', 'Campagne a tema di più settimane (es. «caro bollette») con effetto che cresce', 'Le azioni ripetute rendono meno ma si sommano', KEEP]],
+    [M, 'Modalità Facile: cosa deve rendere più facile?', 'Oggi cambia soprattutto alleati e mercati, non i sondaggi.', ['Anche i sondaggi: le tue azioni valgono il 50% in più', 'Aggiungi una modalità «Storia» con aiuti e consigli continui', 'Entrambe', KEEP]],
+    [M, 'Vuoi un indicatore «Forza del governo» sempre visibile?', 'Un numero che riassume gradimento, compattezza degli alleati e voti in aula.', ['Sì, nella barra in alto quando sei all’opposizione', 'Sì, nel tab Partiti', 'No']],
+  ]],
+  ['Bug, blocchi e salvataggi', [
+    [B, 'Quando una decisione si blocca:', '', ['Tasto «Salta questa decisione» sempre visibile', 'Diagnostica in Impostazioni con l’ultimo errore da copiare e mandarmi', 'Entrambe']],
+    [B, 'Eventi che si ripetono (come i libri di Vannacci):', '', ['Un evento non torna prima di un anno di gioco', 'Più varianti di testo per lo stesso evento', 'Entrambe', KEEP]],
+    [M, 'Salvataggi:', '', ['Più slot con nome (es. «Partita PD», «Partita fondatore»)', 'Esporta e importa la partita per passare a un altro telefono', 'Entrambe', KEEP]],
+    [M, 'Annullare l’ultima settimana?', '', ['Sì, una volta, solo in Facile', 'Sì, sempre una volta', 'No']],
+    [K, 'Capitale politico ⚡:', '', ['Mostra quanto ne recupererai la prossima settimana', 'Se ne avanzi, metà resta per la settimana dopo', 'Entrambe', KEEP]],
+    [B, 'Prima di passare alla settimana dopo:', '', ['Avviso se hai ancora azioni o capitale politico da usare', 'Avviso solo se c’è un voto importante in aula', 'Niente avvisi']],
+  ]],
+  ['Parlamento ed elezioni', [
+    [M, 'In aula vuoi vedere i singoli parlamentari?', '', ['Sì: ribelli e franchi tiratori con nome e cognome', 'Voto segreto con sorprese nelle votazioni chiave', 'Entrambe', KEEP]],
+    [M, 'Emendamenti alle leggi:', 'I partiti propongono modifiche alle leggi in discussione.', ['Sì: accetti o respingi le modifiche per avere più voti', 'Sì, ma solo per le leggi importanti', 'No']],
+    [R, 'Legge elettorale modificabile?', 'Proporzionale, maggioritario, premio di maggioranza: cambia come si contano i seggi.', ['Sì, come riforma che passa dal Parlamento', 'No']],
+    [M, 'Campagna elettorale:', '', ['Dibattiti a turni contro gli altri leader', 'Mappa dei collegi in bilico dove mandare i tuoi comizi', 'Entrambe', KEEP]],
+    [K, 'Notte elettorale:', '', ['Exit poll, poi proiezioni che si aggiornano, poi risultato', 'Solo animazione più lunga dei seggi che si riempiono', KEEP]],
+    [R, 'Elezione del Presidente della Repubblica:', 'Quando scade il mandato: scrutini, nomi bruciati, accordi notturni.', ['Sì, come grande evento giocabile', 'Sì, ma breve', 'No']],
+    [M, 'Sondaggi:', '', ['Più istituti (SWG, YouTrend, Ipsos) con risultati un po’ diversi', 'Sondaggi per età e per zona d’Italia', 'Entrambe', KEEP]],
+  ]],
+  ['Governo, economia e partito', [
+    [M, 'La manovra:', '', ['Con i cursori, come «Regola le leggi»', 'Trattativa con ogni ministro che chiede soldi', 'Entrambe', KEEP]],
+    [M, 'Europa e conti:', '', ['Trattativa con Bruxelles sul deficit come minigioco', 'Rate del PNRR da sbloccare con obiettivi', 'Entrambe', KEEP]],
+    [M, 'Il tuo partito al suo interno:', '', ['Correnti con capicorrente che chiedono posti e leggi', 'Congresso con mozioni da scrivere', 'Entrambe', KEEP]],
+    [M, 'Regioni:', '', ['I presidenti di regione del tuo partito ti aiutano o ti sfidano', 'Autonomia e fondi alle regioni come trattativa', 'Entrambe', KEEP]],
+    [M, 'Sindacati e imprese:', '', ['Tavolo a Palazzo Chigi con le parti sociali (minigioco)', 'Scioperi generali che bloccano il Paese per giorni', 'Entrambe', KEEP]],
+    [M, 'Giustizia e scandali:', '', ['Inchieste lunghe a fasi: avviso di garanzia, processo, sentenza', 'Intercettazioni che escono sui giornali a sorpresa', 'Entrambe', KEEP]],
+    [M, 'Politica estera:', '', ['Vertici G7 e UE con scelte e foto di gruppo', 'Crisi internazionali (guerre, migranti, energia) con decisioni', 'Entrambe', KEEP]],
+    [M, 'Media:', '', ['Direttori di giornale con un orientamento che ti attaccano o difendono', 'Fake news su di te da smentire', 'Entrambe', KEEP]],
+  ]],
+  ['Personaggio e obiettivi', [
+    [M, 'Vita privata del tuo personaggio:', '', ['Famiglia, salute ed età che contano', 'Scandali personali con scelte morali', 'Entrambe', 'No, solo politica']],
+    [M, 'Lo staff:', '', ['Assumi e licenzi, ognuno con pregi e difetti', 'Lo staff può tradirti o passare a un rivale', 'Entrambe', KEEP]],
+    [M, 'Obiettivi di lungo periodo:', '', ['Scelti all’inizio (es. debito sotto il 130%) con punteggio finale', 'Molti più traguardi da sbloccare', 'Entrambe', KEEP]],
+    [R, 'Fine partita:', '', ['Epilogo con il giudizio degli storici e un voto finale', 'Partita senza fine: giochi il tuo erede politico', 'Entrambe', KEEP]],
+  ]],
+  ['Interfaccia e animazioni', [
+    [K, 'Passaggio alla settimana successiva:', '', ['Calendario che sfoglia le pagine', 'Vibrazione leggera e suono', 'Entrambe', 'Niente']],
+    [K, 'La Home:', '', ['Più compatta: 3 numeri chiave e «cosa fare ora»', 'Scegli tu quali riquadri vedere', KEEP]],
+    [K, 'Notifiche:', '', ['Raggruppate per tipo (governo, partito, economia)', 'Badge solo per le cose urgenti', 'Entrambe', KEEP]],
+    [K, 'Grafici:', '', ['Tocchi un punto e vedi cosa era successo quella settimana', 'Confronto tra più partiti sovrapposti', 'Entrambe', KEEP]],
+    [K, 'Leggibilità:', '', ['Testo un po’ più grande', 'Tema chiaro «carta» da attivare', 'Entrambe', KEEP]],
+    [K, 'Suoni:', '', ['Ambiente attivabile (aula, applausi, campanella)', 'Solo piccoli suoni sui tasti', 'No']],
+    [M, 'Ritmo:', '', ['Tasto «Avanza fino al prossimo evento importante» (più settimane insieme)', 'Agenda settimanale a orari (lunedì CdM, martedì aula…)', 'Entrambe', 'Una settimana alla volta come ora']],
+    [K, 'Aiuto:', '', ['Consiglio breve la prima volta che apri ogni schermata', 'Missioni guidate nelle prime 10 settimane', 'Entrambe', KEEP]],
+  ]],
+  ['Contenuti e cambi radicali', [
+    [M, 'Leggi:', '', ['30 leggi nuove (casa, intelligenza artificiale, Mezzogiorno, sport, tecnologia)', 'Leggi divise in articoli da negoziare', 'Entrambe', KEEP]],
+    [M, 'Personaggi reali:', '', ['Aggiorna leader e ministri ai nomi reali di oggi', 'Leader inventati, così il gioco non invecchia', 'Scegli all’inizio partita', KEEP]],
+    [R, 'Scenari con obiettivi:', 'Partite brevi con una situazione di partenza.', ['Storici: crisi dello spread 2011, governo di unità nazionale…', 'Inventati: «Il Paese in recessione», «Maggioranza di un voto»', 'Entrambi', 'No']],
+    [R, 'Altri ruoli giocabili:', '', ['Presidente della Repubblica', 'Sindaco di una grande città', 'Giornalista politico', 'No']],
+    [R, 'Giocare con altri:', '', ['Partita a turni con un amico (ognuno un partito)', 'Classifica online dei punteggi', 'Entrambe', 'No']],
+    [R, 'Grafica dei personaggi:', '', ['Ritratti animati (respiro, espressioni che cambiano)', 'Scene illustrate per gli eventi più importanti', 'Entrambe', KEEP]],
+    [R, 'Tempo di gioco:', '', ['Tempo reale leggero: una settimana di gioco al giorno, con notifiche', 'A turni come ora']],
+  ]],
+];
+let n = 0; const ALL = [];
+let html = '';
+QS.forEach(([sec, qs]) => {
+  html += `<h2>${sec}</h2><div class="wrap">`;
+  qs.forEach(([lv, t, d, opts]) => {
+    n++; ALL.push({ n, t, opts });
+    html += `<div class="q" id="q${n}"><div class="hd"><span class="num">${n}</span><div><div class="t">${t}</div><span class="lvl ${lv}">${LV[lv]}</span></div></div>${d ? `<p>${d}</p>` : ''}<div class="opts">${opts.map((o, i) => `<button class="opt ${o === KEEP || o === 'No' || o === 'Niente' ? 'keep' : ''}" data-q="${n}" data-i="${i}"><span class="k">${'ABCD'[i]}</span><span>${o}</span></button>`).join('')}</div></div>`;
+  });
+  html += `</div>`;
+});
+document.getElementById('list').innerHTML = html;
+let S = {};
+try { S = JSON.parse(localStorage.getItem('pc-scelte-4') || '{}'); } catch (e) {}
+const save = () => { try { localStorage.setItem('pc-scelte-4', JSON.stringify(S)); } catch (e) {} };
+function paint() {
+  document.querySelectorAll('.opt').forEach(b => b.classList.toggle('on', S[b.dataset.q] === +b.dataset.i));
+  document.querySelectorAll('.q[id]').forEach(q => q.classList.toggle('done', S[q.id.slice(1)] !== undefined));
+  const c = Object.keys(S).filter(k => k !== 'note').length;
+  document.getElementById('cnt').textContent = `${c} di ${n}`;
+  document.getElementById('trk').style.width = (c / n * 100) + '%';
+}
+document.getElementById('list').addEventListener('click', e => {
+  const b = e.target.closest('.opt'); if (!b) return;
+  const q = b.dataset.q, i = +b.dataset.i;
+  if (S[q] === i) delete S[q]; else S[q] = i;
+  save(); paint();
+});
+const note = document.getElementById('note');
+note.value = S.note || '';
+note.addEventListener('input', () => { S.note = note.value; save(); });
+function toast(t) { const el = document.getElementById('toast'); el.textContent = t; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 1800); }
+function copyAll() {
+  const lines = ALL.filter(q => S[q.n] !== undefined).map(q => `${q.n}${'ABCD'[S[q.n]]}`);
+  let txt = 'Scelte: ' + (lines.join(' ') || 'nessuna');
+  if (S.note && S.note.trim()) txt += '\nNote: ' + S.note.trim();
+  const done = () => toast('Copiato: incollalo in chat');
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, () => fallback(txt));
+  else fallback(txt);
+}
+function fallback(txt) { const t = document.createElement('textarea'); t.value = txt; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); toast('Copiato: incollalo in chat'); } catch (e) { prompt('Copia questo testo:', txt); } t.remove(); }
+paint();
+</script>
+</body>
+</html>
