@@ -224,7 +224,7 @@ function showSplash() {
     <div class="flag3"><i></i><i></i><i></i></div>
     <div class="sub">Simulatore politico italiano · dati reali a ottobre 2026</div>
     <div class="btns">
-      ${auto ? `<button class="btn gold block" onclick="continueGame()">${icon('chevron')} Continua · ${esc(auto.short)} (${esc(auto.party)}) · ${esc(auto.dnum)}</button>` : ''}
+      ${auto ? `<button class="btn gold block" onclick="continueGame()" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${icon('chevron')} Continua · ${esc(auto.short)} (${esc(auto.party)}) · ${esc(auto.dnum.slice(-4))}</button>` : ''}
       <button class="btn ${auto ? '' : 'pri'} block" onclick="startSetup()">${icon('plus')} Nuova partita</button>
       <button class="btn block" onclick="openLoad()">${icon('folder')} Carica partita</button>
       <button class="btn block" onclick="openGuide()">${icon('info')} Come si gioca</button>
