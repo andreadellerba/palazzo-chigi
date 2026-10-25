@@ -800,3 +800,15 @@ html.bru .sheet .sec h4, html.bru .card .sec h4 { color: #fff !important; }
 html.bru .sheet .sec h4::before, html.bru .sheet .sec h4::after, html.bru .card .sec h4::before, html.bru .card .sec h4::after { background: #fff; }
 html.bru .sheet .sec > :not(h4) { box-shadow: 0 0 0 6px #111; }
 html.bru .tip .btn, html.bru .tabtip .btn { border: 2px solid #fff !important; }
+/* testi grigi appoggiati sul giallo: neri */
+html.bru .content > .scrollx > .tiny, html.bru .content > .scrollx > .muted, html.bru .content > .row > .muted, html.bru .content > .row > .small { color: #000 !important; font-weight: 700; }
+/* niente sfumatura stagionale in alto (sul giallo sembrava una macchia) */
+html.bru #app { background: none !important; }
+/* tasto «rifiuta» della chiamata: quadrato dritto, ruota solo la cornetta */
+html.bru .call .cbtn .no .lic { transform: none; }
+html.bru .call .cbtn .no .lic > * { transform: rotate(135deg); transform-box: fill-box; transform-origin: center; }
+/* in alto tutto nero, con l'arco che segue gli angoli dell'iPhone */
+html.bru body::before { height: env(safe-area-inset-top, 0px); }
+html.bru body::after { content: ''; position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; height: 44px; z-index: 200; pointer-events: none;
+  background: radial-gradient(circle at 100% 100%, transparent 43.5px, #000 44px) left top / 44px 44px no-repeat,
+              radial-gradient(circle at 0 100%, transparent 43.5px, #000 44px) right top / 44px 44px no-repeat; }
