@@ -301,6 +301,14 @@ function ratingReview() {
 // ============================================================
 //  CONSENSO DEL GOVERNO
 // ============================================================
+// coerenza della maggioranza: affinità media tra i partiti di governo, pesata sui seggi (0-100)
+function govCoherence(set) {
+  set = (set || (G.gov ? G.gov.parties : [])).filter(p => G.parties[p]);
+  if (set.length < 2) return 100;
+  let s = 0, w = 0;
+  for (let i = 0; i < set.length; i++) for (let j = i + 1; j < set.length; j++) { const k = Math.max(1, seatsOf(set[i], 'C')) * Math.max(1, seatsOf(set[j], 'C')); s += compat(set[i], set[j]) * k; w += k; }
+  return w ? s / w : 100;
+}
 function approvalTick() {
   const g = G.gov; if (!g) return;
   const e = G.econ;
@@ -311,7 +319,11 @@ function approvalTick() {
   const target = 38 + hm + 3 * (e.pil - 0.7) - 1.5 * (e.dis - 6) - 1.2 * Math.max(0, e.infl - 2) - Math.max(0, e.spread - 200) / 25 + g.popBank + (pc - 6) * 1.2 + (g.tecnico ? 6 : 0) + (g.premier === 'PLAYER' ? ((G.groups.sind || 0) * 0.8 + (G.groups.chiesa || 0) * 0.6 + (G.groups.media || 0) * 0.8) / 100 : 0);
   // usura del potere: dopo due anni i governi del computer perdono consenso
   const usura = g.premier !== 'PLAYER' ? Math.min(8, Math.max(0, (G.week - g.start - 104) * 0.05)) : 0;
-  g.approval += (target - usura - g.approval) * 0.1 + gauss() * 0.4;
+  // alleanze incoerenti (es. PD con FI) costano gradimento, quelle coerenti ne danno un po'
+  const coh = govCoherence(g.parties), cohFx = coh >= 55 ? (coh - 55) * 0.25 : (coh - 55) * 0.32;
+  g.approval += (target - usura + cohFx - g.approval) * 0.1 + gauss() * 0.4;
+  // e gli elettori del tuo partito non perdonano un governo con gli avversari di sempre
+  if (myInGov() && coh < 50) myParty().spinta -= (50 - coh) * 0.025;
   g.approval = clamp(g.approval, 8, 85);
 }
 
