@@ -461,25 +461,36 @@ const routineOK = a => !ROUTINE_NO.includes(a.id) && (a.run || a.id === 'comizio
 function routineToggleHTML(a) {
   if (!routineOK(a)) return `<div class="tiny muted center mt2">È una decisione importante: non si può ripetere in automatico, la prendi tu ogni volta.</div>`;
   const on = !!(G.routine && G.routine[a.id]);
-  return `<div class="card tight mt2"><div class="li click" onclick="toggleRoutine('${a.id}')">${icon('refresh', 20)}<div class="grow"><b class="small">Ripeti ogni settimana</b><div class="tiny muted">Il gioco la fa da solo quando passi alla settimana successiva, se hai capitale e fondi</div></div><span class="tgl ${on ? 'on' : ''}"><i></i></span></div>${on ? routinePickerHTML(a.id) : ''}</div>`;
+  return `<div class="card tight mt2"><div class="li click" onclick="toggleRoutine('${a.id}')">${icon('refresh', 20)}<div class="grow"><b class="small">Ripeti ogni settimana</b><div class="tiny muted">La fa il gioco quando vai alla settimana successiva, con il capitale tenuto da parte. Puoi cambiare bersaglio o farla a mano quando vuoi</div></div><span class="tgl ${on ? 'on' : ''}"><i></i></span></div>${on ? routinePickerHTML(a.id) : ''}</div>`;
 }
 function toggleRoutine(id) {
   G.routine = G.routine || {};
   if (G.routine[id]) delete G.routine[id]; else G.routine[id] = 1;
   vib(8); closeSheet(); openAction(id); renderGame();
 }
+// capitale tenuto da parte per le ricorrenti ancora da fare questa settimana (except: l'azione che stai facendo a mano)
+let _noReserve = false;
+function pcReserved(except) {
+  if (_noReserve || !G.routine || G.phase !== 'normale') return 0;
+  return Object.keys(G.routine).reduce((s, id) => {
+    const a = ACTIONS.find(x => x.id === id);
+    if (!a || id === except || ROUTINE_NO.includes(id) || usedThisWeek(id)) return s;
+    let ok = false; try { ok = a.show(); } catch (e) { }
+    return ok ? s + actionCost(a) : s;
+  }, 0);
+}
+const pcFree = except => Math.max(0, G.pc - pcReserved(except));
 function runRoutine() {
   const done = [];
   if (!G.routine || G.phase !== 'normale') return done;
   ROUTINE_NO.forEach(id => delete G.routine[id]); // il riposo azzera il capitale: mai in automatico
-  // le ricorrenti possono usare al massimo metà del capitale della settimana: il resto è tuo
-  const floor = G.pc - Math.floor(G.pc / 2);
+  // si fanno a fine settimana con il capitale tenuto da parte (vedi pcReserved)
   Object.keys(G.routine).forEach(id => {
     const a = ACTIONS.find(x => x.id === id);
     if (!a || usedThisWeek(id)) return;
     let ok = false; try { ok = a.show(); } catch (e) { }
     if (!ok) return;
-    if (G.pc - actionCost(a) < floor || G.funds < (a.funds || 0)) { done.push({ n: `Saltata: ${a.n} (${G.pc - actionCost(a) < floor ? 'oltre metà del capitale' : 'fondi insufficienti'})`, ico: 'alert', skip: true }); return; }
+    if (G.pc < actionCost(a) || G.funds < (a.funds || 0)) { done.push({ n: `Saltata: ${a.n} (${G.pc < actionCost(a) ? 'capitale insufficiente' : 'fondi insufficienti'})`, ico: 'alert', skip: true }); return; }
     if (ROUTINE_AUTO[id]) { if (!spendPC(actionCost(a))) return; markUsed(id); if (a.funds) G.funds -= a.funds; const t = ROUTINE_AUTO[id](); if (t) done.push({ n: t, ico: ACT_ICON[id] || a.ico }); return; }
     if (id === 'comizio') {
       const reg = REGIONS_DEF.find(x => x.id === routineTarget('comizio')) || REGIONS_DEF.slice().sort((x, y) => (y.el / (G.myReg[y.id] || 1)) - (x.el / (G.myReg[x.id] || 1)))[0];

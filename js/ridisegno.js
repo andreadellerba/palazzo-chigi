@@ -94,7 +94,7 @@ topbar = function () {
     <span class="dt">${fmtDate(G.week).toUpperCase()}</span>${dot}
     <span class="s4" onclick="goTab('partiti')">${esc(mp.short)} <b>${fmt1(mp.poll)}%</b><em class="${d >= 0 ? 'g' : 'r'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</em></span>${dot}
     ${third}${dot}
-    <span class="s4 y" onclick="toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')">⚡${G.pc}</span>
+    <span class="s4 y" onclick="${pcReserved() ? 'openRoutines()' : `toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')`}">⚡${pcFree()}</span>
     <button class="ib5" onclick="openMenu()">${icon('menu', 18)}</button>
   </div></div>`;
 };
@@ -196,6 +196,7 @@ openMenu = function () {
 function planPreview() {
   if (G.phase !== 'normale') return { ids: [], pc: 0 };
   const saved = { used: Object.assign({}, G.usedActs || {}), pc: G.pc, funds: G.funds, stress: G.player.stress }, ids = [];
+  G.pc = pcFree(); _noReserve = true;
   try {
     for (let k = 0; k < 6; k++) {
       const recs = recommendedActions().filter(r => r.id !== 'tv' && r.id !== 'dibattito' && r.id !== 'riposo');
@@ -208,7 +209,7 @@ function planPreview() {
     }
   } catch (e) { console.error(e); }
   const spent = saved.pc - G.pc;
-  G.usedActs = saved.used; G.pc = saved.pc; G.funds = saved.funds; G.player.stress = saved.stress;
+  _noReserve = false; G.usedActs = saved.used; G.pc = saved.pc; G.funds = saved.funds; G.player.stress = saved.stress;
   return { ids, pc: spent };
 }
 function planStarHTML(P5) {
@@ -273,12 +274,13 @@ function routineList() { return Object.keys(G.routine || {}).map(id => ({ id, a:
 function routineLineHTML() {
   ROUTINE_NO.forEach(id => G.routine && delete G.routine[id]);
   const L = routineList(); if (!L.length) return '';
-  const cost = L.reduce((s, x) => s + actionCost(x.a), 0);
-  return `<button class="rt9" onclick="openRoutines()">↻ ${L.length} ricorrent${L.length > 1 ? 'i' : 'e'} · ⚡${cost} · max metà capitale ›</button>`;
+  const res = pcReserved(), short = res > G.pc;
+  return `<button class="rt9 ${short ? 'r' : ''}" onclick="openRoutines()">↻ ${L.length} ricorrent${L.length > 1 ? 'i' : 'e'} · ⚡${res} da parte${short ? ` · ne hai ${G.pc}` : ''} ›</button>`;
 }
 function openRoutines() {
   const L = routineList();
-  openSheet(`${head('Azioni ricorrenti', 'Partono da sole a inizio settimana')}
-    <p class="small muted">Usano al massimo <b>metà</b> del capitale politico della settimana: il resto resta a te. Quelle che non ci stanno vengono saltate e lo vedi nel riepilogo.</p>
-    <div class="list5">${L.map(x => { const tg = routineTarget(x.id); const tn = tg ? (G.parties[tg] ? P(tg).short : (REGIONS_DEF.find(r => r.id === tg) || {}).n || tg) : 'scelta automatica'; return `<div class="m5"><span class="mi5">${icon(ACT_ICON[x.id] || x.a.ico, 18)}</span><span class="grow"><b>${esc(x.a.n)}</b><em>${esc(tn)} · ⚡${actionCost(x.a)}</em></span><button class="btn sm" onclick="delete G.routine['${x.id}'];closeSheet();renderGame();${L.length > 1 ? 'openRoutines()' : ''}">Togli</button></div>`; }).join('')}</div>`);
+  const res = pcReserved();
+  openSheet(`${head('Azioni ricorrenti', 'Le fa il gioco quando vai avanti di una settimana')}
+    <p class="small muted">Hai <b>⚡${G.pc}</b>: <b>⚡${Math.min(res, G.pc)}</b> sono tenuti da parte per queste, <b>⚡${pcFree()}</b> li usi come vuoi. Tocca un'azione per cambiare bersaglio o farla subito a mano.${res > G.pc ? ` <b class="r">Non basta per tutte: quelle in fondo verranno saltate.</b>` : ''}</p>
+    <div class="list5">${L.map(x => { const tg = routineTarget(x.id); const tn = tg ? (G.parties[tg] ? P(tg).short : (REGIONS_DEF.find(r => r.id === tg) || {}).n || tg) : 'scelta automatica'; const used = usedThisWeek(x.id); return `<div class="m5"><span class="mi5">${icon(ACT_ICON[x.id] || x.a.ico, 18)}</span><span class="grow" onclick="closeSheet();openAction('${x.id}')"><b>${esc(x.a.n)} ›</b><em>${esc(tn)} · ⚡${actionCost(x.a)}${used ? ' · già fatta questa settimana' : ''}</em></span><button class="btn sm" onclick="delete G.routine['${x.id}'];closeSheet();renderGame();${L.length > 1 ? 'openRoutines()' : ''}">Togli</button></div>`; }).join('')}</div>`);
 }

@@ -1090,6 +1090,8 @@ html.bru .call .cbtn .no .lic > * { transform: none !important; }
 .rt9 .m { text-transform: none; letter-spacing: 0; font-weight: 600; }
 .rt9 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+html.bru .rt9.r { color: var(--bad); }
+
 </style>
 </head>
 <body>
@@ -7382,7 +7384,7 @@ const ACT_COLORS = ['#38bdf8', '#a78bfa', '#fb923c', '#22c55e', '#f472b6', '#fac
 const usedThisWeek = id => G.usedActs && G.usedActs[id] === G.week;
 function markUsed(id) { G.usedActs = G.usedActs || {}; G.usedActs[id] = G.week; }
 function availableActions() {
-  return ACTIONS.filter(a => { try { return a.show(); } catch (e) { return false; } }).map((a, i) => ({ id: a.id, n: a.n, ico: a.ico, cost: actionCost(a), ac: a.ac || ACT_COLORS[i % ACT_COLORS.length], done: usedThisWeek(a.id), ok: !usedThisWeek(a.id) && G.pc >= actionCost(a) && G.funds >= (a.funds || 0) && G.phase === 'normale' }));
+  return ACTIONS.filter(a => { try { return a.show(); } catch (e) { return false; } }).map((a, i) => ({ id: a.id, n: a.n, ico: a.ico, cost: actionCost(a), ac: a.ac || ACT_COLORS[i % ACT_COLORS.length], done: usedThisWeek(a.id), ok: !usedThisWeek(a.id) && pcFree(a.id) >= actionCost(a) && G.funds >= (a.funds || 0) && G.phase === 'normale' }));
 }
 function openAction(id) {
   const a = ACTIONS.find(x => x.id === id);
@@ -7394,9 +7396,9 @@ function openAction(id) {
   if (cost) pc.contro.push({ k: 'pol', t: `Costa ${cost} capitale politico` });
   if (a.funds) pc.contro.push({ k: 'per', t: `Costa ${euro(a.funds)}` });
   if (a.risk) pc.contro.push({ k: 'pol', t: a.risk });
-  const enough = G.pc >= cost && G.funds >= (a.funds || 0);
+  const free = pcFree(id), enough = free >= cost && G.funds >= (a.funds || 0);
   openSheet(`<div class="sheet-head"><div class="row grow">${medal(a.ico, 56)}<div class="grow"><h2 style="font-size:22px">${esc(a.n)}</h2>${cost || a.funds ? `<div class="tiny gold" style="font-weight:800;letter-spacing:.08em">COSTA ${cost ? '⚡' + cost : ''}${cost && a.funds ? ' · ' : ''}${a.funds ? euro(a.funds) : ''}</div>` : ''}</div></div><button class="xbtn" onclick="closeSheet()">${icon('x', 18)}</button></div><p class="muted">${esc(a.d)}</p><div class="effs">${pc.pro.map(x => `<span class="eff g">▲ ${esc(x.t)}</span>`).join("")}${pc.contro.map(x => `<span class="eff b">▼ ${esc(x.t)}</span>`).join("")}</div>
-    ${routineToggleHTML(a)}<button class="btn pri block mt2" ${enough ? '' : 'disabled'} onclick="runAction('${a.id}')">${enough ? 'Procedi' : (G.pc < cost ? 'Capitale politico insufficiente' : 'Fondi insufficienti')}</button>`);
+    ${routineToggleHTML(a)}<button class="btn pri block mt2" ${enough ? '' : 'disabled'} onclick="runAction('${a.id}')">${enough ? 'Procedi' : (G.pc < cost ? 'Capitale politico insufficiente' : free < cost ? 'Capitale tenuto per le ricorrenti' : 'Fondi insufficienti')}</button>`);
 }
 function runAction(id) {
   const a = ACTIONS.find(x => x.id === id);
@@ -7596,10 +7598,10 @@ function nextWeek() {
   if (G.phase === 'formazione') return openFormation();
   if (G.queue.length) return processQueue();
   const before = { poll: myParty().poll, appr: G.gov ? G.gov.approval : null, spread: G.econ.spread };
+  // le azioni ricorrenti si fanno a fine settimana, con il capitale tenuto da parte per loro
+  const auto = runRoutine();
   const s = advanceWeek();
   if (!s) return;
-  // le azioni ricorrenti partono a inizio settimana, con il capitale politico appena ricaricato
-  const auto = runRoutine();
   // eventi speciali in testa alla coda
   const sp = s.specials.map(x => ({ sp: x }));
   G.queue = sp.concat(G.queue);
@@ -9232,25 +9234,36 @@ const routineOK = a => !ROUTINE_NO.includes(a.id) && (a.run || a.id === 'comizio
 function routineToggleHTML(a) {
   if (!routineOK(a)) return `<div class="tiny muted center mt2">È una decisione importante: non si può ripetere in automatico, la prendi tu ogni volta.</div>`;
   const on = !!(G.routine && G.routine[a.id]);
-  return `<div class="card tight mt2"><div class="li click" onclick="toggleRoutine('${a.id}')">${icon('refresh', 20)}<div class="grow"><b class="small">Ripeti ogni settimana</b><div class="tiny muted">Il gioco la fa da solo quando passi alla settimana successiva, se hai capitale e fondi</div></div><span class="tgl ${on ? 'on' : ''}"><i></i></span></div>${on ? routinePickerHTML(a.id) : ''}</div>`;
+  return `<div class="card tight mt2"><div class="li click" onclick="toggleRoutine('${a.id}')">${icon('refresh', 20)}<div class="grow"><b class="small">Ripeti ogni settimana</b><div class="tiny muted">La fa il gioco quando vai alla settimana successiva, con il capitale tenuto da parte. Puoi cambiare bersaglio o farla a mano quando vuoi</div></div><span class="tgl ${on ? 'on' : ''}"><i></i></span></div>${on ? routinePickerHTML(a.id) : ''}</div>`;
 }
 function toggleRoutine(id) {
   G.routine = G.routine || {};
   if (G.routine[id]) delete G.routine[id]; else G.routine[id] = 1;
   vib(8); closeSheet(); openAction(id); renderGame();
 }
+// capitale tenuto da parte per le ricorrenti ancora da fare questa settimana (except: l'azione che stai facendo a mano)
+let _noReserve = false;
+function pcReserved(except) {
+  if (_noReserve || !G.routine || G.phase !== 'normale') return 0;
+  return Object.keys(G.routine).reduce((s, id) => {
+    const a = ACTIONS.find(x => x.id === id);
+    if (!a || id === except || ROUTINE_NO.includes(id) || usedThisWeek(id)) return s;
+    let ok = false; try { ok = a.show(); } catch (e) { }
+    return ok ? s + actionCost(a) : s;
+  }, 0);
+}
+const pcFree = except => Math.max(0, G.pc - pcReserved(except));
 function runRoutine() {
   const done = [];
   if (!G.routine || G.phase !== 'normale') return done;
   ROUTINE_NO.forEach(id => delete G.routine[id]); // il riposo azzera il capitale: mai in automatico
-  // le ricorrenti possono usare al massimo metà del capitale della settimana: il resto è tuo
-  const floor = G.pc - Math.floor(G.pc / 2);
+  // si fanno a fine settimana con il capitale tenuto da parte (vedi pcReserved)
   Object.keys(G.routine).forEach(id => {
     const a = ACTIONS.find(x => x.id === id);
     if (!a || usedThisWeek(id)) return;
     let ok = false; try { ok = a.show(); } catch (e) { }
     if (!ok) return;
-    if (G.pc - actionCost(a) < floor || G.funds < (a.funds || 0)) { done.push({ n: `Saltata: ${a.n} (${G.pc - actionCost(a) < floor ? 'oltre metà del capitale' : 'fondi insufficienti'})`, ico: 'alert', skip: true }); return; }
+    if (G.pc < actionCost(a) || G.funds < (a.funds || 0)) { done.push({ n: `Saltata: ${a.n} (${G.pc < actionCost(a) ? 'capitale insufficiente' : 'fondi insufficienti'})`, ico: 'alert', skip: true }); return; }
     if (ROUTINE_AUTO[id]) { if (!spendPC(actionCost(a))) return; markUsed(id); if (a.funds) G.funds -= a.funds; const t = ROUTINE_AUTO[id](); if (t) done.push({ n: t, ico: ACT_ICON[id] || a.ico }); return; }
     if (id === 'comizio') {
       const reg = REGIONS_DEF.find(x => x.id === routineTarget('comizio')) || REGIONS_DEF.slice().sort((x, y) => (y.el / (G.myReg[y.id] || 1)) - (x.el / (G.myReg[x.id] || 1)))[0];
@@ -9769,7 +9782,7 @@ function openVotesNow() {
 // ---------- azioni consigliate (un tocco) ----------
 function recommendedActions() {
   const p = G.player, recs = [];
-  const can = id => { const a = ACTIONS.find(x => x.id === id); try { return a && a.show() && !usedThisWeek(id) && G.pc >= actionCost(a) && G.funds >= (a.funds || 0); } catch (e) { return false; } };
+  const can = id => { const a = ACTIONS.find(x => x.id === id); try { return a && a.show() && !usedThisWeek(id) && !(G.routine && G.routine[id]) && pcFree(id) >= actionCost(a) && G.funds >= (a.funds || 0); } catch (e) { return false; } };
   const add = (id, why, param) => { if (can(id) && !recs.some(r => r.id === id)) recs.push({ id, why, param }); };
   if (p.stress > 70) add('riposo', 'Sei stressato');
   if (isPremier()) { if (G.gov.parties.some(x => x !== myPid() && G.gov.sat[x] < 40)) add('vertice', 'Alleati inquieti'); if (G.gov.approval < 42) add('conferenza', 'Consenso in calo'); if (G.econ.spread > 150 || monthOf(G.week) === 8) add('bruxelles', 'Conti e Bruxelles'); }
@@ -11142,8 +11155,8 @@ function fastForward() {
   let s = null, n = 0, auto = [];
   while (n < 8) {
 
-    s = advanceWeek(); if (!s) break; n++;
     auto = runRoutine();
+    s = advanceWeek(); if (!s) break; n++;
     G.queue = s.specials.map(x => ({ sp: x })).concat(G.queue);
     if (G.queue.length || G.phase !== 'normale' || pendingVoteIds().length || (G.cal.election - G.week <= 3 && G.cal.election > G.week)) break;
   }
@@ -11516,7 +11529,7 @@ topbar = function () {
     <span class="dt">${fmtDate(G.week).toUpperCase()}</span>${dot}
     <span class="s4" onclick="goTab('partiti')">${esc(mp.short)} <b>${fmt1(mp.poll)}%</b><em class="${d >= 0 ? 'g' : 'r'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</em></span>${dot}
     ${third}${dot}
-    <span class="s4 y" onclick="toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')">⚡${G.pc}</span>
+    <span class="s4 y" onclick="${pcReserved() ? 'openRoutines()' : `toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')`}">⚡${pcFree()}</span>
     <button class="ib5" onclick="openMenu()">${icon('menu', 18)}</button>
   </div></div>`;
 };
@@ -11618,6 +11631,7 @@ openMenu = function () {
 function planPreview() {
   if (G.phase !== 'normale') return { ids: [], pc: 0 };
   const saved = { used: Object.assign({}, G.usedActs || {}), pc: G.pc, funds: G.funds, stress: G.player.stress }, ids = [];
+  G.pc = pcFree(); _noReserve = true;
   try {
     for (let k = 0; k < 6; k++) {
       const recs = recommendedActions().filter(r => r.id !== 'tv' && r.id !== 'dibattito' && r.id !== 'riposo');
@@ -11630,7 +11644,7 @@ function planPreview() {
     }
   } catch (e) { console.error(e); }
   const spent = saved.pc - G.pc;
-  G.usedActs = saved.used; G.pc = saved.pc; G.funds = saved.funds; G.player.stress = saved.stress;
+  _noReserve = false; G.usedActs = saved.used; G.pc = saved.pc; G.funds = saved.funds; G.player.stress = saved.stress;
   return { ids, pc: spent };
 }
 function planStarHTML(P5) {
@@ -11695,14 +11709,15 @@ function routineList() { return Object.keys(G.routine || {}).map(id => ({ id, a:
 function routineLineHTML() {
   ROUTINE_NO.forEach(id => G.routine && delete G.routine[id]);
   const L = routineList(); if (!L.length) return '';
-  const cost = L.reduce((s, x) => s + actionCost(x.a), 0);
-  return `<button class="rt9" onclick="openRoutines()">↻ ${L.length} ricorrent${L.length > 1 ? 'i' : 'e'} · ⚡${cost} · max metà capitale ›</button>`;
+  const res = pcReserved(), short = res > G.pc;
+  return `<button class="rt9 ${short ? 'r' : ''}" onclick="openRoutines()">↻ ${L.length} ricorrent${L.length > 1 ? 'i' : 'e'} · ⚡${res} da parte${short ? ` · ne hai ${G.pc}` : ''} ›</button>`;
 }
 function openRoutines() {
   const L = routineList();
-  openSheet(`${head('Azioni ricorrenti', 'Partono da sole a inizio settimana')}
-    <p class="small muted">Usano al massimo <b>metà</b> del capitale politico della settimana: il resto resta a te. Quelle che non ci stanno vengono saltate e lo vedi nel riepilogo.</p>
-    <div class="list5">${L.map(x => { const tg = routineTarget(x.id); const tn = tg ? (G.parties[tg] ? P(tg).short : (REGIONS_DEF.find(r => r.id === tg) || {}).n || tg) : 'scelta automatica'; return `<div class="m5"><span class="mi5">${icon(ACT_ICON[x.id] || x.a.ico, 18)}</span><span class="grow"><b>${esc(x.a.n)}</b><em>${esc(tn)} · ⚡${actionCost(x.a)}</em></span><button class="btn sm" onclick="delete G.routine['${x.id}'];closeSheet();renderGame();${L.length > 1 ? 'openRoutines()' : ''}">Togli</button></div>`; }).join('')}</div>`);
+  const res = pcReserved();
+  openSheet(`${head('Azioni ricorrenti', 'Le fa il gioco quando vai avanti di una settimana')}
+    <p class="small muted">Hai <b>⚡${G.pc}</b>: <b>⚡${Math.min(res, G.pc)}</b> sono tenuti da parte per queste, <b>⚡${pcFree()}</b> li usi come vuoi. Tocca un'azione per cambiare bersaglio o farla subito a mano.${res > G.pc ? ` <b class="r">Non basta per tutte: quelle in fondo verranno saltate.</b>` : ''}</p>
+    <div class="list5">${L.map(x => { const tg = routineTarget(x.id); const tn = tg ? (G.parties[tg] ? P(tg).short : (REGIONS_DEF.find(r => r.id === tg) || {}).n || tg) : 'scelta automatica'; const used = usedThisWeek(x.id); return `<div class="m5"><span class="mi5">${icon(ACT_ICON[x.id] || x.a.ico, 18)}</span><span class="grow" onclick="closeSheet();openAction('${x.id}')"><b>${esc(x.a.n)} ›</b><em>${esc(tn)} · ⚡${actionCost(x.a)}${used ? ' · già fatta questa settimana' : ''}</em></span><button class="btn sm" onclick="delete G.routine['${x.id}'];closeSheet();renderGame();${L.length > 1 ? 'openRoutines()' : ''}">Togli</button></div>`; }).join('')}</div>`);
 }
 
 </script>

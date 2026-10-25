@@ -1072,3 +1072,5 @@ html.bru .call .cbtn .no .lic > * { transform: none !important; }
 .rt9 { display: block; width: 100%; text-align: left; padding: 8px 2px 10px; font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #ffe14d; }
 .rt9 .m { text-transform: none; letter-spacing: 0; font-weight: 600; }
 .rt9 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+html.bru .rt9.r { color: var(--bad); }

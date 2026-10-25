@@ -47,8 +47,8 @@ function fastForward() {
   let s = null, n = 0, auto = [];
   while (n < 8) {
 
-    s = advanceWeek(); if (!s) break; n++;
     auto = runRoutine();
+    s = advanceWeek(); if (!s) break; n++;
     G.queue = s.specials.map(x => ({ sp: x })).concat(G.queue);
     if (G.queue.length || G.phase !== 'normale' || pendingVoteIds().length || (G.cal.election - G.week <= 3 && G.cal.election > G.week)) break;
   }

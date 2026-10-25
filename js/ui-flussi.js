@@ -60,7 +60,7 @@ const ACT_COLORS = ['#38bdf8', '#a78bfa', '#fb923c', '#22c55e', '#f472b6', '#fac
 const usedThisWeek = id => G.usedActs && G.usedActs[id] === G.week;
 function markUsed(id) { G.usedActs = G.usedActs || {}; G.usedActs[id] = G.week; }
 function availableActions() {
-  return ACTIONS.filter(a => { try { return a.show(); } catch (e) { return false; } }).map((a, i) => ({ id: a.id, n: a.n, ico: a.ico, cost: actionCost(a), ac: a.ac || ACT_COLORS[i % ACT_COLORS.length], done: usedThisWeek(a.id), ok: !usedThisWeek(a.id) && G.pc >= actionCost(a) && G.funds >= (a.funds || 0) && G.phase === 'normale' }));
+  return ACTIONS.filter(a => { try { return a.show(); } catch (e) { return false; } }).map((a, i) => ({ id: a.id, n: a.n, ico: a.ico, cost: actionCost(a), ac: a.ac || ACT_COLORS[i % ACT_COLORS.length], done: usedThisWeek(a.id), ok: !usedThisWeek(a.id) && pcFree(a.id) >= actionCost(a) && G.funds >= (a.funds || 0) && G.phase === 'normale' }));
 }
 function openAction(id) {
   const a = ACTIONS.find(x => x.id === id);
@@ -72,9 +72,9 @@ function openAction(id) {
   if (cost) pc.contro.push({ k: 'pol', t: `Costa ${cost} capitale politico` });
   if (a.funds) pc.contro.push({ k: 'per', t: `Costa ${euro(a.funds)}` });
   if (a.risk) pc.contro.push({ k: 'pol', t: a.risk });
-  const enough = G.pc >= cost && G.funds >= (a.funds || 0);
+  const free = pcFree(id), enough = free >= cost && G.funds >= (a.funds || 0);
   openSheet(`<div class="sheet-head"><div class="row grow">${medal(a.ico, 56)}<div class="grow"><h2 style="font-size:22px">${esc(a.n)}</h2>${cost || a.funds ? `<div class="tiny gold" style="font-weight:800;letter-spacing:.08em">COSTA ${cost ? '⚡' + cost : ''}${cost && a.funds ? ' · ' : ''}${a.funds ? euro(a.funds) : ''}</div>` : ''}</div></div><button class="xbtn" onclick="closeSheet()">${icon('x', 18)}</button></div><p class="muted">${esc(a.d)}</p><div class="effs">${pc.pro.map(x => `<span class="eff g">▲ ${esc(x.t)}</span>`).join("")}${pc.contro.map(x => `<span class="eff b">▼ ${esc(x.t)}</span>`).join("")}</div>
-    ${routineToggleHTML(a)}<button class="btn pri block mt2" ${enough ? '' : 'disabled'} onclick="runAction('${a.id}')">${enough ? 'Procedi' : (G.pc < cost ? 'Capitale politico insufficiente' : 'Fondi insufficienti')}</button>`);
+    ${routineToggleHTML(a)}<button class="btn pri block mt2" ${enough ? '' : 'disabled'} onclick="runAction('${a.id}')">${enough ? 'Procedi' : (G.pc < cost ? 'Capitale politico insufficiente' : free < cost ? 'Capitale tenuto per le ricorrenti' : 'Fondi insufficienti')}</button>`);
 }
 function runAction(id) {
   const a = ACTIONS.find(x => x.id === id);
@@ -274,10 +274,10 @@ function nextWeek() {
   if (G.phase === 'formazione') return openFormation();
   if (G.queue.length) return processQueue();
   const before = { poll: myParty().poll, appr: G.gov ? G.gov.approval : null, spread: G.econ.spread };
+  // le azioni ricorrenti si fanno a fine settimana, con il capitale tenuto da parte per loro
+  const auto = runRoutine();
   const s = advanceWeek();
   if (!s) return;
-  // le azioni ricorrenti partono a inizio settimana, con il capitale politico appena ricaricato
-  const auto = runRoutine();
   // eventi speciali in testa alla coda
   const sp = s.specials.map(x => ({ sp: x }));
   G.queue = sp.concat(G.queue);

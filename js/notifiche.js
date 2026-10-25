@@ -108,7 +108,7 @@ function openVotesNow() {
 // ---------- azioni consigliate (un tocco) ----------
 function recommendedActions() {
   const p = G.player, recs = [];
-  const can = id => { const a = ACTIONS.find(x => x.id === id); try { return a && a.show() && !usedThisWeek(id) && G.pc >= actionCost(a) && G.funds >= (a.funds || 0); } catch (e) { return false; } };
+  const can = id => { const a = ACTIONS.find(x => x.id === id); try { return a && a.show() && !usedThisWeek(id) && !(G.routine && G.routine[id]) && pcFree(id) >= actionCost(a) && G.funds >= (a.funds || 0); } catch (e) { return false; } };
   const add = (id, why, param) => { if (can(id) && !recs.some(r => r.id === id)) recs.push({ id, why, param }); };
   if (p.stress > 70) add('riposo', 'Sei stressato');
   if (isPremier()) { if (G.gov.parties.some(x => x !== myPid() && G.gov.sat[x] < 40)) add('vertice', 'Alleati inquieti'); if (G.gov.approval < 42) add('conferenza', 'Consenso in calo'); if (G.econ.spread > 150 || monthOf(G.week) === 8) add('bruxelles', 'Conti e Bruxelles'); }
