@@ -385,7 +385,13 @@ function fixAppHeight() {
   if (!st) { root.style.removeProperty('--app-h'); return; }
   const portrait = window.innerHeight >= window.innerWidth;
   const full = portrait ? Math.max(screen.height, screen.width) : Math.min(screen.height, screen.width);
+  // con la barra dell'orologio piena la pagina parte sotto di essa: niente schermo intero
+  if (safeTop() === 0) { const h = window.innerHeight >= full - 70 ? window.innerHeight : full - 59; root.style.setProperty('--app-h', h + 'px'); return; }
   root.style.setProperty('--app-h', Math.max(window.innerHeight, full) + 'px');
+}
+function safeTop() {
+  const d = document.createElement('div'); d.style.cssText = 'position:fixed;top:0;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none';
+  document.documentElement.appendChild(d); const v = d.getBoundingClientRect().height; d.remove(); return v;
 }
 fixAppHeight();
 ['resize', 'orientationchange', 'pageshow', 'focus'].forEach(ev => window.addEventListener(ev, () => { fixAppHeight(); setTimeout(fixAppHeight, 300); }));

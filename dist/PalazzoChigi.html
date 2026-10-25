@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Palazzo Chigi">
 <meta name="theme-color" content="#0a1024">
 <title>Palazzo Chigi</title>
@@ -842,6 +842,9 @@ html.bru body::after { top: var(--band); }
 html.bru, html.bru body { background: #000 !important; }
 html.bru #app { background: var(--bg) !important; }
 html.bru { --band: env(safe-area-inset-top, 0px); --top-gap: calc(max(var(--safe-t), 54px) + 14px); }
+/* app dalla schermata Home con barra dell'orologio nera piena (niente sfumatura di iOS):
+   se iOS non mette più il contenuto sotto l'orologio, lo spazio in alto si riduce da solo */
+html.pwa { --top-gap: calc(var(--safe-t) + 14px); }
 
 </style>
 </head>
@@ -6135,7 +6138,13 @@ function fixAppHeight() {
   if (!st) { root.style.removeProperty('--app-h'); return; }
   const portrait = window.innerHeight >= window.innerWidth;
   const full = portrait ? Math.max(screen.height, screen.width) : Math.min(screen.height, screen.width);
+  // con la barra dell'orologio piena la pagina parte sotto di essa: niente schermo intero
+  if (safeTop() === 0) { const h = window.innerHeight >= full - 70 ? window.innerHeight : full - 59; root.style.setProperty('--app-h', h + 'px'); return; }
   root.style.setProperty('--app-h', Math.max(window.innerHeight, full) + 'px');
+}
+function safeTop() {
+  const d = document.createElement('div'); d.style.cssText = 'position:fixed;top:0;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none';
+  document.documentElement.appendChild(d); const v = d.getBoundingClientRect().height; d.remove(); return v;
 }
 fixAppHeight();
 ['resize', 'orientationchange', 'pageshow', 'focus'].forEach(ev => window.addEventListener(ev, () => { fixAppHeight(); setTimeout(fixAppHeight, 300); }));

@@ -825,3 +825,6 @@ html.bru body::after { top: var(--band); }
 html.bru, html.bru body { background: #000 !important; }
 html.bru #app { background: var(--bg) !important; }
 html.bru { --band: env(safe-area-inset-top, 0px); --top-gap: calc(max(var(--safe-t), 54px) + 14px); }
+/* app dalla schermata Home con barra dell'orologio nera piena (niente sfumatura di iOS):
+   se iOS non mette più il contenuto sotto l'orologio, lo spazio in alto si riduce da solo */
+html.pwa { --top-gap: calc(var(--safe-t) + 14px); }
