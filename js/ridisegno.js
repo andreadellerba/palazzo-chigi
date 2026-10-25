@@ -117,7 +117,8 @@ function infoHTML() {
   if (G.cal.quirinale > G.week) dl.push({ w: G.cal.quirinale, i: 'building', t: 'Nuovo Capo dello Stato' });
   G.referendums.filter(r => !r.done).forEach(r => dl.push({ w: r.w, i: 'pen', t: 'Referendum' }));
   dl.sort((a, b) => a.w - b.w);
-  return sec('Info') + `<div class="pills3">${todo.map(n => `<button class="p3 u${n.u}" onclick="${n.on}">${icon(n.ico, 14)}<span>${esc(n.t)}</span></button>`).join('')}${dl.map(x => `<span class="p3 due3">${icon(x.i, 14)}<span>${esc(x.t)} · ${weeksLeft(x.w)}</span></span>`).join('')}</div>`;
+  const on = x => x.i === 'vote' ? "UI.partiti='alleanze';goTab('partiti')" : x.i === 'map' ? "goTab('italia')" : x.i === 'euro' ? "infoExplain('manovra')" : x.i === 'building' ? "infoExplain('quirinale')" : "infoExplain('referendum')";
+  return sec('Info') + `<div class="pills3">${todo.map(n => `<button class="p3 u${n.u}" onclick="${n.on}">${icon(n.ico, 14)}<span>${esc(n.t)}</span></button>`).join('')}${dl.map(x => `<button class="p3 due3" onclick="${on(x)}">${icon(x.i, 14)}<span>${esc(x.t)} · ${weeksLeft(x.w)}</span></button>`).join('')}</div>`;
 }
 
 // ---------- niente più tasto «avanti veloce» ----------
@@ -145,3 +146,45 @@ function chigiSVG() {
     <rect x="4" y="87" width="92" height="4" fill="${Y}"/></g></svg>`;
 }
 logoChigi = function (size) { return `<span class="logo-chigi lg2" style="--ls:${size}px">${chigiSVG()}</span>`; };
+
+// ---------- spiegazioni delle scadenze toccate in Info ----------
+function infoExplain(k) {
+  const y = yearOf(G.week), wm = weekOf(`${monthOf(G.week) > 9 ? y + 1 : y}-10-10`);
+  const T = {
+    manovra: ['La manovra', `Ogni anno a metà ottobre il governo presenta la legge di bilancio: decide spese, tagli e tasse dell’anno dopo e quanto deficit fare. Va approvata da Camera e Senato entro il 31 dicembre, altrimenti scatta l’esercizio provvisorio. Prossima: ${weeksLeft(wm)}.`, isPremier() ? 'Da premier la scrivi tu: scegli le misure, guardi il deficit e il parere di Bruxelles.' : 'Se non sei al governo puoi votarla in aula e criticarla in TV.'],
+    quirinale: ['Il nuovo Capo dello Stato', `Il mandato del Presidente della Repubblica dura sette anni. Alla scadenza Camera, Senato e delegati regionali lo eleggono a scrutinio segreto: nei primi tre voti servono i due terzi, poi basta la maggioranza assoluta. Elezione ${weeksLeft(G.cal.quirinale)}.`, 'Se guidi un partito puoi proporre un nome e trattare con gli altri.'],
+    referendum: ['Il referendum', 'Gli italiani votano sì o no per cancellare una legge (o confermare una riforma costituzionale). Per i referendum abrogativi serve che voti più della metà degli elettori.', 'Puoi fare campagna per il sì o per il no.'],
+  }[k];
+  if (!T) return;
+  openSheet(`${head(esc(T[0]))}<p style="line-height:1.55">${esc(T[1])}</p><div class="card tight mt"><div class="small">${esc(T[2])}</div></div>`);
+}
+
+// ---------- menu a pagina intera, voci in maiuscolo ----------
+openMenu = function () {
+  const row = (i, t, s, on) => `<button class="m5" onclick="${on}"><span class="mi5">${icon(i, 18)}</span><span class="grow"><b>${t}</b>${s ? `<em>${s}</em>` : ''}</span>${icon('chevron', 14)}</button>`;
+  openSheet(`${head('Menu')}
+    ${sec('Tu e il governo')}<div class="list5">
+    ${row('building', 'Il governo', G.gov ? esc(G.gov.name) : '', 'closeSheet();openGovernment()')}
+    ${row('user', 'Profilo e carriera', esc(G.player.name), 'closeSheet();openProfile()')}
+    ${row('palette', 'Crea il tuo avatar', 'Viso, capelli, occhiali, vestiti', 'closeSheet();openAvatarEditor()')}
+    ${isLeader() ? row('clipboard', 'Programma elettorale', G.program ? 'annunciato' : 'da presentare', 'closeSheet();openProgram()') : ''}
+    ${row('book', 'La tua storia', 'La linea del tempo della carriera', 'closeSheet();openTimeline()')}
+    ${row('trophy', 'Traguardi', Object.keys(G.ach || {}).length + ' su ' + ACHIEVEMENTS.length, 'closeSheet();openAchievements()')}
+    ${row('key', 'Istituzioni e poteri', 'Quirinale, Camere, UE, parti sociali', 'closeSheet();openInstitutions()')}</div>
+    ${sec('Media')}<div class="list5">
+    ${row('news', 'Archivio notizie', G.news.length + ' notizie', 'closeSheet();openNews()')}
+    ${row('mic', 'Giornalisti', 'Chi ti segue, chi ti attacca', 'closeSheet();openJournalists()')}
+    ${row('news', 'Direttori dei giornali', 'Chi ti difende e chi ti attacca', 'closeSheet();openDirettori()')}
+    ${row('phone', 'Sui social', 'Il feed e i tuoi follower', 'closeSheet();openFeed()')}</div>
+    ${sec('Partita')}<div class="list5">
+    ${row('save', 'Salva partita', 'Tre slot sul telefono', 'closeSheet();openSave()')}
+    ${row('upload', 'Sposta la partita', 'Su un altro telefono: file o testo', 'closeSheet();openTransfer()')}
+    ${row('palette', 'Stile grafico', styleNow() === 'bru' ? 'Brutalista: tocca per il classico' : 'Classico: tocca per il brutalista', "setStyle(styleNow() === 'bru' ? 'classico' : 'bru');closeSheet()")}
+    ${row('radio', 'Suoni', soundOn() ? 'Attivi: tocca per spegnerli' : 'Spenti: tocca per accenderli', "setSound(!soundOn());closeSheet();toast(soundOn() ? 'Suoni attivi' : 'Suoni spenti')")}
+    ${row('cap', 'Tutorial', 'Rivedi la guida passo passo', 'closeSheet();startTutorial(0)')}
+    ${row('info', 'Come si gioca', 'Riassunto delle regole', 'closeSheet();openGuide()')}
+    ${row('search', 'Diagnostica', 'Gli ultimi errori, da mandarmi', 'closeSheet();openDiagnostics()')}
+    ${row('star', 'Crediti', 'Loghi, fonti dei dati, avatar', 'closeSheet();openCredits()')}
+    ${row('door', 'Torna al menu iniziale', 'La partita resta salvata', "closeSheet();saveGame('auto');showSplash()")}</div>
+    <div class="tiny m center mt2">Difficoltà ${D().n} · ${G.legislature}ª legislatura</div>`, { full: true });
+};

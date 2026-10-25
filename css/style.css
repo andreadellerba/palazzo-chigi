@@ -1024,3 +1024,11 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .infolink { text-decoration: underline; text-decoration-color: #ffe14d; text-underline-offset: 3px; cursor: pointer; }
 .logo-chigi.lg2 { background: #000 !important; border: 3px solid #ffe14d; overflow: hidden; }
 .logo-chigi.lg2 svg { width: 100%; height: 100%; display: block; }
+/* menu a pagina intera */
+.list5 { border-top: 1px solid #262626; }
+.m5 { width: 100%; display: flex; align-items: center; gap: 12px; padding: 11px 2px; border-bottom: 1px solid #262626; color: #fff; text-align: left; }
+.m5 .mi5 { flex: none; color: #ffe14d; display: grid; place-items: center; }
+.m5 b { display: block; font-weight: 800; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+.m5 em { display: block; font-style: normal; font-size: 11.5px; color: #9a9a9a; margin-top: 2px; }
+.m5 > .lic { flex: none; color: #555; }
+.m5:active { background: #141414; }
