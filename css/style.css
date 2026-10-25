@@ -847,3 +847,18 @@ html.bru .setup input[type=range], html.bru .sheet input[type=range] { backgroun
 html.bru .content > .card, html.bru .content > .card.center, html.bru .content > .card.small, html.bru .content > .card.tiny { color: #fff !important; }
 html.bru .content > .card .muted, html.bru .content > .card .small.muted, html.bru .content > .card .tiny.muted { color: #cfcfcf !important; }
 html.bru .ach { opacity: .75; border: 2px solid #444 !important; } html.bru .ach.on { opacity: 1; border-color: #ffe14d !important; background: #1c1c1c !important; }
+/* testata nera: sotto l'orologio non c'è mai giallo, così la sfumatura di iOS non si vede */
+html.bru body::after { display: none; }
+html.bru .topbar { background: #000; }
+html.bru .topbar .date { color: #fff !important; }
+html.bru .topbar .role { color: #ffe14d !important; }
+html.bru .topbar .stat { background: #1c1c1c !important; border: 2px solid #1c1c1c !important; box-shadow: none; }
+html.bru .topbar .pill, html.bru .topbar .iconbtn { background: #1c1c1c !important; border-color: #1c1c1c !important; }
+html.bru .tricolore { background-color: #000; }
+html.bru #app .content { border-top-left-radius: 34px !important; border-top-right-radius: 34px !important; background: var(--bg); }
+html.bru #app { background: #000 !important; }
+/* schermata iniziale nera */
+html.bru .splash { background: #000; }
+html.bru .splash h1 { color: #fff !important; }
+html.bru .splash .sub, html.bru .splash .tiny { color: #cfcfcf !important; }
+html.bru .splash .btn:not(.gold):not(.pri) { border: 2px solid #fff !important; }
