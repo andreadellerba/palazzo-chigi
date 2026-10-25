@@ -18,13 +18,13 @@ function openGovStrength() {
   const s = govStrength(); if (!s) return;
   const al = G.gov.parties.filter(p => p !== G.gov.premierParty);
   openSheet(`${head('Fiducia nel governo', esc(G.gov.name))}
-    <div class="center"><div class="bignum" style="color:${s.v >= 60 ? 'var(--bad)' : s.v >= 40 ? 'var(--warn)' : 'var(--good)'}">${s.v}</div><div class="small muted">su 100: ${s.v >= 60 ? 'solido, difficile da far cadere' : s.v >= 40 ? 'in bilico' : 'debole: è il momento di attaccare'}</div></div>
+    <div class="center"><div class="bignum" style="color:${(inGov(myPid()) ? s.v >= 50 : s.v < 40) ? 'var(--good)' : s.v >= 40 && s.v < 60 ? 'var(--warn)' : 'var(--bad)'}">${s.v}</div><div class="small muted">su 100: ${s.v >= 60 ? 'solido' : s.v >= 40 ? 'in bilico' : 'debole'}${inGov(myPid()) ? '' : s.v < 40 ? ': è il momento di attaccare' : s.v >= 60 ? ', difficile da far cadere' : ''}</div></div>
     <div class="card tight mt"><div class="list">
       <div class="li"><div class="grow small">Gradimento degli italiani</div><b>${fmt0(s.appr)}%</b></div>
       <div class="li"><div class="grow small">Soddisfazione media degli alleati</div><b>${fmt0(s.sat)}/100</b></div>
       <div class="li"><div class="grow small">Margine alla Camera</div><b>${s.margin >= 0 ? '+' : ''}${s.margin} seggi</b></div></div></div>
     ${al.length ? sec('Gli alleati') + `<div class="card tight"><div class="list">${al.map(p => `<div class="li">${partyChip(p)}<div class="grow"></div><span class="tag ${G.gov.sat[p] < 30 ? 'g' : G.gov.sat[p] < 45 ? 'w' : ''}">${fmt0(G.gov.sat[p] || 0)}/100</span></div>`).join('')}</div></div>` : ''}
-    <p class="small muted mt">Per indebolirlo: <b>lavora ai fianchi</b> gli alleati (più sono scontenti, più firmano la sfiducia), apri una <b>commissione d’inchiesta</b>, lancia <b>campagne a tema</b> sui problemi del Paese. Sotto 40 la sfiducia diventa possibile.</p>`);
+    ${inGov(myPid()) ? `<p class="small muted mt">È il tuo governo: per rafforzarlo tieni contenti gli alleati (vertici di maggioranza, leggi che piacciono a loro), fai crescere l'economia e scegli alleati coerenti. Sotto 40 rischi la crisi.</p>` : ''}<p class="small muted mt" style="${inGov(myPid()) ? 'display:none' : ''}">Per indebolirlo: <b>lavora ai fianchi</b> gli alleati (più sono scontenti, più firmano la sfiducia), apri una <b>commissione d’inchiesta</b>, lancia <b>campagne a tema</b> sui problemi del Paese. Sotto 40 la sfiducia diventa possibile.</p>`);
 }
 
 // ---------- 2A: sfiducia preparata con le adesioni ----------

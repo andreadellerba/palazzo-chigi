@@ -86,7 +86,9 @@ topbar = function () {
   const mp = myParty(), d0 = dateOf(G.week);
   const old = G.hist.polls.length > 5 ? G.hist.polls[G.hist.polls.length - 5].p[myPid()] : mp.poll;
   const d = mp.poll - (old || mp.poll);
-  const third = topbarThird().replace('class="stat"', 'class="s4"');
+  // sempre la fiducia del governo in carica: il tuo se ci sei dentro, quello degli altri se sei all'opposizione
+  const gs = G.gov && typeof govStrength === 'function' ? govStrength() : null, mine = G.gov && inGov(myPid());
+  const third = gs ? `<span class="s4" onclick="openGovStrength()">Fiducia <b style="color:${(mine ? gs.v >= 50 : gs.v < 45) ? 'var(--good)' : 'var(--bad)'}">${gs.v}</b></span>` : topbarThird().replace('class="stat"', 'class="s4"');
   const dot = '<i class="dot5">·</i>';
   return `<div class="topbar t5"><div class="tb5">
     <span class="dt">${fmtDate(G.week).toUpperCase()}</span>${dot}
