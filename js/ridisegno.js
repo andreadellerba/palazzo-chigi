@@ -102,7 +102,7 @@ homeHeroHTML = function () {
   const p = G.player, mp = myParty(), g = G.gov;
   return `<div class="hero2" style="--pc:${mp.color}"><span class="av-badge" onclick="openAvatarEditor()">${portrait(p.name, 48, { party: myPid() })}</span>
     <div class="grow tx2"><b class="nm">${esc(p.name)}</b><div class="rl">${esc(roleLabel())}</div></div>
-    <div class="nums"><div><span>Sondaggio</span><b>${fmt1(mp.poll)}%</b></div>${g ? `<div><span>Fiducia</span><b style="color:${pctColor(g.approval * 1.4)}">${fmt0(g.approval)}%</b></div>` : ''}</div></div>
+    <div class="nums"><div><span>Sondaggio</span><b>${fmt1(mp.poll)}%</b></div>${g ? `<div><span>Gradimento</span><b style="color:${pctColor(g.approval * 1.4)}">${fmt0(g.approval)}%</b></div>` : ''}</div></div>
     <div class="hero2-sub">${icon('coin', 13)} ${euro(G.funds)} · fama ${fmt0(p.fama)} · stress ${fmt0(p.stress)} · ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</div>`;
 };
 

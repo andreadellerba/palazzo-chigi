@@ -1052,7 +1052,7 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .starb2 { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px; background: #000; color: #ffe14d; border: 2px solid #ffe14d; font-size: 12px; font-weight: 800; white-space: nowrap; }
 .starb2.off { color: #777; border-color: #333; }
 .a2.plan { box-shadow: inset 4px 0 0 #ffe14d; padding-left: 10px; background: #15130a; }
-.a2.plan .ac2::before { content: "★ "; }
+
 .tb5 { gap: 3px; } .tb5 .dot5 { margin: 0 -1px; }
 
 </style>
@@ -6748,7 +6748,7 @@ function topbarThird() {
   }
   if (!isLeader()) return `<span class="stat" onclick="openProfile()">Col leader<b style="${col(G.player.rap >= 0)}">${relNum(G.player.rap)}</b></span>`;
   const left = G.cal.election - G.week, c = coalitionOf(myPid());
-  if (G.gov && !inGov(myPid()) && !(left > 0 && left <= 12) && typeof govStrength === 'function') { const s = govStrength(); return `<span class="stat" onclick="openGovStrength()">Forza gov.<b style="${col(s.v < 45)}">${s.v}</b></span>`; }
+  if (G.gov && !inGov(myPid()) && !(left > 0 && left <= 12) && typeof govStrength === 'function') { const s = govStrength(); return `<span class="stat" onclick="openGovStrength()">Fiducia<b style="${col(s.v < 45)}">${s.v}</b></span>`; }
   if (left > 0 && left <= 30) return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Al voto<b>${left} sett.</b></span>`;
   if (c) { const s = c.members.reduce((t, m) => t + (G.parties[m] ? P(m).poll : 0), 0); return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Coalizione<b style="${col(s >= 42)}">${fmt1(s)}%</b></span>`; }
   return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Soglia 3%<b style="${col(myParty().poll >= 3)}">${myParty().poll >= 3 ? 'sopra' : 'sotto'}</b></span>`;
@@ -6809,7 +6809,7 @@ function homeTab() {
   const acts = availableActions().sort((a, b) => (rec.includes(b.id) && !b.done ? 1 : 0) - (rec.includes(a.id) && !a.done ? 1 : 0) || (a.done ? 1 : 0) - (b.done ? 1 : 0));
   const PLAN = typeof planPreview === 'function' ? planPreview() : { ids: [], pc: 0 };
   h += sec('Azioni', planStarHTML(PLAN)) +
-    `<div class="acts2">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="a2 ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${PLAN.ids.includes(a.id) ? 'plan' : ''} ${star ? 'rec' : ''}" style="--ac:${a.ac}" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai2">${a.done ? icon('check', 18) : icon(ACT_ICON[a.id] || a.ico || 'star', 18)}</span><span class="an2">${esc(a.n)}${star ? ' <i class="y">★</i>' : ''}${G.routine && G.routine[a.id] ? ` <i class="g">${icon('refresh', 11)}</i>` : ''}</span><span class="ac2">${a.done ? 'FATTA' : a.cost ? '⚡' + a.cost : 'GRATIS'}</span></button>`; }).join('')}</div>
+    `<div class="acts2">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="a2 ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${PLAN.ids.includes(a.id) ? 'plan' : ''}" style="--ac:${a.ac}" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai2">${a.done ? icon('check', 18) : icon(ACT_ICON[a.id] || a.ico || 'star', 18)}</span><span class="an2">${esc(a.n)}${PLAN.ids.includes(a.id) ? ' <i class="y">★</i>' : ''}${G.routine && G.routine[a.id] ? ` <i class="g">${icon('refresh', 11)}</i>` : ''}</span><span class="ac2">${a.done ? 'FATTA' : a.cost ? '⚡' + a.cost : 'GRATIS'}</span></button>`; }).join('')}</div>
     <div class="tiny muted center mt">★ consigliate · ↻ ricorrenti: aprila e attiva «Ripeti ogni settimana» per farla in automatico</div>`;
   // staff e social
   h += sec('Il tuo staff') + staffHTML();
@@ -10215,7 +10215,7 @@ function govStrength() {
 function openGovStrength() {
   const s = govStrength(); if (!s) return;
   const al = G.gov.parties.filter(p => p !== G.gov.premierParty);
-  openSheet(`${head('Forza del governo', esc(G.gov.name))}
+  openSheet(`${head('Fiducia nel governo', esc(G.gov.name))}
     <div class="center"><div class="bignum" style="color:${s.v >= 60 ? 'var(--bad)' : s.v >= 40 ? 'var(--warn)' : 'var(--good)'}">${s.v}</div><div class="small muted">su 100: ${s.v >= 60 ? 'solido, difficile da far cadere' : s.v >= 40 ? 'in bilico' : 'debole: è il momento di attaccare'}</div></div>
     <div class="card tight mt"><div class="list">
       <div class="li"><div class="grow small">Gradimento degli italiani</div><b>${fmt0(s.appr)}%</b></div>
@@ -11439,7 +11439,7 @@ homeHeroHTML = function () {
   const p = G.player, mp = myParty(), g = G.gov;
   return `<div class="hero2" style="--pc:${mp.color}"><span class="av-badge" onclick="openAvatarEditor()">${portrait(p.name, 48, { party: myPid() })}</span>
     <div class="grow tx2"><b class="nm">${esc(p.name)}</b><div class="rl">${esc(roleLabel())}</div></div>
-    <div class="nums"><div><span>Sondaggio</span><b>${fmt1(mp.poll)}%</b></div>${g ? `<div><span>Fiducia</span><b style="color:${pctColor(g.approval * 1.4)}">${fmt0(g.approval)}%</b></div>` : ''}</div></div>
+    <div class="nums"><div><span>Sondaggio</span><b>${fmt1(mp.poll)}%</b></div>${g ? `<div><span>Gradimento</span><b style="color:${pctColor(g.approval * 1.4)}">${fmt0(g.approval)}%</b></div>` : ''}</div></div>
     <div class="hero2-sub">${icon('coin', 13)} ${euro(G.funds)} · fama ${fmt0(p.fama)} · stress ${fmt0(p.stress)} · ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</div>`;
 };
 

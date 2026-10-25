@@ -17,7 +17,7 @@ function govStrength() {
 function openGovStrength() {
   const s = govStrength(); if (!s) return;
   const al = G.gov.parties.filter(p => p !== G.gov.premierParty);
-  openSheet(`${head('Forza del governo', esc(G.gov.name))}
+  openSheet(`${head('Fiducia nel governo', esc(G.gov.name))}
     <div class="center"><div class="bignum" style="color:${s.v >= 60 ? 'var(--bad)' : s.v >= 40 ? 'var(--warn)' : 'var(--good)'}">${s.v}</div><div class="small muted">su 100: ${s.v >= 60 ? 'solido, difficile da far cadere' : s.v >= 40 ? 'in bilico' : 'debole: è il momento di attaccare'}</div></div>
     <div class="card tight mt"><div class="list">
       <div class="li"><div class="grow small">Gradimento degli italiani</div><b>${fmt0(s.appr)}%</b></div>

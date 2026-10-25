@@ -1035,5 +1035,5 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .starb2 { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px; background: #000; color: #ffe14d; border: 2px solid #ffe14d; font-size: 12px; font-weight: 800; white-space: nowrap; }
 .starb2.off { color: #777; border-color: #333; }
 .a2.plan { box-shadow: inset 4px 0 0 #ffe14d; padding-left: 10px; background: #15130a; }
-.a2.plan .ac2::before { content: "★ "; }
+
 .tb5 { gap: 3px; } .tb5 .dot5 { margin: 0 -1px; }

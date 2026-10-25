@@ -33,7 +33,7 @@ function topbarThird() {
   }
   if (!isLeader()) return `<span class="stat" onclick="openProfile()">Col leader<b style="${col(G.player.rap >= 0)}">${relNum(G.player.rap)}</b></span>`;
   const left = G.cal.election - G.week, c = coalitionOf(myPid());
-  if (G.gov && !inGov(myPid()) && !(left > 0 && left <= 12) && typeof govStrength === 'function') { const s = govStrength(); return `<span class="stat" onclick="openGovStrength()">Forza gov.<b style="${col(s.v < 45)}">${s.v}</b></span>`; }
+  if (G.gov && !inGov(myPid()) && !(left > 0 && left <= 12) && typeof govStrength === 'function') { const s = govStrength(); return `<span class="stat" onclick="openGovStrength()">Fiducia<b style="${col(s.v < 45)}">${s.v}</b></span>`; }
   if (left > 0 && left <= 30) return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Al voto<b>${left} sett.</b></span>`;
   if (c) { const s = c.members.reduce((t, m) => t + (G.parties[m] ? P(m).poll : 0), 0); return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Coalizione<b style="${col(s >= 42)}">${fmt1(s)}%</b></span>`; }
   return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Soglia 3%<b style="${col(myParty().poll >= 3)}">${myParty().poll >= 3 ? 'sopra' : 'sotto'}</b></span>`;
@@ -94,7 +94,7 @@ function homeTab() {
   const acts = availableActions().sort((a, b) => (rec.includes(b.id) && !b.done ? 1 : 0) - (rec.includes(a.id) && !a.done ? 1 : 0) || (a.done ? 1 : 0) - (b.done ? 1 : 0));
   const PLAN = typeof planPreview === 'function' ? planPreview() : { ids: [], pc: 0 };
   h += sec('Azioni', planStarHTML(PLAN)) +
-    `<div class="acts2">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="a2 ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${PLAN.ids.includes(a.id) ? 'plan' : ''} ${star ? 'rec' : ''}" style="--ac:${a.ac}" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai2">${a.done ? icon('check', 18) : icon(ACT_ICON[a.id] || a.ico || 'star', 18)}</span><span class="an2">${esc(a.n)}${star ? ' <i class="y">★</i>' : ''}${G.routine && G.routine[a.id] ? ` <i class="g">${icon('refresh', 11)}</i>` : ''}</span><span class="ac2">${a.done ? 'FATTA' : a.cost ? '⚡' + a.cost : 'GRATIS'}</span></button>`; }).join('')}</div>
+    `<div class="acts2">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="a2 ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${PLAN.ids.includes(a.id) ? 'plan' : ''}" style="--ac:${a.ac}" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai2">${a.done ? icon('check', 18) : icon(ACT_ICON[a.id] || a.ico || 'star', 18)}</span><span class="an2">${esc(a.n)}${PLAN.ids.includes(a.id) ? ' <i class="y">★</i>' : ''}${G.routine && G.routine[a.id] ? ` <i class="g">${icon('refresh', 11)}</i>` : ''}</span><span class="ac2">${a.done ? 'FATTA' : a.cost ? '⚡' + a.cost : 'GRATIS'}</span></button>`; }).join('')}</div>
     <div class="tiny muted center mt">★ consigliate · ↻ ricorrenti: aprila e attiva «Ripeti ogni settimana» per farla in automatico</div>`;
   // staff e social
   h += sec('Il tuo staff') + staffHTML();
