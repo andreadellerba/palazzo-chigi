@@ -490,6 +490,7 @@ function openMenu() {
     ${menuItem('trophy', 'Traguardi', Object.keys(G.ach || {}).length + ' su ' + ACHIEVEMENTS.length, 'closeSheet();openAchievements()')}
     ${menuItem('news', 'Archivio notizie', G.news.length + ' notizie', 'closeSheet();openNews()')}
     ${menuItem('mic', 'Giornalisti', 'Chi ti segue, chi ti attacca', 'closeSheet();openJournalists()')}
+    ${menuItem('news', 'Direttori dei giornali', 'Chi ti difende e chi ti attacca', 'closeSheet();openDirettori()')}
     ${menuItem('chat', 'Sui social', 'Il feed e i tuoi follower', 'closeSheet();openFeed()')}
     ${menuItem('key', 'Istituzioni e poteri', 'Quirinale, Camere, UE, parti sociali', 'closeSheet();openInstitutions()')}
     </div></div><div class="card tight"><div class="list">

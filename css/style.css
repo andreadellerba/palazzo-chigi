@@ -678,3 +678,10 @@ html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolut
 .ptab .pr > span:not(:first-child), .ptab .pr > b { text-align: right; font-variant-numeric: tabular-nums; }
 .ptab .ph b { font-size: 10.5px; color: var(--muted); letter-spacing: .04em; }
 .ptab .pr.me { background: rgba(214,178,94,.08); border-radius: 8px; }
+.rflag { display: inline-block; border-radius: 50%; overflow: hidden; flex: none; box-shadow: 0 0 0 2px var(--line2), 0 4px 10px rgba(0,0,0,.35); }
+.rflag svg { width: 100%; height: 100%; display: block; }
+.sum-flags { gap: 10px; }
+.sum-flags .sfl { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 58px; }
+.sum-flags .sfl b { font-size: 11px; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.sum-flags .sfl span { font-size: 9.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; padding: 0; background: none; border: 0; }
+.sum-flags .rflag { border-radius: 50%; padding: 0; border: 0; background: none; }

@@ -315,7 +315,7 @@ function openSummit(sp) {
 function renderSummit() {
   const sh = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null, st = sh ? sh.scrollTop : 0;
   const flags = { ue: ['DE', 'FR', 'ES', 'PL', 'NL', 'IT'], g7: ['US', 'DE', 'FR', 'UK', 'JP', 'CA', 'IT'], nato: ['US', 'UK', 'DE', 'FR', 'PL', 'TR', 'IT'] }[SUM.s.k];
-  let h = `<div class="center">${medal('globe', 64)}<div class="tiny gold mt" style="font-weight:800;letter-spacing:.1em">${esc(SUM.s.at.toUpperCase())}</div><h2 class="mt">${esc(SUM.s.n)}</h2><div class="sum-flags">${flags.map(f => `<span class="${f === 'IT' ? 'it' : ''}">${f}</span>`).join('')}</div><div class="small muted mt">Tre dossier sul tavolo: scegli la linea dell’Italia.</div></div>`;
+  let h = `<div class="center">${medal('globe', 64)}<div class="tiny gold mt" style="font-weight:800;letter-spacing:.1em">${esc(SUM.s.at.toUpperCase())}</div><h2 class="mt">${esc(SUM.s.n)}</h2>${typeof summitFlagsHTML === 'function' ? summitFlagsHTML(flags) : ''}<div class="small muted mt">Tre dossier sul tavolo: scegli la linea dell’Italia.</div></div>`;
   SUM.ds.forEach((d, i) => {
     h += sec(esc(d.t));
     d.s.forEach((s, j) => { h += `<button class="choice ${SUM.ch[i] === j ? 'sel' : ''}" onclick="SUM.ch[${i}]=${j};renderSummit()"><div class="t">${esc(s.t)}</div>${fxChips(s.fx, s.x ? '<span class="c">▼ Scontro con i partner</span>' : '')}</button>`; });

@@ -657,7 +657,7 @@ function manovraCalc() {
 }
 function renderManovra() {
   const r = manovraCalc();
-  const mrow = m => { const on = MAN.sel.has(m.id); const who = Object.keys(MAN.dem).filter(p => MAN.dem[p].includes(m.id)); const pc = fxProCon(m.e); return `<button class="choice ${on ? 'sel' : ''}" onclick="toggleMeasure('${m.id}')"><div class="row between"><span class="t"><span class="ck ${on ? 'on' : ''}">${on ? icon('check', 14) : ''}</span>${esc(m.n)}${m.extra ? ' <span class="tag o" style="height:20px;padding:0 7px;font-size:10px">novità</span>' : ''}</span><b class="${m.c > 0 ? 'bad' : 'good'}">${m.c > 0 ? '+' : ''}${fmt1(m.c)}</b></div><div class="tiny muted" style="margin-top:3px">${esc(m.d)}</div><div class="fx">${who.map(p => `<span class="n">chiesta da ${esc(P(p).short)}</span>`).join('')}${pc.pro.map(x => `<span class="p">▲ ${esc(x.t)}</span>`).join('')}${pc.contro.map(x => `<span class="c">▼ ${esc(x.t)}</span>`).join('')}${m.risk ? '<span class="c">▼ Entrate incerte</span>' : ''}</div></button>`; };
+  const mrow = m => { const on = MAN.sel.has(m.id); const who = Object.keys(MAN.dem).filter(p => MAN.dem[p].includes(m.id)); const pc = fxProCon(m.e); return `<button class="choice ${on ? 'sel' : ''}" onclick="toggleMeasure('${m.id}')"><div class="row between"><span class="t"><span class="ck ${on ? 'on' : ''}">${on ? icon('check', 14) : ''}</span>${esc(m.n)}${m.extra ? ' <span class="tag o" style="height:20px;padding:0 7px;font-size:10px">novità</span>' : ''}</span><b class="${m.c > 0 ? 'bad' : 'good'}">${m.c > 0 ? '+' : ''}${fmt1(m.c)}</b></div><div class="tiny muted" style="margin-top:3px">${esc(m.d)}</div><div class="fx">${who.map(p => `<span class="n">chiesta da ${esc(demWho(p))}</span>`).join('')}${pc.pro.map(x => `<span class="p">▲ ${esc(x.t)}</span>`).join('')}${pc.contro.map(x => `<span class="c">▼ ${esc(x.t)}</span>`).join('')}${m.risk ? '<span class="c">▼ Entrate incerte</span>' : ''}</div></button>`; };
   const fisLaws = allLaws().filter(l => l.fis);
   replaceSheet(`<div class="row between"><div><div class="tiny gold" style="font-weight:800">LEGGE DI BILANCIO</div><h2>Manovra ${MAN.year}</h2></div><button class="btn sm" onclick="closeSheet();renderGame()">Più tardi</button></div>
     <div class="card hero mt" style="position:sticky;top:-12px;z-index:3">
@@ -667,11 +667,12 @@ function renderManovra() {
       <div class="row wrap small mt" style="gap:10px"><span>Spread ${r.spreadEst > 0 ? `<b class="bad">+${fmt0(r.spreadEst)}</b>` : '<b class="good">stabile</b>'}</span><span>PIL <b>${sgn(r.pil)}</b></span><span>Consenso <b class="${r.pop >= 0 ? 'good' : 'bad'}">${sgn(r.pop * 0.6)}</b></span></div>
       <div class="row wrap mt" style="gap:4px">${Object.keys(r.sat).map(p => `<span class="tag ${r.sat[p] > 0 ? 'g' : r.sat[p] < 0 ? 'b' : ''}">${esc(P(p).short)} ${icon(r.sat[p] > 0 ? 'smile' : r.sat[p] < 0 ? 'frown' : 'user', 14)}</span>`).join('')}</div></div>
     ${manovraGuideHTML(r)}
+    ${ministerRequestsHTML()}
     <p class="small muted">Scegli spese e coperture. Le misure valgono per un anno; le riforme strutturali restano. ${G.econ.flex ? '' : 'Puoi ottenere flessibilità con una «Missione a Bruxelles» tra settembre e novembre.'}</p>
     ${sec('Spese e tagli di tasse')}${(MAN.menu || BUDGET_MEASURES).filter(m => m.g === 'Spese').map(mrow).join('')}
     ${sec('Coperture')}${(MAN.menu || BUDGET_MEASURES).filter(m => m.g === 'Coperture').map(mrow).join('')}
     ${sec('Riforme fiscali (facoltative)')}
-    ${fisLaws.map(l => { const cur = MAN.laws[l.id] !== undefined ? MAN.laws[l.id] : G.laws[l.id]; return `<div class="card tight"><b class="small">${icon(LAW_CATS[l.cat] || 'doc', 14)} ${esc(l.nome)}</b><select class="mt" onchange="setManLaw('${l.id}',+this.value)">${l.opts.map((o, i) => `<option value="${i}" ${i === cur ? 'selected' : ''}>${i === G.laws[l.id] ? '• ' : ''}${esc(o.t)}${(o.costo || 0) !== (l.opts[G.laws[l.id]].costo || 0) ? ` (${(o.costo - (l.opts[G.laws[l.id]].costo || 0)) > 0 ? '+' : ''}${fmt1(o.costo - (l.opts[G.laws[l.id]].costo || 0))} mld)` : ''}</option>`).join('')}</select></div>`; }).join('')}
+    ${fisLaws.map(l => manLawRow(l)).join('')}
     <button class="btn gold block mt2" onclick="submitManovra()">${icon('building')} Approva in Consiglio dei ministri</button>
     <div class="tiny dim center mt">Poi la manovra va al Senato e alla Camera: va approvata entro il 31 dicembre.</div>`);
 }
