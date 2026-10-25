@@ -727,6 +727,14 @@ html.pwa .fab2 { position: absolute; }
 .vpb.on { background: linear-gradient(135deg, var(--oroD), var(--oro2)); color: #1a1405; border-color: transparent; }
 .tabtip { border-color: rgba(56,189,248,.45); }
 .tabtip > .row > .lic { color: #38bdf8; }
+/* scene illustrate */
+.scene { width: 100%; max-width: 360px; margin: 0 auto 4px; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,.4); border: 1px solid var(--line2); aspect-ratio: 320 / 130; }
+.scene svg { width: 100%; height: 100%; display: block; }
+/* ritratti che respirano */
+.evcard .portrait img, .hcomp .portrait img, .call .portrait img, .e-tv .portrait img { animation: breathe 4.2s ease-in-out infinite; transform-origin: 50% 90%; }
+.hcomp .portrait img { animation-delay: -1.3s; }
+@keyframes breathe { 0%, 100% { transform: scale(1) rotate(0deg); } 35% { transform: scale(1.025) rotate(-.6deg); } 70% { transform: scale(1.012) rotate(.5deg); } }
+@media (prefers-reduced-motion: reduce) { .evcard .portrait img, .hcomp .portrait img, .call .portrait img, .e-tv .portrait img { animation: none; } }
 
 </style>
 </head>
@@ -2152,6 +2160,249 @@ function explainHTML(law, opt) {
   const o = S.o[opt];
   return `<div class="expl"><span class="k">Di cosa si tratta</span>${esc(S.s)}${o ? `<span class="k" style="margin-top:10px">In pratica</span>${esc(o[0])}<div class="who"><div class="w"><b>Ci guadagna</b>${esc(o[1])}</div><div class="l"><b>Ci perde</b>${esc(o[2])}</div></div>` : ''}</div>`;
 }
+
+</script>
+<script>
+// ============================================================
+//  30 LEGGI NUOVE (casa, intelligenza artificiale, Mezzogiorno,
+//  sport, tecnologia, sanità, scuola, istituzioni, difesa...)
+//  [testo, spiegazione, posizione sull'asse, costo in mld/anno, effetti]
+// ============================================================
+const LEGGI2_START = LAWS.length;
+
+// ---------- casa e territorio ----------
+L('n_casa_giovani', 'Welfare', 'Casa per i giovani', 'Fondo garanzia prima casa (Consap)', 'eco', 0,
+  'Lo Stato garantisce fino all’80% del mutuo per gli under 36 con ISEE basso.', [
+  ['Garanzia all’80% per gli under 36', 'Situazione attuale.', 0, 0, {}],
+  ['Garanzia al 100% e niente tasse sul rogito', 'Mutuo senza anticipo e zero imposte per chi compra la prima casa sotto i 36 anni.', -2, 1.2, { pop: 2, sind: 3 }],
+  ['Piano da 100.000 case popolari', 'Lo Stato costruisce e ristruttura case a canone sociale in dieci anni.', -6, 3, { pop: 2, sind: 8, conf: 2, occ: -0.05 }],
+  ['Abolire la garanzia pubblica', 'Il mercato fa da sé: le banche valutano i mutui senza aiuto dello Stato.', 6, -0.5, { pop: -1, merc: 2 }],
+], { sal: 2 });
+L('n_affitti_brevi', 'Territorio', 'Affitti brevi turistici', 'Cedolare secca 21-26%, codice identificativo nazionale', 'eco', 0,
+  'Cedolare secca al 21% sul primo appartamento e al 26% dal secondo; obbligo del codice identificativo.', [
+  ['Cedolare 21-26% e codice nazionale', 'Situazione attuale.', 2, 0, {}],
+  ['Tetto agli affitti brevi nei centri storici', 'I Comuni possono limitare il numero di appartamenti per turisti.', -5, 0, { pop: 1, conf: -3, sind: 3 }],
+  ['Cedolare al 33% per chi ha più case', 'Si tassa di più chi fa impresa con gli affitti brevi.', -3, -0.3, { pop: 1, conf: -2 }],
+  ['Liberalizzazione totale', 'Nessun limite e nessun codice: decide il proprietario.', 7, 0, { conf: 3, pop: -1 }],
+], { sal: 1 });
+L('n_acqua', 'Territorio', 'Gestione dell’acqua', 'Referendum 2011, gestori misti', 'eco', 0,
+  'Acquedotti gestiti da società pubbliche, miste o private; perdite di rete intorno al 42%.', [
+  ['Gestori misti come oggi', 'Situazione attuale.', 1, 0, {}],
+  ['Tutto pubblico e un piano contro le perdite', 'Gestione solo pubblica e 2 miliardi l’anno per rifare le reti.', -6, 2, { pop: 2, sind: 4, occ: -0.03 }],
+  ['Gare europee per i gestori', 'Concessioni a gara: entrano grandi operatori privati.', 6, -0.2, { merc: 3, ue: 3, pop: -2 }],
+], { sal: 1 });
+
+// ---------- tecnologia ----------
+L('n_ia', 'Economia', 'Intelligenza artificiale', 'L. 132/2025', 'eco', 0,
+  'Prima legge italiana sull’IA: agenzie di controllo, regole per sanità e lavoro, un miliardo per le imprese.', [
+  ['Legge del 2025 con un miliardo per le imprese', 'Situazione attuale.', 1, 0, {}],
+  ['Fondo da 5 miliardi per un’IA italiana', 'Supercalcolo pubblico, startup e ricerca: l’Italia prova a giocarsela.', -1, 1, { pil: 0.05, conf: 4, media: 2 }],
+  ['Regole severe e un’autorità indipendente', 'Divieti per riconoscimento facciale e controllo dei lavoratori.', -4, 0.1, { sind: 5, conf: -3, ue: 2 }],
+  ['Mani libere alle aziende', 'Meno vincoli possibili per attirare investimenti.', 6, 0, { conf: 5, pil: 0.03, sind: -4 }],
+], { sal: 1 });
+L('n_rete', 'Infrastrutture', 'Rete in fibra', 'Rete di FiberCop e Open Fiber', 'eco', 0,
+  'Due reti separate: FiberCop (ex Tim, fondo KKR con lo Stato) e Open Fiber (CDP e Macquarie).', [
+  ['Due reti separate', 'Situazione attuale.', 2, 0, {}],
+  ['Rete unica a controllo pubblico', 'Lo Stato riunisce le due reti e porta la fibra ovunque.', -5, 1.5, { pil: 0.03, merc: -2, pop: 1 }],
+  ['Voucher per le famiglie e concorrenza', 'Incentivi alla domanda, la rete resta privata.', 4, 0.4, { pop: 1, conf: 2 }],
+], { sal: 1 });
+L('n_contante', 'Fisco', 'Tetto al contante', 'L. 197/2022', 'eco', 0,
+  'Pagamenti in contanti consentiti fino a 5.000 euro.', [
+  ['Tetto a 5.000 euro', 'Situazione attuale.', 3, 0, {}],
+  ['Tetto a 1.000 euro', 'Meno contante per combattere l’evasione.', -4, -0.6, { ue: 3, conf: -2, pop: -1 }],
+  ['Nessun tetto', 'Ognuno paga come vuole.', 8, 0.3, { pop: 1, ue: -4 }],
+], { sal: 1 });
+L('n_bollo', 'Fisco', 'Bollo auto', 'Tassa automobilistica regionale', 'eco', 0,
+  'Tassa annuale su ogni auto, incassata dalle Regioni: circa 6,5 miliardi l’anno.', [
+  ['Bollo regionale', 'Situazione attuale.', 0, 0, {}],
+  ['Abolizione del bollo', 'Lo Stato rimborsa le Regioni: costa molto, piace molto.', 5, 6.5, { pop: 3, ue: -4, merc: -2 }],
+  ['Bollo solo sulle auto più inquinanti', 'Gratis per le auto nuove ed elettriche, più caro per le vecchie.', -2, 0.8, { pop: -1, conf: 1 }],
+], { sal: 1 });
+L('n_auto_elettriche', 'Energia', 'Incentivi alle auto elettriche', 'Ecobonus', 'amb', 0,
+  'Incentivi a fasce di ISEE per comprare auto elettriche rottamando le vecchie.', [
+  ['Ecobonus a fasce', 'Situazione attuale.', 0, 0, {}],
+  ['Incentivi forti e colonnine ovunque', 'Fino a 10.000 euro e 50.000 nuove colonnine.', -6, 1.2, { conf: 2, pil: 0.02, ue: 2 }],
+  ['Stop agli incentivi, sì ai motori termici', 'Si difende l’auto tradizionale e la filiera italiana.', 6, -0.5, { conf: 1, ue: -2 }],
+], { sal: 1 });
+L('n_aree_idonee', 'Energia', 'Pannelli solari a terra', 'D.L. Agricoltura 2024, aree idonee', 'amb', 0,
+  'Vietati i pannelli a terra nei campi agricoli; le Regioni scelgono le aree idonee.', [
+  ['Divieto nei campi e scelta alle Regioni', 'Situazione attuale.', 3, 0, {}],
+  ['Via libera agli impianti nelle aree idonee', 'Procedure veloci per solare ed eolico.', -5, 0, { pil: 0.03, prezzi: 0, infl: -0.05, ue: 3, conf: 2 }],
+  ['Stop totale ai nuovi impianti a terra', 'Il paesaggio prima di tutto.', 7, 0, { infl: 0.03, conf: -1 }],
+], { sal: 1 });
+
+// ---------- lavoro ----------
+L('n_smart', 'Lavoro', 'Lavoro da casa', 'L. 81/2017', 'eco', 0,
+  'Il lavoro agile si decide con un accordo tra azienda e lavoratore.', [
+  ['Accordo individuale', 'Situazione attuale.', 2, 0, {}],
+  ['Diritto a due giorni da casa', 'Chi può lavorare da remoto ha diritto a due giorni a settimana.', -4, 0, { sind: 5, conf: -3, pop: 1 }],
+  ['Sgravi alle aziende che lo concedono', 'Incentivi per chi adotta il lavoro agile.', 1, 0.4, { conf: 2, pop: 1 }],
+], { sal: 1 });
+L('n_settimana_corta', 'Lavoro', 'Settimana di quattro giorni', 'Sperimentazioni aziendali', 'eco', 0,
+  'Solo alcune grandi aziende sperimentano la settimana corta.', [
+  ['Libera sperimentazione', 'Situazione attuale.', 2, 0, {}],
+  ['Incentivi a chi passa a 4 giorni a parità di stipendio', 'Sgravi contributivi alle aziende che riducono l’orario.', -4, 1, { sind: 7, conf: -2, pop: 2, pil: -0.02 }],
+  ['Settimana corta per legge nel pubblico', 'Dal 2028 quattro giorni nella pubblica amministrazione.', -7, 0.6, { sind: 6, merc: -2, pop: 1 }],
+], { sal: 1 });
+L('n_opzione_donna', 'Pensioni', 'Opzione donna', 'L. bilancio 2025', 'eco', 0,
+  'Pensione anticipata per le donne con 35 anni di contributi, solo per alcune categorie.', [
+  ['Solo per alcune categorie', 'Situazione attuale.', 1, 0, {}],
+  ['Per tutte le donne a 58 anni', 'Torna l’Opzione donna originale con il ricalcolo contributivo.', -3, 0.6, { pop: 2, sind: 4, ue: -1 }],
+  ['Abolita', 'Si chiude il canale.', 4, -0.1, { pop: -1 }],
+], { sal: 1 });
+
+// ---------- Mezzogiorno e infrastrutture ----------
+L('n_av_sud', 'Infrastrutture', 'Alta velocità al Sud', 'Salerno-Reggio Calabria, lavori in corso', 'terr', 0,
+  'L’alta velocità arriva a Salerno; il tratto fino a Reggio è finanziato solo in parte.', [
+  ['Lavori a tratti', 'Situazione attuale.', 0, 0, {}],
+  ['Finanziare tutta la Salerno-Reggio e la Palermo-Catania', 'Venti miliardi in dieci anni per collegare il Sud.', -6, 2, { pil: 0.05, occ: -0.04, pop: 1, conf: 3 }],
+  ['Prima le opere al Nord', 'Pedemontane e valichi alpini: dove passa più traffico.', 6, 1, { pil: 0.03, conf: 2 }],
+], { sal: 1 });
+L('n_porti_sud', 'Economia', 'Porti del Sud', 'Autorità di sistema portuale', 'eco', 0,
+  'Sedici autorità portuali indipendenti; Gioia Tauro e Taranto sotto le potenzialità.', [
+  ['Sedici autorità portuali', 'Situazione attuale.', 0, 0, {}],
+  ['Porti Spa unica con investimenti al Sud', 'Una società nazionale gestisce i porti e investe su Gioia Tauro e Taranto.', -3, 0.8, { pil: 0.03, occ: -0.02 }],
+  ['Privatizzare la gestione dei porti', 'Concessioni lunghe ai grandi operatori internazionali.', 6, -0.4, { merc: 3, sind: -4 }],
+], { sal: 1 });
+
+// ---------- scuola, sport, cultura ----------
+L('n_sport_scuola', 'Scuola', 'Sport a scuola', 'Educazione motoria alla primaria (2023)', 'soc', 0,
+  'Due ore di educazione fisica a settimana; insegnanti di motoria solo nelle ultime classi della primaria.', [
+  ['Due ore e insegnanti solo in parte', 'Situazione attuale.', 0, 0, {}],
+  ['Un’ora al giorno di sport e palestre ristrutturate', 'Sport ogni giorno e 2 miliardi per le palestre scolastiche.', -2, 1.2, { pop: 2, occ: -0.01 }],
+  ['Accordi con le società sportive', 'Le ore di sport le fanno le associazioni del territorio.', 3, 0.3, { pop: 1, conf: 1 }],
+], { sal: 1 });
+L('n_cellulari', 'Scuola', 'Telefoni a scuola', 'Circolari ministeriali 2024-2025', 'soc', 0,
+  'Telefoni vietati in classe dalla primaria alle superiori.', [
+  ['Divieto in classe', 'Situazione attuale.', 2, 0, {}],
+  ['Divieto anche nell’intervallo, con armadietti', 'I telefoni restano chiusi per tutta la giornata.', 5, 0.1, { pop: 1, chiesa: 2 }],
+  ['Libertà alle scuole', 'Ogni istituto decide come usarli, anche per la didattica.', -4, 0, { media: 1 }],
+], { sal: 1 });
+L('n_stadi', 'Cultura', 'Nuovi stadi', 'Commissario per gli stadi (2025)', 'eco', 0,
+  'Stadi vecchi in vista degli Europei 2032: un commissario per accelerare.', [
+  ['Commissario e procedure accelerate', 'Situazione attuale.', 2, 0, {}],
+  ['Fondo pubblico per gli stadi degli Europei', 'Due miliardi per rifare gli stadi delle città ospitanti.', -2, 0.4, { pop: 2, conf: 2 }],
+  ['Stadi solo con soldi privati, in cambio di centri commerciali', 'Le società costruiscono, lo Stato concede le aree.', 5, 0, { conf: 3, pop: 0 }],
+], { sal: 1 });
+L('n_canone', 'Cultura', 'Canone RAI', 'In bolletta, 90 euro (2026)', 'eco', 0,
+  'Il canone della televisione pubblica si paga nella bolletta della luce: 90 euro l’anno.', [
+  ['90 euro in bolletta', 'Situazione attuale.', 0, 0, {}],
+  ['Abolito: la RAI vive di pubblicità e fiscalità generale', 'Niente più canone: lo Stato copre con il bilancio.', 5, 1.7, { pop: 2, media: -3 }],
+  ['Canone legato al reddito', 'Gratis per i redditi bassi, di più per chi guadagna molto.', -4, -0.1, { pop: 1 }],
+], { sal: 1 });
+
+// ---------- sanità e diritti ----------
+L('n_medici_base', 'Sanità', 'Medici di famiglia', 'Convenzione con il Servizio sanitario', 'eco', 0,
+  'I medici di base sono liberi professionisti convenzionati; in molte zone mancano.', [
+  ['Liberi professionisti convenzionati', 'Situazione attuale.', 1, 0, {}],
+  ['Dipendenti del Servizio sanitario nelle Case di comunità', 'Orari lunghi, studi associati, più medici dove mancano.', -5, 1.5, { pop: 2, sind: 5 }],
+  ['Più autonomia e incentivi a chi apre nelle zone scoperte', 'Bonus per chi va nei piccoli centri.', 3, 0.5, { pop: 1 }],
+], { sal: 1 });
+L('n_azzardo', 'Sanità', 'Gioco d’azzardo', 'Decreto Dignità 2018 (divieto di pubblicità)', 'soc', 0,
+  'Pubblicità vietata; slot e scommesse online fruttano allo Stato circa 11 miliardi l’anno.', [
+  ['Pubblicità vietata', 'Situazione attuale.', 0, 0, {}],
+  ['Via le slot dai bar e distanze dalle scuole', 'Si riduce l’offerta di gioco sul territorio.', 4, 1.2, { chiesa: 6, pop: 1 }],
+  ['Torna la sponsorizzazione nello sport', 'Le squadre di calcio possono avere sponsor di scommesse.', -3, -0.3, { conf: 2, chiesa: -4 }],
+], { sal: 1 });
+L('n_animali', 'Diritti', 'Tutela degli animali', 'L. 82/2025 (reati contro gli animali)', 'soc', 0,
+  'Pene più alte per maltrattamenti e uccisioni; gli animali tutelati in quanto tali.', [
+  ['Legge del 2025', 'Situazione attuale.', 0, 0, {}],
+  ['Animali in Costituzione come esseri senzienti e stop agli allevamenti in gabbia', 'Tutela ancora più forte, anche negli allevamenti.', -4, 0.3, { pop: 1, conf: -2 }],
+  ['Più tutele per allevatori e cacciatori', 'Si allentano alcuni vincoli per il mondo agricolo.', 5, 0, { conf: 1, pop: -1 }],
+], { sal: 1 });
+L('n_cannabis', 'Diritti', 'Cannabis', 'D.L. Sicurezza 2025 (divieto della cannabis light)', 'soc', 0,
+  'Vietata anche la cannabis light; il consumo personale resta illecito amministrativo.', [
+  ['Divieto anche della cannabis light', 'Situazione attuale.', 6, 0, {}],
+  ['Torna legale la cannabis light', 'Si salva una filiera da migliaia di posti di lavoro.', 0, -0.1, { conf: 1, occ: -0.01 }],
+  ['Legalizzazione con monopolio di Stato', 'Coltivazione e vendita controllate, come il tabacco.', -7, -0.8, { pop: 0, chiesa: -6, mag: 2 }],
+], { sal: 1 });
+L('n_caccia', 'Ambiente', 'Caccia', 'L. 157/1992, modifiche 2025', 'amb', 0,
+  'Calendario venatorio deciso dalle Regioni; nel 2025 allentati alcuni limiti.', [
+  ['Regole del 2025', 'Situazione attuale.', 3, 0, {}],
+  ['Stop alla caccia nei parchi e alle specie a rischio', 'Più tutela per la fauna selvatica.', -5, 0, { pop: 1, conf: -1 }],
+  ['Più giorni e più specie cacciabili', 'Si allarga la stagione venatoria.', 7, 0, { pop: -1, conf: 1 }],
+], { sal: 1 });
+L('n_carne_coltivata', 'Agricoltura', 'Carne coltivata', 'L. 172/2023 (divieto)', 'amb', 0,
+  'In Italia è vietato produrre e vendere carne coltivata in laboratorio.', [
+  ['Divieto', 'Situazione attuale.', 5, 0, {}],
+  ['Via libera alla ricerca, vendita solo con il via dell’UE', 'Si allinea l’Italia alle regole europee.', -3, 0, { ue: 3, conf: 1 }],
+], { sal: 1 });
+
+// ---------- giustizia, istituzioni, difesa ----------
+L('n_carceri', 'Giustizia', 'Carceri sovraffollate', 'Piano carceri 2024', 'giu', 0,
+  'Oltre 62.000 detenuti per 51.000 posti; un piano per nuovi padiglioni.', [
+  ['Piano per nuovi padiglioni', 'Situazione attuale.', 0, 0, {}],
+  ['Pene alternative per i reati minori', 'Domiciliari e lavori socialmente utili per chi ha meno di due anni da scontare.', 4, -0.2, { mag: 2, chiesa: 4, pop: -1 }],
+  ['Venti nuove carceri in cinque anni', 'Un grande piano di edilizia penitenziaria.', -5, 1.2, { pop: 1, occ: -0.01 }],
+  ['Indulto di due anni', 'Un provvedimento di clemenza per svuotare le celle.', 6, -0.3, { chiesa: 5, pop: -3, mag: -2 }],
+], { sal: 1 });
+L('n_fuorisede', 'Istituzioni', 'Voto dei fuorisede', 'Sperimentazione alle europee 2024', 'ist', 0,
+  'Solo gli studenti fuorisede hanno potuto votare dove studiano, e solo alle europee.', [
+  ['Sperimentazione solo per studenti', 'Situazione attuale.', 0, 0, {}],
+  ['Voto dove vivi per tutti i fuorisede', 'Lavoratori e studenti votano senza tornare a casa.', -2, 0.05, { pop: 2 }],
+  ['Voto elettronico da remoto', 'Si vota anche dal telefono, con l’identità digitale.', 3, 0.2, { pop: 1, media: 2 }],
+], { sal: 1 });
+L('n_terzo_mandato', 'Istituzioni', 'Terzo mandato dei presidenti di Regione', 'Limite di due mandati', 'ist', 0,
+  'I presidenti di Regione non possono fare più di due mandati consecutivi.', [
+  ['Massimo due mandati', 'Situazione attuale.', 0, 0, {}],
+  ['Via libera al terzo mandato', 'Possono ricandidarsi i presidenti più popolari.', 4, 0, { pop: -1 }],
+  ['Un solo mandato lungo di sei anni', 'Niente rielezione: più ricambio.', -3, 0, { pop: 1 }],
+], { sal: 1 });
+L('n_lobby', 'Istituzioni', 'Registro dei lobbisti', 'Nessuna legge nazionale', 'ist', 0,
+  'Non esiste un registro nazionale obbligatorio dei rappresentanti di interessi.', [
+  ['Nessuna regola nazionale', 'Situazione attuale.', 2, 0, {}],
+  ['Registro obbligatorio e agende pubbliche', 'Ogni incontro con ministri e parlamentari va reso pubblico.', -5, 0.02, { pop: 2, media: 3, conf: -2 }],
+], { sal: 1 });
+L('n_leva', 'Difesa', 'Servizio militare volontario', 'Leva sospesa dal 2005', 'soc', 0,
+  'Esercito professionale; la leva obbligatoria è sospesa.', [
+  ['Esercito professionale', 'Situazione attuale.', 0, 0, {}],
+  ['Riserva volontaria di 10.000 cittadini', 'Addestramento nei fine settimana per una riserva pronta alle emergenze.', 4, 0.4, { pop: 0, ue: 1 }],
+  ['Servizio civile universale di sei mesi', 'Per tutti i diciottenni: protezione civile, sanità, cultura.', -3, 1.5, { pop: 1, chiesa: 3, occ: -0.02 }],
+  ['Torna la leva obbligatoria', 'Dodici mesi per tutti i diciottenni.', 8, 3, { pop: -2, ue: -1 }],
+], { sal: 1 });
+L('n_cyber', 'Difesa', 'Difesa cibernetica', 'Agenzia per la cybersicurezza nazionale', 'eu', 0,
+  'Un’agenzia nazionale coordina la difesa dagli attacchi informatici.', [
+  ['Agenzia nazionale', 'Situazione attuale.', 0, 0, {}],
+  ['Comando cyber e 5.000 specialisti', 'Una forza armata digitale con assunzioni straordinarie.', 2, 0.8, { ue: 2, occ: -0.01 }],
+  ['Difesa cyber comune europea', 'Si mettono insieme le forze con gli altri Paesi UE.', -5, 0.4, { ue: 5 }],
+], { sal: 1 });
+
+// registra le nuove leggi
+LAWS.slice(LEGGI2_START).forEach(l => { LAW_BY_ID[l.id] = l; });
+
+// spiegazioni in parole semplici: [in pratica, chi ci guadagna, chi ci perde]
+Object.assign(SPIEGA, {
+  n_casa_giovani: { s: 'Per i giovani comprare casa è difficile: servono anticipo e garanzie che spesso non hanno.', o: [['Lo Stato fa da garante per gran parte del mutuo.', 'Giovani con reddito basso', 'Nessuno in particolare'], ['Mutuo senza anticipo e niente tasse sul rogito.', 'Giovani che comprano casa', 'Conti pubblici'], ['Lo Stato costruisce case da affittare a prezzi bassi.', 'Famiglie a basso reddito, edilizia', 'Conti pubblici'], ['Nessun aiuto pubblico: decidono le banche.', 'Conti pubblici', 'Giovani senza risparmi']] },
+  n_affitti_brevi: { s: 'Gli affitti ai turisti rendono più di quelli lunghi e nelle città d’arte mancano case per chi ci vive.', o: [['Tassa piatta sugli affitti brevi e un codice per ogni casa.', 'Proprietari', 'Residenti dei centri storici'], ['I Comuni possono mettere un tetto agli appartamenti per turisti.', 'Residenti e studenti', 'Proprietari e piattaforme'], ['Chi ha più case paga di più.', 'Conti pubblici, residenti', 'Chi affitta molte case'], ['Nessun limite.', 'Proprietari e turismo', 'Chi cerca casa in affitto']] },
+  n_acqua: { s: 'Gli acquedotti italiani perdono quasi metà dell’acqua: servono miliardi di lavori.', o: [['Gestori pubblici, misti o privati a seconda del territorio.', 'Nessuno in particolare', 'Nessuno in particolare'], ['Solo gestione pubblica e un grande piano contro le perdite.', 'Cittadini, lavoratori del settore', 'Conti pubblici'], ['Gestori scelti con gare europee.', 'Grandi aziende, efficienza', 'Chi teme aumenti delle bollette']] },
+  n_ia: { s: 'L’intelligenza artificiale cambia economia e lavoro: si decide quanto investire e quanto regolare.', o: [['Regole di base e un miliardo per le imprese.', 'Imprese tecnologiche', 'Nessuno in particolare'], ['Cinque miliardi per supercalcolo, ricerca e startup.', 'Ricerca e imprese, crescita', 'Conti pubblici'], ['Regole severe e un’autorità indipendente.', 'Lavoratori, privacy', 'Aziende che usano l’IA'], ['Pochi vincoli per attirare investimenti.', 'Grandi aziende tecnologiche', 'Lavoratori e privacy']] },
+  n_rete: { s: 'La fibra ottica è la strada del futuro: oggi ci sono due reti che a volte si sovrappongono.', o: [['Due reti in concorrenza.', 'Concorrenza', 'Le zone meno redditizie'], ['Una rete unica controllata dallo Stato.', 'Aree rurali, coperture complete', 'Conti pubblici, investitori privati'], ['Voucher alle famiglie per abbonarsi alla fibra.', 'Famiglie', 'Conti pubblici']] },
+  n_contante: { s: 'Il tetto ai pagamenti in contanti serve a frenare evasione e riciclaggio, ma limita la libertà di pagare.', o: [['Contanti fino a 5.000 euro.', 'Chi preferisce il contante', 'Lotta all’evasione'], ['Contanti solo fino a 1.000 euro.', 'Lotta all’evasione', 'Anziani e piccoli negozi'], ['Nessun limite.', 'Chi usa contanti', 'Lotta all’evasione e al riciclaggio']] },
+  n_bollo: { s: 'Il bollo auto è una delle tasse più odiate, ma finanzia le Regioni.', o: [['Si paga ogni anno alla propria Regione.', 'Bilanci delle Regioni', 'Automobilisti'], ['Nessun bollo: paga lo Stato al posto degli automobilisti.', 'Automobilisti', 'Conti pubblici'], ['Gratis per auto nuove ed elettriche, più caro per le vecchie.', 'Chi ha auto nuove, ambiente', 'Chi ha auto vecchie']] },
+  n_auto_elettriche: { s: 'Le auto elettriche inquinano meno ma costano di più: gli incentivi abbassano il prezzo.', o: [['Incentivi a fasce di reddito.', 'Chi compra elettrico', 'Nessuno in particolare'], ['Incentivi forti e colonnine ovunque.', 'Ambiente, chi compra elettrico', 'Conti pubblici'], ['Niente incentivi, si difendono i motori tradizionali.', 'Conti pubblici, filiera dei motori', 'Ambiente']] },
+  n_aree_idonee: { s: 'Per produrre energia pulita servono spazi per pannelli e pale: la difficoltà è dove metterli.', o: [['Niente pannelli nei campi, decidono le Regioni.', 'Agricoltura, paesaggio', 'Rinnovabili'], ['Procedure rapide nelle aree adatte.', 'Bollette più basse, clima', 'Chi teme per il paesaggio'], ['Stop ai nuovi impianti a terra.', 'Paesaggio', 'Rinnovabili, bollette']] },
+  n_smart: { s: 'Il lavoro da casa fa risparmiare tempo e traffico, ma non tutte le aziende lo vogliono.', o: [['Si decide caso per caso con l’azienda.', 'Imprese', 'Chi vorrebbe lavorare da casa'], ['Diritto a due giorni a settimana da casa.', 'Lavoratori d’ufficio', 'Imprese e negozi dei centri'], ['Sgravi per chi concede il lavoro agile.', 'Lavoratori e imprese', 'Conti pubblici']] },
+  n_settimana_corta: { s: 'Lavorare quattro giorni a parità di stipendio: alcune aziende lo provano già.', o: [['Ogni azienda decide da sola.', 'Imprese', 'Nessuno in particolare'], ['Incentivi a chi passa a quattro giorni.', 'Lavoratori', 'Conti pubblici, produttività'], ['Quattro giorni per legge negli uffici pubblici.', 'Dipendenti pubblici', 'Servizi ai cittadini']] },
+  n_opzione_donna: { s: 'Opzione donna permette alle lavoratrici di andare in pensione prima con un assegno più basso.', o: [['Solo per alcune categorie di donne.', 'Conti pubblici', 'Lavoratrici escluse'], ['Per tutte le donne a 58 anni con 35 di contributi.', 'Lavoratrici', 'Conti pubblici'], ['Nessuna uscita anticipata dedicata.', 'Conti pubblici', 'Lavoratrici']] },
+  n_av_sud: { s: 'L’alta velocità si ferma a Salerno: il Sud resta lontano dal resto del Paese.', o: [['Lavori a pezzi, quando ci sono i fondi.', 'Conti pubblici', 'Pendolari del Sud'], ['Si finanzia tutta la linea fino a Reggio e in Sicilia.', 'Sud, turismo, imprese', 'Conti pubblici'], ['Prima le opere dove passa più traffico.', 'Nord, logistica', 'Sud']] },
+  n_porti_sud: { s: 'I porti del Sud potrebbero intercettare il traffico del Mediterraneo, ma sono frammentati.', o: [['Ogni porto con la sua autorità.', 'Territori', 'Efficienza'], ['Una società nazionale che investe al Sud.', 'Sud, lavoro', 'Conti pubblici'], ['Gestione affidata ai grandi operatori privati.', 'Investitori, efficienza', 'Lavoratori portuali']] },
+  n_sport_scuola: { s: 'I ragazzi italiani fanno poco sport e molte palestre scolastiche cadono a pezzi.', o: [['Due ore a settimana.', 'Nessuno in particolare', 'Studenti sedentari'], ['Un’ora al giorno e palestre nuove.', 'Studenti, salute', 'Conti pubblici'], ['Lo sport lo fanno le associazioni del territorio.', 'Società sportive', 'Insegnanti di educazione fisica']] },
+  n_cellulari: { s: 'Gli smartphone distraggono in classe: molti Paesi li hanno vietati.', o: [['Vietati durante le lezioni.', 'Concentrazione degli studenti', 'Nessuno in particolare'], ['Chiusi in armadietto per tutta la giornata.', 'Concentrazione, socialità', 'Libertà degli studenti'], ['Ogni scuola decide.', 'Autonomia delle scuole', 'Uniformità delle regole']] },
+  n_stadi: { s: 'Gli stadi italiani sono tra i più vecchi d’Europa e nel 2032 arrivano gli Europei.', o: [['Un commissario accelera i progetti.', 'Club e città', 'Nessuno in particolare'], ['Soldi pubblici per gli stadi degli Europei.', 'Tifosi, città ospitanti', 'Conti pubblici'], ['Stadi privati in cambio di aree da edificare.', 'Club, costruttori', 'Consumo di suolo']] },
+  n_canone: { s: 'Il canone finanzia la RAI: oggi si paga nella bolletta della luce.', o: [['Novanta euro l’anno in bolletta.', 'RAI', 'Famiglie'], ['Niente canone, paga lo Stato.', 'Famiglie', 'Conti pubblici, indipendenza RAI'], ['Si paga in base al reddito.', 'Redditi bassi', 'Redditi alti']] },
+  n_medici_base: { s: 'In molte zone mancano medici di famiglia e gli studi chiudono presto.', o: [['Medici liberi professionisti convenzionati.', 'Medici', 'Pazienti delle zone scoperte'], ['Medici dipendenti nelle Case di comunità.', 'Pazienti, orari lunghi', 'Conti pubblici, autonomia dei medici'], ['Incentivi a chi apre dove mancano.', 'Piccoli centri', 'Conti pubblici']] },
+  n_azzardo: { s: 'Il gioco d’azzardo porta soldi allo Stato ma crea dipendenze.', o: [['Pubblicità vietata.', 'Salute pubblica', 'Concessionari'], ['Via le slot dai bar e distanze dalle scuole.', 'Salute, famiglie', 'Entrate dello Stato, gestori'], ['Sponsor di scommesse nello sport.', 'Squadre di calcio', 'Salute pubblica']] },
+  n_animali: { s: 'Gli animali sono tutelati come esseri senzienti: si decide quanto.', o: [['Pene più alte per i maltrattamenti.', 'Animali', 'Nessuno in particolare'], ['Tutela in Costituzione e stop alle gabbie.', 'Animali, ambientalisti', 'Allevatori'], ['Meno vincoli per allevatori e cacciatori.', 'Mondo agricolo', 'Animali']] },
+  n_cannabis: { s: 'La cannabis divide: per alcuni è una droga da vietare, per altri un mercato da togliere alla criminalità.', o: [['Vietata anche quella senza effetti stupefacenti.', 'Chi vuole regole severe', 'Coltivatori e negozi di cannabis light'], ['Torna legale la cannabis light.', 'Agricoltori e commercianti', 'Chi vuole regole severe'], ['Legalizzazione con monopolio di Stato.', 'Entrate dello Stato, lotta alle mafie', 'Chi teme più consumo']] },
+  n_caccia: { s: 'La caccia è regolata dalle Regioni con una legge nazionale degli anni ’90.', o: [['Regole del 2025.', 'Cacciatori', 'Ambientalisti'], ['Più parchi protetti e specie tutelate.', 'Fauna, ambiente', 'Cacciatori'], ['Stagione più lunga e più specie.', 'Cacciatori', 'Fauna selvatica']] },
+  n_carne_coltivata: { s: 'La carne prodotta in laboratorio da cellule animali: l’Italia l’ha vietata.', o: [['Vietata.', 'Allevatori italiani', 'Ricerca'], ['Ricerca libera e vendita solo con l’ok europeo.', 'Ricerca, startup', 'Allevatori']] },
+  n_carceri: { s: 'Le carceri italiane sono piene oltre la capienza: condizioni difficili e molti suicidi.', o: [['Si costruiscono nuovi padiglioni.', 'Polizia penitenziaria', 'Detenuti nel breve'], ['Pene alternative per i reati minori.', 'Detenuti, reinserimento', 'Chi chiede pene certe'], ['Venti nuove carceri.', 'Sicurezza percepita, edilizia', 'Conti pubblici'], ['Un indulto per liberare posti.', 'Detenuti', 'Vittime, sicurezza percepita']] },
+  n_fuorisede: { s: 'Milioni di italiani vivono lontano da dove sono iscritti per votare.', o: [['Solo gli studenti, solo alle europee.', 'Nessuno in particolare', 'Lavoratori fuorisede'], ['Tutti i fuorisede votano dove vivono.', 'Partecipazione', 'Nessuno in particolare'], ['Voto dal telefono con l’identità digitale.', 'Partecipazione, giovani', 'Sicurezza del voto']] },
+  n_terzo_mandato: { s: 'I presidenti di Regione possono fare al massimo due mandati: alcuni vorrebbero il terzo.', o: [['Due mandati e basta.', 'Ricambio', 'Presidenti popolari'], ['Possibile il terzo mandato.', 'Presidenti uscenti', 'Ricambio della classe politica'], ['Un solo mandato lungo.', 'Ricambio', 'Continuità']] },
+  n_lobby: { s: 'Chi rappresenta interessi incontra ministri e parlamentari senza obblighi di trasparenza.', o: [['Nessuna regola nazionale.', 'Lobbisti', 'Trasparenza'], ['Registro obbligatorio e incontri pubblici.', 'Trasparenza, cittadini', 'Lobbisti']] },
+  n_leva: { s: 'Dal 2005 la leva è sospesa: con le guerre vicine si discute di riserve e servizio civile.', o: [['Solo militari professionisti.', 'Libertà dei giovani', 'Riserve in caso di crisi'], ['Una riserva volontaria addestrata.', 'Difesa, protezione civile', 'Conti pubblici'], ['Sei mesi di servizio civile per tutti.', 'Comunità, protezione civile', 'Conti pubblici, giovani'], ['Dodici mesi di leva obbligatoria.', 'Difesa', 'Giovani, conti pubblici']] },
+  n_cyber: { s: 'Gli attacchi informatici a ospedali, aziende e ministeri sono sempre più frequenti.', o: [['Un’agenzia nazionale coordina la difesa.', 'Sicurezza', 'Nessuno in particolare'], ['Un comando cyber con migliaia di specialisti.', 'Sicurezza, lavoro qualificato', 'Conti pubblici'], ['Difesa comune con gli altri Paesi europei.', 'Europa, sicurezza', 'Sovranità nazionale']] },
+});
 
 </script>
 <script>
@@ -5673,7 +5924,7 @@ function renderSetup() {
   let body = '';
   if (st === 'Modalità') body = `<h2>Come vuoi entrare in politica?</h2><p class="muted">Ottobre 2026: il governo Meloni è al quarto anno, le elezioni politiche sono previste per la primavera 2027.</p>
     <div class="opt ${SETUP.mode === 'fondatore' ? 'on' : ''}" onclick="SETUP.mode='fondatore';renderSetup()"><div class="row">${medal('flag', 52)}<div class="grow"><div class="t">Fonda il tuo partito</div><div class="small muted" style="margin-top:4px">Parti da zero con un tuo movimento: nome, simbolo, idee. Cresci nei sondaggi, cerca alleati, corri per Palazzo Chigi.</div></div></div></div>
-    <div class="opt ${SETUP.mode === 'carriera' ? 'on' : ''}" onclick="SETUP.mode='carriera';renderSetup()"><div class="row">${medal('rocket', 52)}<div class="grow"><div class="t">Entra in un partito esistente</div><div class="small muted" style="margin-top:4px">Inizi da militante, consigliere o parlamentare di FdI, PD, M5S, Lega… Fai carriera, diventa ministro, scala il partito o fai una scissione come Vannacci.</div></div></div></div>`;
+    <div class="opt ${SETUP.mode === 'carriera' ? 'on' : ''}" onclick="SETUP.mode='carriera';renderSetup()"><div class="row">${medal('rocket', 52)}<div class="grow"><div class="t">Entra in un partito esistente</div><div class="small muted" style="margin-top:4px">Inizi da militante, consigliere o parlamentare di FdI, PD, M5S, Lega… Fai carriera, diventa ministro, scala il partito o fai una scissione come Vannacci.</div></div></div></div>${typeof scenarioPickHTML === 'function' ? scenarioPickHTML() : ''}`;
   if (st === 'Personaggio') {
     body = `<h2>Il tuo personaggio</h2>
     <label class="lbl">Nome e cognome</label><input id="pname" value="${esc(SETUP.player.name)}" placeholder="Es. Andrea Rossi" oninput="SETUP.player.name=this.value">
@@ -5754,6 +6005,7 @@ function setupNext() {
   if (SETUP.mode === 'fondatore') cfg.party = Object.assign({}, SETUP.party, { name: SETUP.party.name.trim(), short: SETUP.party.short.trim().toUpperCase() });
   else cfg.join = SETUP.join;
   newGame(cfg);
+  if (SETUP.scenario && typeof applyScenario === 'function') { const S = SCENARI.find(s => s.id === SETUP.scenario); if (S && (!S.mode || S.mode === G.mode)) applyScenario(SETUP.scenario); }
   rerollPlayerAvatar();
   UI.tab = 'home';
   renderGame();
@@ -7436,7 +7688,7 @@ function renderResults() {
 function setLabel(set) { return set.map(p => P(p).short).join(' + '); }
 function renderConsultazioni() {
   const f = G.formation;
-  let h = `<div class="center">${medal('building', 76)}<h2 class="mt">Consultazioni al Quirinale</h2><div class="small muted">${esc(INSTITUTIONS.pdr)} riceve le delegazioni dei partiti</div></div>`;
+  let h = `<div class="center">${typeof sceneHTML === 'function' ? sceneHTML('quirinale') : medal('building', 76)}<h2 class="mt">Consultazioni al Quirinale</h2><div class="small muted">${esc(INSTITUTIONS.pdr)} riceve le delegazioni dei partiti</div></div>`;
   h += `<div class="card mt"><div class="row between small"><b>Maggioranza necessaria</b><span>Camera <b>${majority('C')}</b> · Senato <b>${majority('S')}</b></span></div><div class="list mt">${PIDS().filter(id => seatsOf(id, 'C') + seatsOf(id, 'S') > 0).sort((a, b) => seatsOf(b, 'C') - seatsOf(a, 'C')).map(id => `<div class="li">${partyChip(id)}<span class="grow small muted ellipsis">${esc(leaderName(id))}</span><span class="small">${seatsOf(id, 'C')} · ${seatsOf(id, 'S')}</span></div>`).join('')}</div></div>`;
   // vincitore con maggioranza propria
   const winner = f.after === 'elezioni' ? G.coalitions.find(c => c.members.length > 1 && hasMajority(c.members.filter(m => G.parties[m]))) : null;
@@ -7686,7 +7938,7 @@ function renderFiducia() {
   setTimeout(() => { animateVote($('#fid-s'), vs.by); setTimeout(() => {
     $('#fid-s-r').innerHTML = `<span class="stamp ${vs.passed ? 'good' : 'bad'}">${vs.passed ? 'FIDUCIA' : 'SFIDUCIA'}</span><div class="small mt">Sì ${vs.yes} · No ${vs.no} · Astenuti ${vs.ab}</div>`; vib(30);
     if (vc.passed && vs.passed) {
-      $('#fid-end').innerHTML = `<div class="card hero center mt2">${medal('flag', 70)}<h2 class="mt">Il governo ha la fiducia</h2><p class="muted">Ora sei ${G.player.art === 'la' ? 'la' : 'il'} Presidente del Consiglio dei ministri.</p><button class="btn gold block" onclick="finishGovernment()">A Palazzo Chigi ›</button></div>`;
+      $('#fid-end').innerHTML = `<div class="card hero center mt2">${typeof sceneHTML === 'function' ? sceneHTML('chigi') : medal('flag', 70)}<h2 class="mt">Il governo ha la fiducia</h2><p class="muted">Ora sei ${G.player.art === 'la' ? 'la' : 'il'} Presidente del Consiglio dei ministri.</p><button class="btn gold block" onclick="finishGovernment()">A Palazzo Chigi ›</button></div>`;
       confetti();
     } else {
       $('#fid-end').innerHTML = `<div class="card center mt2"><h3 class="bad">Fiducia negata</h3><p class="muted small">Gli alleati scontenti non ti hanno votato. Si torna alle consultazioni.</p><button class="btn block" onclick="G.formation.step='consultazioni';G.formation.tries++;renderFormation()">Consultazioni ›</button></div>`;
@@ -9425,6 +9677,7 @@ function submitTuner() {
     TUNE = null; closeSheet(); renderGame();
     return resultSheet(ok.length ? 'building' : 'hand', ok.length ? 'Via libera del Consiglio dei ministri' : 'Il premier frena', `${ok.length ? `${ok.length} ${ok.length > 1 ? 'riforme vanno' : 'riforma va'} in Parlamento come disegni di legge del governo.` : ''}${no.length ? ` ${G.gov.premier} blocca: ${no.map(([id, o]) => '«' + esc(getLaw(id).opts[o].t) + '»').join(', ')}.` : ''}`);
   }
+  G.flags.pacchetto = true;
   const proposer = isPremier() ? 'GOV' : 'PLAYER';
   list.forEach(([id, opt]) => proposeBill(id, +opt, 'ddl', proposer, 'C'));
   if (!isPremier()) { G.player.fama = clamp(G.player.fama + list.length, 0, 100); }
@@ -9771,7 +10024,7 @@ function campagnaTick() {
   const tgt = myParty().ax[C.ax];
   if (G.mood[C.ax] !== undefined && tgt !== undefined) G.mood[C.ax] = clamp(G.mood[C.ax] + Math.sign(tgt - G.mood[C.ax]) * 0.12 * k, -10, 10);
   Object.keys(C.grp).forEach(g => { if (G.groups[g] !== undefined) G.groups[g] = clamp(G.groups[g] + C.grp[g], -100, 100); });
-  if (c.n >= 6) { addNews(`Si chiude la campagna «${C.n}» di ${myParty().short}.`, 'mio'); G.camp = null; }
+  if (c.n >= 6) { G.flags.campDone = true; addNews(`Si chiude la campagna «${C.n}» di ${myParty().short}.`, 'mio'); G.camp = null; }
 }
 
 // ---------- tick settimanale ----------
@@ -10108,6 +10361,7 @@ function debateAnswer(k) {
 }
 function endDebate() {
   const d = DEB, win = d.me >= d.them, diff = clamp((d.me - d.them) / 4, -2, 2);
+  if (win) G.flags.debWin = true;
   myParty().spinta += 1 + diff; P(d.opp).spinta -= diff * 0.7;
   applyFx({ fama: win ? 4 : 2 });
   addNews(`Confronto TV ${G.player.name}–${P(d.opp).leader}: ${win ? `vince ${G.player.name}` : `meglio ${P(d.opp).leader}`} secondo i sondaggi istantanei.`, win ? 'mio' : 'bad');
@@ -10273,7 +10527,7 @@ function euFundsTick() {
   if (!G.euf) { const t = EU_TARGETS.slice().sort(() => Math.random() - 0.5).slice(0, 3); G.euf = { n: (G.eufN || 0) + 1, start: G.week, due: G.week + 26, t: t.map(x => ({ t: x.t, cats: x.cats, def: x.def })) }; G.eufN = G.euf.n; return; }
   if (G.week < G.euf.due) return;
   const ok = euDone(G.euf), n = ok.filter(Boolean).length;
-  const bn = n * 0.25;
+  const bn = n * 0.25; if (n === 3) G.flags.eufFull = true;
   G.econ.oneOff += bn; G.econ.shockPil += n * 0.04;
   addNews(n === 3 ? `Bruxelles sblocca per intero la ${G.euf.n}ª rata dei fondi europei: miliardi per investimenti.` : n ? `Bruxelles sblocca solo in parte la ${G.euf.n}ª rata dei fondi europei (${n} obiettivi su 3).` : `Bruxelles congela la ${G.euf.n}ª rata dei fondi europei: obiettivi mancati.`, n >= 2 ? 'good' : 'bad');
   if (n === 0) { G.gov.popBank -= 1.5; G.groups.ue = clamp(G.groups.ue - 6, -100, 100); }
@@ -10382,7 +10636,7 @@ const GOV_EVENTS = [
     ] },
   { id: 'sentenza', for: 'all', w: 0, chain: true, img: 'scales', look: 'paper', title: c => sentOk(c) ? 'Assolto: il fatto non sussiste' : 'Condannato in primo grado',
     text: c => sentOk(c) ? 'Il tribunale ti assolve con formula piena. Chi ti aveva attaccato ora tace.' : 'Il tribunale ti condanna in primo grado. Ci sarà l’appello, ma il colpo è pesante.',
-    choices: c => sentOk(c) ? [{ t: '«Avevo ragione io»', fx: { fama: 4, cred: 5, my: 1 }, r: 'Ne esci rafforzato.' }] : [
+    choices: c => sentOk(c) ? [{ t: '«Avevo ragione io»', fx: { fama: 4, cred: 5, my: 1 }, r: 'Ne esci rafforzato.', run: () => { G.flags.assolto = true; } }] : [
       { t: 'Ricorrere in appello e restare al mio posto', fx: { cred: -6, my: -1.5 }, r: 'Resti, ma il consenso cala.' },
       { t: 'Fare un passo indietro', fx: { cred: 4, fama: -6, stress: -10 }, r: 'Un gesto di responsabilità.', run: () => { if (G.player.minister && G.gov) { replaceMinister(G.player.minister, myPid()); G.player.minister = null; } } },
     ] },
@@ -10541,6 +10795,213 @@ function toggleViceInline(mid) {
 // applausi insieme ai coriandoli
 const _confettiUi = confetti;
 confetti = function (...a) { sfx('applause'); return _confettiUi.apply(this, a); };
+
+</script>
+<script>
+// ============================================================
+//  FINE PARTITA: giudizio degli storici, ritiro con erede o senza
+//  (e i cinque anni dopo simulati), nuovi traguardi, scenari
+// ============================================================
+
+// ---------- giudizio degli storici ----------
+function historiansVerdict() {
+  const s = G.stats, p = G.player, h = G.hist.econ, a = h[0] || {}, z = h[h.length - 1] || {};
+  let sc = Math.min(30, s.weeksPremier / 52 * 8) + Math.min(20, s.laws * 1.2) + Math.min(10, (s.govs || 0) * 2) + p.fama / 6;
+  const facts = [];
+  if (s.weeksPremier >= 52) facts.push(`${fmt1(s.weeksPremier / 52)} anni a Palazzo Chigi`);
+  if (s.laws) facts.push(`${s.laws} leggi approvate`);
+  if (h.length > 10 && s.weeksPremier > 20) {
+    const dd = (a.debito || 0) - (z.debito || 0), dp = (z.pil || 0) - (a.pil || 0), ds = (a.spread || 0) - (z.spread || 0);
+    sc += clamp(dd, -10, 10) + clamp(dp * 5, -8, 8) + clamp(ds / 20, -6, 6);
+    facts.push(`debito ${dd >= 0 ? 'sceso' : 'salito'} di ${fmt1(Math.abs(dd))} punti`, `spread da ${fmt0(a.spread || 0)} a ${fmt0(z.spread || 0)}`);
+  }
+  const grades = [[70, 'Uno statista', 'I manuali di storia gli dedicheranno un capitolo intero: ha cambiato il Paese e lo ha lasciato più solido di come l’aveva trovato.'],
+    [45, 'Un leader che ha lasciato il segno', 'Luci e ombre, ma una stagione riconoscibile della politica italiana porta il suo nome.'],
+    [25, 'Una carriera onesta', 'Non ha cambiato la storia, ma ci ha provato con serietà. Ricordato con rispetto.'],
+    [0, 'Una meteora', 'Molto rumore, poche tracce: tra qualche anno in pochi si ricorderanno il suo nome.']];
+  const g = grades.find(x => sc >= x[0]);
+  return { score: Math.round(sc), title: g[1], text: g[2], facts };
+}
+function verdictHTML() {
+  const v = historiansVerdict();
+  return `<div class="card hero mt" style="--pc:#d6b25e"><div class="tiny gold" style="font-weight:800;letter-spacing:.1em">IL GIUDIZIO DEGLI STORICI</div><h3 class="mt">${esc(v.title)}</h3><p class="small muted mt">${esc(v.text)}</p>${v.facts.length ? `<div class="row wrap mt" style="gap:5px">${v.facts.map(f => `<span class="tag">${esc(f)}</span>`).join('')}</div>` : ''}<div class="tiny dim mt">Punteggio storico: ${v.score}</div></div>`;
+}
+const _endGameEp = endGame;
+endGame = function (why) {
+  _endGameEp(why);
+  const sh = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null;
+  if (sh) sh.insertAdjacentHTML('beforeend', verdictHTML());
+};
+
+// ---------- ritiro: con un erede o guardando da fuori ----------
+function openRetire() {
+  const mates = isLeader() ? allPeople().filter(x => x.party === myPid() && !x.isPlayer && x.name !== G.player.name).sort((a, b) => b.comp - a.comp).slice(0, 4) : [];
+  openSheet(`${head('Ritirati dalla politica', 'La partita finisce qui')}
+    <p class="small muted">Lasci la politica attiva. Il gioco simula i cinque anni successivi con le regole di sempre e ti racconta com’è andata, poi arriva il giudizio degli storici.</p>
+    ${mates.length ? sec('Lascia tutto al tuo erede') + mates.map(x => `<button class="choice" onclick="startRetire('${x.name.replace(/'/g, '’')}')"><div class="row">${portrait(x.name, 44)}<div class="grow"><div class="t">${esc(x.name)}</div><div class="small muted">Competenza ${x.comp}/10 · guiderà ${esc(myParty().short)}${isPremier() ? ' e Palazzo Chigi' : ''}</div></div></div></button>`).join('') : ''}
+    ${sec('Oppure')}<button class="choice" onclick="startRetire('')"><div class="t">Mi ritiro e guardo come va</div><div class="small muted">${isLeader() ? 'Il partito sceglie da solo il nuovo leader.' : 'Esci di scena senza designare nessuno.'}</div></button>
+    <button class="btn block mt2" onclick="closeSheet()">Ci ho ripensato</button>`);
+}
+let RET = null;
+function startRetire(heirName) {
+  const p = G.player, pid = myPid(), wasLeader = isLeader(), wasPremier = isPremier();
+  let heir = heirName ? (allPeople().find(x => x.name.replace(/'/g, '’') === heirName) || { name: heirName, comp: 6 }) : null;
+  if (!heir && wasLeader) heir = allPeople().filter(x => x.party === pid && !x.isPlayer && x.name !== p.name).sort((a, b) => b.comp - a.comp)[0] || { name: randomName(), comp: 5 };
+  RET = { from: G.week, heir: heir ? heir.name : null, heirComp: heir ? heir.comp : 0, pid, wasPremier, start: { poll: P(pid).poll, appr: G.gov ? G.gov.approval : null, debt: G.econ.debito }, log: [], govs: [], heirWeeksPrem: 0, done: 0 };
+  G.careerLog.push({ w: G.week, t: heir && heirName ? `Ti ritiri e lasci il partito a ${heir.name}` : 'Ti ritiri dalla politica' });
+  // il giocatore esce di scena
+  if (heir) { const pp = P(pid); pp.leader = heir.name; pp.lCar = clamp(heir.comp - 1 + irnd(-1, 1), 3, 9); pp.lComp = heir.comp; }
+  G.coalitions.forEach(c => { if (c.cand === 'PLAYER') { c.cand = heir ? heir.name : P(c.candParty || pid).leader; c.candLocked = false; } });
+  if (G.gov && G.gov.premier === 'PLAYER') { G.gov.premier = heir ? heir.name : P(G.gov.premierParty).leader; G.gov.name = govName(G.gov.premier); }
+  if (p.minister && G.gov) { replaceMinister(p.minister, pid); }
+  Object.assign(p, { leader: false, minister: null, parl: null, candidate: null });
+  G.flags.retired = true; G.queue = [];
+  closeSheet(true); openSheet('', { full: true, locked: true }); retireStep();
+}
+function ghostFormation() {
+  const f = G.formation; if (!f) return;
+  const winner = f.after === 'elezioni' ? G.coalitions.find(c => c.members.length > 1 && hasMajority(c.members.filter(m => G.parties[m]))) : null;
+  if (winner) { const mem = winner.members.filter(m => G.parties[m]), big = mem.slice().sort((a, b) => seatsOf(b, 'C') - seatsOf(a, 'C'))[0]; return formAIGovernment(mem, winner.cand && winner.cand !== 'PLAYER' ? winner.cand : P(big).leader, winner.candParty || big, false); }
+  const sets = feasibleSets({ exclude: f.exclude || [] });
+  if (sets.length) { const s = sets[0].set, big = largestIn(s); return formAIGovernment(s, P(big).leader, big, false); }
+  const tech = feasibleSets({ tecnico: true, exclude: f.exclude || [] });
+  if (tech.length) return formAIGovernment(tech[0].set, pick(['Daniele Franco', 'Marta Cartabia', 'Carlo Cottarelli']), null, true);
+  G.cal.election = G.week + 9; G.gov = G.prevGov || G.gov; endFormation();
+}
+function retireStep() {
+  const R = RET, total = 260;
+  for (let k = 0; k < 6 && R.done < total; k++, R.done++) {
+    const govBefore = G.gov ? G.gov.name : null;
+    try {
+      if (G.phase === 'formazione') ghostFormation();
+      const s = advanceWeek();
+      if (s) s.specials.forEach(x => { if (x.k === 'elezioni') { runGeneralElection(); ghostFormation(); const E = G.lastElection; const top = Object.keys(E.votes).sort((a, b) => E.votes[b] - E.votes[a])[0]; R.log.push({ w: G.week, t: `Elezioni: primo partito ${P(top).short} (${fmt1(E.votes[top])}%), ${P(R.pid) ? P(R.pid).short + ' al ' + fmt1(E.votes[R.pid] || 0) + '%' : ''}` }); } });
+      G.queue = [];
+      if (G.phase === 'formazione') ghostFormation();
+    } catch (e) { console.error(e); G.queue = []; }
+    if (G.gov && G.gov.name !== govBefore) R.log.push({ w: G.week, t: `Nasce il ${G.gov.name}${G.gov.tecnico ? ' (tecnico)' : ''}` });
+    if (G.gov && R.heir && G.gov.premier === R.heir) R.heirWeeksPrem++;
+  }
+  const pct = Math.round(R.done / total * 100);
+  replaceSheet(`<div class="center" style="margin-top:30vh">${medal('hourglass', 70)}<h2 class="mt">Cinque anni dopo…</h2><div class="small muted mt">${fmtDate(G.week)}</div><div class="bar mt" style="max-width:260px;margin:14px auto 0"><i style="width:${pct}%"></i></div></div>`);
+  if (R.done < total) setTimeout(retireStep, 16); else setTimeout(showRetireSummary, 300);
+}
+function showRetireSummary() {
+  const R = RET, pid = R.pid, pp = G.parties[pid];
+  const end = { poll: pp ? pp.poll : 0, debt: G.econ.debito };
+  let heirLine = '';
+  if (R.heir) {
+    const y = R.heirWeeksPrem / 52;
+    heirLine = R.heirWeeksPrem >= 156 ? `${R.heir} ha fatto meglio di te: ${fmt1(y)} anni a Palazzo Chigi e il partito al ${fmt1(end.poll)}%.`
+      : R.heirWeeksPrem >= 26 ? `${R.heir} è arrivato a Palazzo Chigi per ${fmt1(y)} anni, tra alti e bassi.`
+      : end.poll > R.start.poll + 1 ? `${R.heir} non è diventato premier, ma ha fatto crescere il partito dal ${fmt1(R.start.poll)}% al ${fmt1(end.poll)}%.`
+      : end.poll < R.start.poll * 0.6 ? `${R.heir} ha fallito presto: il partito è crollato dal ${fmt1(R.start.poll)}% al ${fmt1(end.poll)}%.`
+      : `${R.heir} ha tenuto il partito più o meno dove l’avevi lasciato (${fmt1(end.poll)}%).`;
+  }
+  G.phase = 'fine'; saveGame('auto');
+  replaceSheet(`<div class="center">${medal('hourglass', 76)}<div class="tiny gold mt" style="font-weight:800;letter-spacing:.1em">${fmtDate(R.from).toUpperCase()} – ${fmtDate(G.week).toUpperCase()}</div><h2 class="mt">Cinque anni dopo</h2></div>
+    ${R.heir ? `<div class="card hero mt"><div class="row">${portrait(R.heir, 56)}<div class="grow"><div class="tiny gold" style="font-weight:800">IL TUO EREDE</div><b>${esc(R.heir)}</b><div class="small muted mt">${esc(heirLine)}</div></div></div></div>` : ''}
+    <div class="card tight mt"><div class="list">
+      <div class="li"><div class="grow small">${pp ? esc(pp.name) : 'Il tuo partito'}</div><b>${fmt1(R.start.poll)}% → ${fmt1(end.poll)}%</b></div>
+      <div class="li"><div class="grow small">Debito pubblico</div><b>${fmt1(R.start.debt)}% → ${fmt1(end.debt)}%</b></div>
+      <div class="li"><div class="grow small">Governo oggi</div><b class="small">${G.gov ? esc(G.gov.name) : '—'}</b></div></div></div>
+    ${R.log.length ? sec('Cosa è successo') + `<div class="card tight"><div class="list">${R.log.slice(-10).map(x => `<div class="li"><span class="tiny muted" style="width:70px;flex:none">${fmtDate(x.w, true)}</span><div class="grow small">${esc(x.t)}</div></div>`).join('')}</div></div>` : ''}
+    ${verdictHTML()}
+    <button class="btn gold block mt2" onclick="RET=null;closeSheet(true);showSplash()">Torna al menu</button>`);
+}
+
+// ---------- nuovi traguardi ----------
+const MORE_ACH = [
+  { id: 'sfiduciato', ico: 'gavel', n: 'Spallata', d: 'Fai cadere un governo con la sfiducia', c: () => G.careerLog.some(x => /Fai cadere il governo/.test(x.t)) },
+  { id: 'dibattito', ico: 'podium', n: 'Re del confronto', d: 'Vinci un confronto TV tra leader', c: () => !!G.flags.debWin },
+  { id: 'campagna', ico: 'mega', n: 'Martello', d: 'Porta a termine una campagna a tema', c: () => !!G.flags.campDone },
+  { id: 'flessibilita', ico: 'eu', n: 'Trattativa a Bruxelles', d: 'Ottieni flessibilità sui conti', c: () => (G.econ.flex || 0) > 0 },
+  { id: 'fondiue', ico: 'eu', n: 'Rata piena', d: 'Sblocca per intero una rata dei fondi europei', c: () => !!G.flags.eufFull },
+  { id: 'assolto', ico: 'scales', n: 'Il fatto non sussiste', d: 'Vieni assolto in tribunale', c: () => !!G.flags.assolto },
+  { id: 'tuttiverdi', ico: 'check', n: 'Tutto in verde', d: 'Da premier tutti e cinque gli indicatori in positivo', c: () => isPremier() && G.econ.pil >= 1.2 && G.econ.deficit <= 3 && G.econ.spread <= 160 && G.econ.dis <= 6 && G.econ.infl <= 2.5 },
+  { id: 'cinqueanni', ico: 'crown', n: 'Legislatura intera', d: 'Cinque anni da premier', c: () => G.stats.weeksPremier >= 260 },
+  { id: 'debito130', ico: 'chartdown', n: 'Debito sotto controllo', d: 'Da premier porti il debito sotto il 130%', c: () => isPremier() && G.econ.debito < 130 },
+  { id: 'trenta', ico: 'rocket', n: 'Trenta per cento', d: 'Il tuo partito supera il 30%', c: () => myParty().poll >= 30 },
+  { id: 'cinqueregioni', ico: 'map', n: 'L’Italia è tua', d: 'Cinque presidenti di Regione del tuo partito', c: () => Object.values(G.regions).filter(r => r.gp === myPid()).length >= 5 },
+  { id: 'vicepremier', ico: 'briefcase', n: 'Numero due', d: 'Diventi vicepremier', c: () => G.careerLog.some(x => /Vicepremier/.test(x.t)) },
+  { id: 'casacca', ico: 'swap', n: 'Cambio di casacca', d: 'Passi a un altro partito', c: () => G.careerLog.some(x => /^Passi a/.test(x.t)) },
+  { id: 'pacchetto', ico: 'gear', n: 'Pacchetto di riforme', d: 'Presenti un pacchetto con «Regola le leggi»', c: () => !!G.flags.pacchetto },
+  { id: 'correnti', ico: 'puzzle', n: 'Partito unito', d: 'Tutte le correnti del tuo partito soddisfatte', c: () => !!(G.corr && G.corr.L.length && G.corr.L.every(x => x.sat >= 65)) },
+  { id: 'scenario', ico: 'trophy', n: 'Missione compiuta', d: 'Completa uno scenario', c: () => !!(G.scen && G.scen.won) },
+];
+MORE_ACH.forEach(a => { if (!ACHIEVEMENTS.some(x => x.id === a.id)) ACHIEVEMENTS.push(a); });
+
+// ---------- scenari con obiettivo ----------
+const SCENARI = [
+  { id: 'recessione', n: 'Il Paese in recessione', d: 'Sei premier mentre l’economia crolla: PIL negativo, disoccupazione alle stelle, spread oltre 240. Obiettivo: in tre anni riportare il PIL sopra l’1% e la disoccupazione sotto il 7,5%, restando a Palazzo Chigi.', weeks: 156, premier: true,
+    setup: () => { Object.assign(G.econ, { pil: -0.9, dis: 9.6, spread: 245, deficit: 4.4 }); G.econ.shockSpread += 60; },
+    win: () => isPremier() && G.econ.pil >= 1 && G.econ.dis <= 7.5, lose: () => !isPremier(), goal: () => `PIL ${sgn(G.econ.pil)}% (serve +1%) · disoccupazione ${fmt1(G.econ.dis)}% (serve 7,5%)` },
+  { id: 'unvoto', n: 'Maggioranza di un voto', d: 'Sei premier, ma alla Camera hai un solo voto di margine. Ogni franco tiratore può farti cadere. Obiettivo: restare a Palazzo Chigi per due anni.', weeks: 104, premier: true, tight: true,
+    win: () => isPremier() && G.week - G.scen.start >= 104, lose: () => !isPremier(), goal: () => `Margine alla Camera: ${govSeats('C') - majority('C') >= 0 ? '+' : ''}${govSeats('C') - majority('C')} · ${Math.max(0, 104 - (G.week - G.scen.start))} settimane alla meta` },
+  { id: 'outsider', n: 'L’outsider', d: 'Il tuo partito nuovo parte dallo 0,6% e le elezioni sono tra sei mesi. Obiettivo: entrare in Parlamento.', weeks: 40, mode: 'fondatore',
+    setup: () => { P('MIO').poll = 0.6; P('MIO').base = 0.6; G.cal.election = G.week + 26; },
+    win: () => P(myPid()).seatsC + P(myPid()).seatsS > 0 && G.lastElection, lose: () => !!G.lastElection && P(myPid()).seatsC + P(myPid()).seatsS === 0, goal: () => `${fmt1(myParty().poll)}% (soglia 3%) · elezioni tra ${Math.max(0, G.cal.election - G.week)} settimane` },
+  { id: 'scandalo', n: 'Il giorno dopo lo scandalo', d: 'Un’inchiesta ha travolto il tuo partito: sondaggi dimezzati e credibilità a terra. Obiettivo: in un anno tornare ai consensi di prima.', weeks: 52,
+    setup: () => { G.scen.target = myParty().poll; myParty().poll *= 0.5; myParty().base *= 0.6; G.cred = 20; G.player.fama = clamp(G.player.fama + 20, 0, 100); },
+    win: () => myParty().poll >= G.scen.target, lose: () => false, goal: () => `${fmt1(myParty().poll)}% su ${fmt1(G.scen.target || 0)}% da recuperare` },
+];
+function scenarioPickHTML() {
+  return `<div class="opt ${SETUP.scenario ? 'on' : ''}" onclick="SETUP.showScen=!SETUP.showScen;renderSetup()"><div class="row">${medal('trophy', 52)}<div class="grow"><div class="t">Scenario con obiettivo</div><div class="small muted" style="margin-top:4px">${SETUP.scenario ? `Scelto: <b>${esc(SCENARI.find(s => s.id === SETUP.scenario).n)}</b>` : 'Partite brevi con una situazione di partenza e una missione da compiere.'}</div></div></div></div>
+    ${SETUP.showScen ? SCENARI.map(s => `<div class="opt ${SETUP.scenario === s.id ? 'on' : ''}" style="margin-left:14px" onclick="SETUP.scenario=SETUP.scenario==='${s.id}'?null:'${s.id}';${s.mode ? `SETUP.mode='${s.mode}';` : ''}renderSetup()"><div class="t">${esc(s.n)}</div><div class="small muted mt">${esc(s.d)}</div></div>`).join('') : ''}`;
+}
+function makePremier() {
+  const pid = myPid(), p = G.player;
+  if (!isLeader()) { p.leader = true; P(pid).leader = p.name; p.rank = 7; }
+  const me = P(pid); if (me.seatsC < 90) { const need = 90 - me.seatsC, needS = 45 - me.seatsS; const donors = PIDS().filter(x => x !== pid).sort((a, b) => compat(a, pid) - compat(b, pid)); let n = need, ns = Math.max(0, needS); donors.forEach(d => { const t = Math.min(n, Math.floor(P(d).seatsC * 0.5)), ts = Math.min(ns, Math.floor(P(d).seatsS * 0.5)); P(d).seatsC -= t; P(d).seatsS -= ts; n -= t; ns -= ts; }); me.seatsC = 90 - n; me.seatsS = 45 - ns; }
+  const allies = PIDS().filter(x => x !== pid).sort((a, b) => compat(b, pid) - compat(a, pid)); const set = [pid];
+  for (const a of allies) { if (hasMajority(set)) break; set.push(a); }
+  startPlayerGovernment(set, assignCabinet(set, pid, p.name), []);
+  G.cal.election = Math.max(G.cal.election, G.week + 200);
+  return set;
+}
+function applyScenario(id) {
+  const S = SCENARI.find(s => s.id === id); if (!S) return;
+  G.scen = { id, start: G.week, until: G.week + S.weeks };
+  if (S.premier) { const set = makePremier(); if (S.tight) { const opp = PIDS().filter(x => !set.includes(x)).sort((a, b) => seatsOf(b, 'C') - seatsOf(a, 'C'))[0]; let m = govSeats('C') - majority('C'); while (m > 1 && opp) { const gp = set.filter(x => P(x).seatsC > 1).sort((a, b) => P(b).seatsC - P(a).seatsC)[0]; P(gp).seatsC--; P(opp).seatsC++; m--; } } }
+  if (S.setup) S.setup();
+  addNews(`Scenario: ${S.n}.`, 'mio');
+}
+function scenarioTick() {
+  const sc = G.scen; if (!sc || sc.won || sc.lost) return;
+  const S = SCENARI.find(s => s.id === sc.id); if (!S) return;
+  if (S.win()) { sc.won = G.week; G.queue.push({ id: 'scenario_fine', ctx: { ok: true } }); }
+  else if (S.lose() || G.week >= sc.until) { sc.lost = G.week; G.queue.push({ id: 'scenario_fine', ctx: { ok: false } }); }
+}
+EVENTS.push({ id: 'scenario_fine', for: 'all', w: 0, chain: true, img: 'trophy', look: 'paper',
+  title: c => c.ok ? 'Missione compiuta' : 'Missione fallita',
+  text: c => { const S = G.scen && SCENARI.find(s => s.id === G.scen.id); return c.ok ? `Hai completato lo scenario «${S ? S.n : ''}». Puoi continuare a giocare liberamente.` : `Lo scenario «${S ? S.n : ''}» non è riuscito. Puoi comunque continuare la partita.`; },
+  choices: c => [{ t: 'Continua', fx: c.ok ? { fama: 5 } : {}, r: c.ok ? 'Un risultato che resterà nella tua carriera.' : 'Ci sarà un’altra occasione.', run: () => { if (c.ok) confetti(); } }] });
+EVENT_BY_ID.scenario_fine = EVENTS[EVENTS.length - 1];
+function scenarioCardHTML() {
+  const sc = G.scen; if (!sc || sc.won || sc.lost) return '';
+  const S = SCENARI.find(s => s.id === sc.id); if (!S) return '';
+  return `<div class="card hero" style="--pc:#fbbf24"><div class="row between"><b>${icon('trophy', 16)} ${esc(S.n)}</b><span class="tag w">${Math.max(0, sc.until - G.week)} sett.</span></div><div class="small muted mt">${esc(S.goal())}</div></div>`;
+}
+const _homeTabEp = homeTab;
+homeTab = function () { return scenarioCardHTML() + _homeTabEp(); };
+const _storyTickEp = storyTick;
+storyTick = function () { _storyTickEp(); if (G.flags.retired) return; try { scenarioTick(); } catch (e) { console.error(e); } };
+
+// ---------- azione ----------
+ACTIONS.splice(ACTIONS.findIndex(x => x.id === 'riposo') + 1, 0, { id: 'ritiro', n: 'Ritirati dalla politica', ico: 'door', cost: 0, show: () => G.week >= 26, d: 'Chiudi la carriera: lasci tutto a un erede o esci di scena. Il gioco simula i cinque anni dopo e arriva il giudizio degli storici.', custom: () => openRetire() });
+ROUTINE_NO.push('ritiro');
+
+// ---------- scene illustrate per i momenti principali ----------
+function sceneHTML(k) {
+  const win = (x0, y, n, dx, w, h) => Array.from({ length: n }, (_, i) => `<rect x="${x0 + i * dx}" y="${y}" width="${w}" height="${h}" rx="1.5" fill="#f6d98a" opacity="${0.55 + ((i * 37) % 10) / 25}"/>`).join('');
+  const sky = '<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1b2a5c"/><stop offset="1" stop-color="#e59a5b"/></linearGradient></defs><rect width="320" height="130" fill="url(#sk)"/><circle cx="270" cy="34" r="14" fill="#ffe3a3" opacity=".8"/>';
+  const flag = (x, y) => `<path d="M${x} ${y}v-26" stroke="#ddd" stroke-width="1.5"/><rect x="${x}" y="${y - 26}" width="6" height="11" fill="#009246"/><rect x="${x + 6}" y="${y - 26}" width="6" height="11" fill="#fff"/><rect x="${x + 12}" y="${y - 26}" width="6" height="11" fill="#ce2b37"/>`;
+  const S = {
+    quirinale: `${sky}<rect x="20" y="62" width="280" height="68" fill="#e8d3b0"/><rect x="20" y="58" width="280" height="6" fill="#cdb48c"/>${win(32, 72, 13, 21, 9, 14)}${win(32, 98, 13, 21, 9, 16)}<rect x="138" y="30" width="44" height="32" fill="#e8d3b0"/><rect x="136" y="26" width="48" height="6" fill="#cdb48c"/>${win(146, 38, 3, 11, 6, 14)}${flag(160, 26)}<rect x="146" y="106" width="28" height="24" rx="12" fill="#3b2a1a"/>`,
+    chigi: `${sky}<rect x="40" y="50" width="240" height="80" fill="#efe1c4"/><rect x="36" y="44" width="248" height="8" fill="#d8c29a"/>${win(52, 60, 11, 20, 9, 16)}${win(52, 88, 11, 20, 9, 16)}<rect x="130" y="80" width="60" height="5" fill="#b89a6a"/><rect x="146" y="104" width="28" height="26" rx="2" fill="#3b2a1a"/>${flag(124, 44)}<path d="M184 44v-26" stroke="#ddd" stroke-width="1.5"/><rect x="184" y="18" width="18" height="11" fill="#003399"/><circle cx="193" cy="23.5" r="3" fill="none" stroke="#ffcc00" stroke-width="1" stroke-dasharray="1 1.2"/>`,
+  };
+  return `<div class="scene"><svg viewBox="0 0 320 130" preserveAspectRatio="xMidYMid slice">${S[k] || ''}</svg></div>`;
+}
 
 </script>
 </body>

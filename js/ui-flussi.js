@@ -752,7 +752,7 @@ function renderResults() {
 function setLabel(set) { return set.map(p => P(p).short).join(' + '); }
 function renderConsultazioni() {
   const f = G.formation;
-  let h = `<div class="center">${medal('building', 76)}<h2 class="mt">Consultazioni al Quirinale</h2><div class="small muted">${esc(INSTITUTIONS.pdr)} riceve le delegazioni dei partiti</div></div>`;
+  let h = `<div class="center">${typeof sceneHTML === 'function' ? sceneHTML('quirinale') : medal('building', 76)}<h2 class="mt">Consultazioni al Quirinale</h2><div class="small muted">${esc(INSTITUTIONS.pdr)} riceve le delegazioni dei partiti</div></div>`;
   h += `<div class="card mt"><div class="row between small"><b>Maggioranza necessaria</b><span>Camera <b>${majority('C')}</b> · Senato <b>${majority('S')}</b></span></div><div class="list mt">${PIDS().filter(id => seatsOf(id, 'C') + seatsOf(id, 'S') > 0).sort((a, b) => seatsOf(b, 'C') - seatsOf(a, 'C')).map(id => `<div class="li">${partyChip(id)}<span class="grow small muted ellipsis">${esc(leaderName(id))}</span><span class="small">${seatsOf(id, 'C')} · ${seatsOf(id, 'S')}</span></div>`).join('')}</div></div>`;
   // vincitore con maggioranza propria
   const winner = f.after === 'elezioni' ? G.coalitions.find(c => c.members.length > 1 && hasMajority(c.members.filter(m => G.parties[m]))) : null;
@@ -1002,7 +1002,7 @@ function renderFiducia() {
   setTimeout(() => { animateVote($('#fid-s'), vs.by); setTimeout(() => {
     $('#fid-s-r').innerHTML = `<span class="stamp ${vs.passed ? 'good' : 'bad'}">${vs.passed ? 'FIDUCIA' : 'SFIDUCIA'}</span><div class="small mt">Sì ${vs.yes} · No ${vs.no} · Astenuti ${vs.ab}</div>`; vib(30);
     if (vc.passed && vs.passed) {
-      $('#fid-end').innerHTML = `<div class="card hero center mt2">${medal('flag', 70)}<h2 class="mt">Il governo ha la fiducia</h2><p class="muted">Ora sei ${G.player.art === 'la' ? 'la' : 'il'} Presidente del Consiglio dei ministri.</p><button class="btn gold block" onclick="finishGovernment()">A Palazzo Chigi ›</button></div>`;
+      $('#fid-end').innerHTML = `<div class="card hero center mt2">${typeof sceneHTML === 'function' ? sceneHTML('chigi') : medal('flag', 70)}<h2 class="mt">Il governo ha la fiducia</h2><p class="muted">Ora sei ${G.player.art === 'la' ? 'la' : 'il'} Presidente del Consiglio dei ministri.</p><button class="btn gold block" onclick="finishGovernment()">A Palazzo Chigi ›</button></div>`;
       confetti();
     } else {
       $('#fid-end').innerHTML = `<div class="card center mt2"><h3 class="bad">Fiducia negata</h3><p class="muted small">Gli alleati scontenti non ti hanno votato. Si torna alle consultazioni.</p><button class="btn block" onclick="G.formation.step='consultazioni';G.formation.tries++;renderFormation()">Consultazioni ›</button></div>`;

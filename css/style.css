@@ -710,3 +710,11 @@ html.pwa .fab2 { position: absolute; }
 .vpb.on { background: linear-gradient(135deg, var(--oroD), var(--oro2)); color: #1a1405; border-color: transparent; }
 .tabtip { border-color: rgba(56,189,248,.45); }
 .tabtip > .row > .lic { color: #38bdf8; }
+/* scene illustrate */
+.scene { width: 100%; max-width: 360px; margin: 0 auto 4px; border-radius: 20px; overflow: hidden; box-shadow: 0 12px 30px rgba(0,0,0,.4); border: 1px solid var(--line2); aspect-ratio: 320 / 130; }
+.scene svg { width: 100%; height: 100%; display: block; }
+/* ritratti che respirano */
+.evcard .portrait img, .hcomp .portrait img, .call .portrait img, .e-tv .portrait img { animation: breathe 4.2s ease-in-out infinite; transform-origin: 50% 90%; }
+.hcomp .portrait img { animation-delay: -1.3s; }
+@keyframes breathe { 0%, 100% { transform: scale(1) rotate(0deg); } 35% { transform: scale(1.025) rotate(-.6deg); } 70% { transform: scale(1.012) rotate(.5deg); } }
+@media (prefers-reduced-motion: reduce) { .evcard .portrait img, .hcomp .portrait img, .call .portrait img, .e-tv .portrait img { animation: none; } }

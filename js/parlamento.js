@@ -117,6 +117,7 @@ function debateAnswer(k) {
 }
 function endDebate() {
   const d = DEB, win = d.me >= d.them, diff = clamp((d.me - d.them) / 4, -2, 2);
+  if (win) G.flags.debWin = true;
   myParty().spinta += 1 + diff; P(d.opp).spinta -= diff * 0.7;
   applyFx({ fama: win ? 4 : 2 });
   addNews(`Confronto TV ${G.player.name}–${P(d.opp).leader}: ${win ? `vince ${G.player.name}` : `meglio ${P(d.opp).leader}`} secondo i sondaggi istantanei.`, win ? 'mio' : 'bad');

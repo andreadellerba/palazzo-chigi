@@ -76,6 +76,7 @@ function submitTuner() {
     TUNE = null; closeSheet(); renderGame();
     return resultSheet(ok.length ? 'building' : 'hand', ok.length ? 'Via libera del Consiglio dei ministri' : 'Il premier frena', `${ok.length ? `${ok.length} ${ok.length > 1 ? 'riforme vanno' : 'riforma va'} in Parlamento come disegni di legge del governo.` : ''}${no.length ? ` ${G.gov.premier} blocca: ${no.map(([id, o]) => '«' + esc(getLaw(id).opts[o].t) + '»').join(', ')}.` : ''}`);
   }
+  G.flags.pacchetto = true;
   const proposer = isPremier() ? 'GOV' : 'PLAYER';
   list.forEach(([id, opt]) => proposeBill(id, +opt, 'ddl', proposer, 'C'));
   if (!isPremier()) { G.player.fama = clamp(G.player.fama + list.length, 0, 100); }

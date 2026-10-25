@@ -146,7 +146,7 @@ function campagnaTick() {
   const tgt = myParty().ax[C.ax];
   if (G.mood[C.ax] !== undefined && tgt !== undefined) G.mood[C.ax] = clamp(G.mood[C.ax] + Math.sign(tgt - G.mood[C.ax]) * 0.12 * k, -10, 10);
   Object.keys(C.grp).forEach(g => { if (G.groups[g] !== undefined) G.groups[g] = clamp(G.groups[g] + C.grp[g], -100, 100); });
-  if (c.n >= 6) { addNews(`Si chiude la campagna «${C.n}» di ${myParty().short}.`, 'mio'); G.camp = null; }
+  if (c.n >= 6) { G.flags.campDone = true; addNews(`Si chiude la campagna «${C.n}» di ${myParty().short}.`, 'mio'); G.camp = null; }
 }
 
 // ---------- tick settimanale ----------

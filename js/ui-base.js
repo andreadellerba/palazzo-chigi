@@ -281,7 +281,7 @@ function renderSetup() {
   let body = '';
   if (st === 'Modalità') body = `<h2>Come vuoi entrare in politica?</h2><p class="muted">Ottobre 2026: il governo Meloni è al quarto anno, le elezioni politiche sono previste per la primavera 2027.</p>
     <div class="opt ${SETUP.mode === 'fondatore' ? 'on' : ''}" onclick="SETUP.mode='fondatore';renderSetup()"><div class="row">${medal('flag', 52)}<div class="grow"><div class="t">Fonda il tuo partito</div><div class="small muted" style="margin-top:4px">Parti da zero con un tuo movimento: nome, simbolo, idee. Cresci nei sondaggi, cerca alleati, corri per Palazzo Chigi.</div></div></div></div>
-    <div class="opt ${SETUP.mode === 'carriera' ? 'on' : ''}" onclick="SETUP.mode='carriera';renderSetup()"><div class="row">${medal('rocket', 52)}<div class="grow"><div class="t">Entra in un partito esistente</div><div class="small muted" style="margin-top:4px">Inizi da militante, consigliere o parlamentare di FdI, PD, M5S, Lega… Fai carriera, diventa ministro, scala il partito o fai una scissione come Vannacci.</div></div></div></div>`;
+    <div class="opt ${SETUP.mode === 'carriera' ? 'on' : ''}" onclick="SETUP.mode='carriera';renderSetup()"><div class="row">${medal('rocket', 52)}<div class="grow"><div class="t">Entra in un partito esistente</div><div class="small muted" style="margin-top:4px">Inizi da militante, consigliere o parlamentare di FdI, PD, M5S, Lega… Fai carriera, diventa ministro, scala il partito o fai una scissione come Vannacci.</div></div></div></div>${typeof scenarioPickHTML === 'function' ? scenarioPickHTML() : ''}`;
   if (st === 'Personaggio') {
     body = `<h2>Il tuo personaggio</h2>
     <label class="lbl">Nome e cognome</label><input id="pname" value="${esc(SETUP.player.name)}" placeholder="Es. Andrea Rossi" oninput="SETUP.player.name=this.value">
@@ -362,6 +362,7 @@ function setupNext() {
   if (SETUP.mode === 'fondatore') cfg.party = Object.assign({}, SETUP.party, { name: SETUP.party.name.trim(), short: SETUP.party.short.trim().toUpperCase() });
   else cfg.join = SETUP.join;
   newGame(cfg);
+  if (SETUP.scenario && typeof applyScenario === 'function') { const S = SCENARI.find(s => s.id === SETUP.scenario); if (S && (!S.mode || S.mode === G.mode)) applyScenario(SETUP.scenario); }
   rerollPlayerAvatar();
   UI.tab = 'home';
   renderGame();

@@ -108,7 +108,7 @@ function euFundsTick() {
   if (!G.euf) { const t = EU_TARGETS.slice().sort(() => Math.random() - 0.5).slice(0, 3); G.euf = { n: (G.eufN || 0) + 1, start: G.week, due: G.week + 26, t: t.map(x => ({ t: x.t, cats: x.cats, def: x.def })) }; G.eufN = G.euf.n; return; }
   if (G.week < G.euf.due) return;
   const ok = euDone(G.euf), n = ok.filter(Boolean).length;
-  const bn = n * 0.25;
+  const bn = n * 0.25; if (n === 3) G.flags.eufFull = true;
   G.econ.oneOff += bn; G.econ.shockPil += n * 0.04;
   addNews(n === 3 ? `Bruxelles sblocca per intero la ${G.euf.n}ª rata dei fondi europei: miliardi per investimenti.` : n ? `Bruxelles sblocca solo in parte la ${G.euf.n}ª rata dei fondi europei (${n} obiettivi su 3).` : `Bruxelles congela la ${G.euf.n}ª rata dei fondi europei: obiettivi mancati.`, n >= 2 ? 'good' : 'bad');
   if (n === 0) { G.gov.popBank -= 1.5; G.groups.ue = clamp(G.groups.ue - 6, -100, 100); }
@@ -217,7 +217,7 @@ const GOV_EVENTS = [
     ] },
   { id: 'sentenza', for: 'all', w: 0, chain: true, img: 'scales', look: 'paper', title: c => sentOk(c) ? 'Assolto: il fatto non sussiste' : 'Condannato in primo grado',
     text: c => sentOk(c) ? 'Il tribunale ti assolve con formula piena. Chi ti aveva attaccato ora tace.' : 'Il tribunale ti condanna in primo grado. Ci sarà l’appello, ma il colpo è pesante.',
-    choices: c => sentOk(c) ? [{ t: '«Avevo ragione io»', fx: { fama: 4, cred: 5, my: 1 }, r: 'Ne esci rafforzato.' }] : [
+    choices: c => sentOk(c) ? [{ t: '«Avevo ragione io»', fx: { fama: 4, cred: 5, my: 1 }, r: 'Ne esci rafforzato.', run: () => { G.flags.assolto = true; } }] : [
       { t: 'Ricorrere in appello e restare al mio posto', fx: { cred: -6, my: -1.5 }, r: 'Resti, ma il consenso cala.' },
       { t: 'Fare un passo indietro', fx: { cred: 4, fama: -6, stress: -10 }, r: 'Un gesto di responsabilità.', run: () => { if (G.player.minister && G.gov) { replaceMinister(G.player.minister, myPid()); G.player.minister = null; } } },
     ] },
