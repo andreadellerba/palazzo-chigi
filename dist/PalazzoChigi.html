@@ -11562,6 +11562,42 @@ function planStarHTML(P5) {
   return `<button class="starb2" onclick="autoPlan()" title="Fai le azioni evidenziate">${icon('star', 13)} ${P5.ids.length} ${P5.ids.length > 1 ? 'azioni' : 'azione'} · ⚡${P5.pc}</button>`;
 }
 
+// ---------- gradimento: quanto gli italiani vorrebbero la TUA coalizione al governo adesso ----------
+function myApproval() {
+  const me = myPid();
+  if (isPremier() && G.gov) return { v: G.gov.approval, real: true };
+  const c = coalitionOf(me), set = (c ? c.members : [me]).filter(p => G.parties[p]);
+  const votes = set.reduce((s, p) => s + P(p).poll, 0);
+  // elettori di partiti vicini che non vi voterebbero ma vi vedrebbero bene al governo
+  const others = PIDS().filter(p => !set.includes(p));
+  const symp = others.reduce((s, p) => { const a = set.reduce((t, q) => t + compat(p, q), 0) / set.length; return s + P(p).poll * clamp((a - 50) / 100, 0, 0.5); }, 0);
+  const coh = typeof govCoherence === 'function' ? govCoherence(set) : 60;
+  const cohFx = set.length > 1 ? (coh >= 55 ? (coh - 55) * 0.25 : (coh - 55) * 0.32) : 0;
+  const lead = (G.player.fama - 50) * 0.05 + ((G.cred || 50) - 50) * 0.05;
+  return { v: clamp(votes + symp + cohFx + lead, 1, 85), votes, symp, cohFx, lead, coh, set, real: false };
+}
+function openMyApproval() {
+  const a = myApproval();
+  if (a.real) return openSheet(`${head('Gradimento')}<p style="line-height:1.55">Sei a Palazzo Chigi: è la percentuale di italiani che approva il tuo governo, oggi <b>${fmt0(a.v)}%</b>. Sale con l’economia che va bene, le riforme popolari e alleati coerenti; scende con crisi, scandali e alleanze tra avversari.</p>`);
+  const row = (t, v, d) => `<div class="li"><div class="grow small">${t}${d ? `<div class="tiny muted">${d}</div>` : ''}</div><b class="${v >= 0 ? 'good' : 'bad'}">${v >= 0 ? '+' : ''}${fmt1(v)}</b></div>`;
+  openSheet(`${head('Gradimento', 'Se governassi tu, adesso')}
+    <div class="center"><div class="bignum">${fmt0(a.v)}%</div><div class="small muted">degli italiani vedrebbe bene ${a.set.length > 1 ? 'la tua coalizione' : 'il tuo partito'} al governo</div></div>
+    <div class="card tight mt"><div class="list">
+      ${row('Voti di ' + a.set.map(p => P(p).short).join(', '), a.votes, 'chi vi vota già')}
+      ${row('Simpatizzanti', a.symp, 'elettori di partiti vicini che vi vedrebbero bene al governo')}
+      ${a.set.length > 1 ? row('Coerenza dell’alleanza', a.cohFx, `affinità tra i partiti: ${fmt0(a.coh)}/100`) : ''}
+      ${row('La tua figura', a.lead, 'fama e credibilità')}
+    </div></div>
+    <p class="small muted mt">Per farlo salire: allearti con partiti vicini alle tue idee, crescere nei sondaggi, farti conoscere. Allearti con gli avversari di sempre lo fa scendere.</p>`);
+}
+homeHeroHTML = function () {
+  const p = G.player, mp = myParty(), a = myApproval();
+  return `<div class="hero2" style="--pc:${mp.color}"><span class="av-badge" onclick="openAvatarEditor()">${portrait(p.name, 48, { party: myPid() })}</span>
+    <div class="grow tx2"><b class="nm">${esc(p.name)}</b><div class="rl">${esc(roleLabel())}</div></div>
+    <div class="nums"><div><span>Sondaggio</span><b>${fmt1(mp.poll)}%</b></div><div onclick="openMyApproval()" style="cursor:pointer"><span>Gradimento</span><b style="color:${pctColor(a.v * 1.4)}">${fmt0(a.v)}%</b></div></div></div>
+    <div class="hero2-sub">${icon('coin', 13)} ${euro(G.funds)} · fama ${fmt0(p.fama)} · stress ${fmt0(p.stress)} · ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</div>`;
+};
+
 </script>
 </body>
 </html>
