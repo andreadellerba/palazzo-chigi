@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="it" class="bru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Ridisegno schermate</title>
+<script>
+// partita di prova: non deve mai toccare i salvataggi veri
+(function () { try { const S = Storage.prototype; S.setItem = function () {}; S.removeItem = function () {}; S.clear = function () {}; } catch (e) {} })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700;900&family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+html, body { height: auto !important; min-height: 0 !important; overflow: auto !important; }
+body { padding: max(env(safe-area-inset-top), 20px) 0 80px; }
+#app { display: none !important; }
+html.bru body::before, html.bru body::after { display: none; }
+.pg { max-width: 430px; margin: 0 auto; padding: 0 14px; }
+.pg h1 { font-family: var(--serif); font-size: 28px; text-align: center; color: #fff; margin: 10px 0 6px; text-transform: uppercase; }
+.lead { text-align: center; color: #bdbdbd; font-size: 14px; line-height: 1.5; margin: 0 0 8px; }
+.lead b { color: #ffe14d; }
+.part { margin: 46px 0 8px; font-family: var(--serif); font-size: 22px; color: #fff; display: flex; align-items: center; gap: 10px; text-transform: uppercase; }
+.part::after { content: ''; flex: 1; height: 3px; background: #ffe14d; }
+.pd { color: #bdbdbd; font-size: 13px; margin: 0 0 6px; }
+.var { margin-top: 18px; }
+.vh { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.vh .code { flex: none; min-width: 38px; height: 26px; display: inline-grid; place-items: center; padding: 0 8px; background: #ffe14d; color: #000; font-weight: 900; font-size: 13px; }
+.vh .code.cur { background: #333; color: #bbb; }
+.vh b { color: #fff; font-size: 15px; }
+.vh span { color: #9a9a9a; font-size: 12px; }
+.box { position: relative; background: #000; border: 1px dashed #333; padding: 12px; overflow: hidden; }
+.w { color: #fff; } .y { color: #ffe14d; } .g { color: #3ddc84; } .r { color: #ff5a4f; } .m { color: #9a9a9a; }
+.mono { font-family: "IBM Plex Mono", monospace; }
+.num { font-family: var(--sans); font-weight: 800; font-variant-numeric: tabular-nums; }
+.lic { width: 18px; height: 18px; }
+/* blocchi riusati */
+.flat { background: #141414; border: 2px solid #2e2e2e; }
+.row2 { display: flex; align-items: center; gap: 10px; }
+.sp { flex: 1; min-width: 0; }
+.ell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hr { height: 1px; background: #262626; margin: 8px 0; }
+.lbl2 { font-size: 10.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #9a9a9a; }
+.big { font-family: var(--sans); font-weight: 800; font-size: 30px; line-height: 1; color: #fff; }
+.chipy { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 8px; background: #1c1c1c; border: 1px solid #333; color: #fff; font-size: 12px; font-weight: 700; }
+.bar2 { height: 6px; background: #262626; position: relative; } .bar2 > i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--c, #ffe14d); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+<div class="pg">
+<h1>Ridisegno</h1>
+<p class="lead">Ogni parte dell’app in più versioni, <b>con i dati veri</b> di una partita di prova e lo stile scuro di adesso. Dimmi i codici che preferisci per ogni parte (es. «A2, B3, D1…»), anche misti.</p>
+<div id="out"><p class="lead" style="margin-top:30px">Preparo la partita di prova…</p></div>
+</div>
+<script src="js/dati.js"></script> <script src="js/mappa.js"></script> <script src="js/leggi.js"></script> <script src="js/manovra.js"></script> <script src="js/spiegazioni.js"></script> <script src="js/leggi2.js"></script> <script src="js/loghi.js"></script> <script src="js/motore.js"></script> <script src="js/avatar-base.js"></script> <script src="js/avatar.js"></script> <script src="js/analisi.js"></script> <script src="js/interviste.js"></script> <script src="js/effetti.js"></script> <script src="js/eventi.js"></script> <script src="js/eventi2.js"></script> <script src="js/eventi3.js"></script> <script src="js/eventi4.js"></script> <script src="js/provocazioni.js"></script> <script src="js/sfide.js"></script> <script src="js/ui-base.js"></script> <script src="js/questionario.js"></script> <script src="js/stile.js"></script> <script src="js/ui-schermate.js"></script> <script src="js/ui-flussi.js"></script> <script src="js/poteri.js"></script> <script src="js/racconto.js"></script> <script src="js/giornalisti.js"></script> <script src="js/discorsi.js"></script> <script src="js/avatar-editor.js"></script> <script src="js/tutorial.js"></script> <script src="js/notifiche.js"></script> <script src="js/immersivo.js"></script> <script src="js/regola.js"></script> <script src="js/carriera.js"></script> <script src="js/opposizione.js"></script> <script src="js/storia.js"></script> <script src="js/parlamento.js"></script> <script src="js/governo.js"></script> <script src="js/interfaccia.js"></script> <script src="js/epilogo.js"></script>
+<script>
+showSplash = function () {};
+saveGame = function () { return true; };
+document.documentElement.classList.add('bru');
+const V = [];
+const part = (t, d) => V.push(`<div class="part">${t}</div>${d ? `<p class="pd">${d}</p>` : ''}`);
+const v = (code, t, sub, html, cur) => V.push(`<div class="var"><div class="vh"><span class="code ${cur ? 'cur' : ''}">${code}</span><b>${t}</b><span>${sub || ''}</span></div><div class="box">${html}</div></div>`);
+const sgnp = x => (x > 0 ? '+' : '') + fmt1(x);
+function build() {
+  const p = G.player, mp = myParty(), g = G.gov, me = myPid();
+  const old = G.hist.polls.length > 5 ? G.hist.polls[G.hist.polls.length - 5].p[me] : mp.poll, dP = mp.poll - old;
+  const third = typeof govStrength === 'function' && g && !inGov(me) ? ['Forza gov.', govStrength().v] : ['Fama', fmt0(p.fama)];
+  const acts = availableActions().slice(0, 9);
+  const todo = notifications().slice(0, 4);
+  const laws = visibleLaws().filter(l => !l.custom).slice(0, 5);
+  const bills = G.bills.filter(b => !b.dead).slice(0, 3);
+  const ids = PIDS().sort((a, b) => P(b).poll - P(a).poll).slice(0, 6);
+  const e = G.econ;
+  const kpis = [['Crescita PIL', sgn(e.pil) + '%', e.pil >= 1 ? 'g' : 'r', 'pil'], ['Deficit', fmt1(e.deficit) + '%', e.deficit <= 3 ? 'g' : 'r', 'deficit'], ['Debito', fmt1(e.debito) + '%', 'r', 'debito'], ['Spread', fmt0(e.spread), e.spread < 150 ? 'g' : 'r', 'spread'], ['Inflazione', fmt1(e.infl) + '%', e.infl <= 2.5 ? 'g' : 'r', 'infl'], ['Disoccupazione', fmt1(e.dis) + '%', e.dis <= 6 ? 'g' : 'r', 'dis']];
+
+  // ---------------- A. TESTATA ----------------
+  part('A · Testata', 'La parte in alto con data, capitale politico e i tre numeri.');
+  v('A1', 'Attuale', 'data grande e tre riquadri', `<div class="topbar" style="padding:0">${topbar().replace(/^<div class="topbar">/, '').replace(/<\/div>$/, '')}</div>`, true);
+  v('A2', 'Riga unica', 'minimal: tutto su una riga', `<div class="row2"><div class="sp"><div class="w num" style="font-size:15px">${fmtDate(G.week, true)}</div><div class="lbl2 y">${esc(roleLabel())}</div></div><span class="chipy">${icon('bolt', 14)} ${G.pc}</span><span class="chipy">${icon('bell', 14)}</span><span class="chipy">${icon('menu', 14)}</span></div>
+    <div class="row2" style="margin-top:10px;gap:14px"><span class="num w">${esc(mp.short)} <b class="y">${fmt1(mp.poll)}%</b> <span class="${dP >= 0 ? 'g' : 'r'}" style="font-size:12px">${dP >= 0 ? '▲' : '▼'}${fmt1(Math.abs(dP))}</span></span><span class="m">·</span><span class="num w">Gov. <b class="${g && g.approval >= 42 ? 'g' : 'r'}">${g ? fmt0(g.approval) : '–'}%</b></span><span class="m">·</span><span class="num w">${third[0]} <b class="y">${third[1]}</b></span></div>`);
+  v('A3', 'Numero protagonista', 'il tuo sondaggio in grande', `<div class="row2"><div class="sp"><div class="lbl2">${esc(mp.name)}</div><div class="big">${fmt1(mp.poll)}<span style="font-size:18px">%</span> <span class="${dP >= 0 ? 'g' : 'r'}" style="font-size:14px">${dP >= 0 ? '▲' : '▼'} ${fmt1(Math.abs(dP))}</span></div><div class="m" style="font-size:12px;margin-top:4px">${fmtDate(G.week)} · ${esc(roleLabel())}</div></div><div style="text-align:right"><span class="chipy">${icon('bolt', 14)} ${G.pc}</span><div class="m num" style="font-size:12px;margin-top:8px">Gov ${g ? fmt0(g.approval) : '–'}% · ${third[0]} ${third[1]}</div></div></div>`);
+  v('A4', 'Barra strumenti', 'compatta, stile terminale', `<div class="mono" style="font-size:12px;color:#bdbdbd;border:2px solid #2e2e2e;padding:8px 10px;display:flex;justify-content:space-between"><span>${fmtDate(G.week, true).toUpperCase()}</span><span class="y">⚡${G.pc}</span><span>${esc(mp.short)} ${fmt1(mp.poll)}%</span><span>GOV ${g ? fmt0(g.approval) : '–'}%</span><span>☰</span></div>`);
+
+  // ---------------- B. CARD PERSONAGGIO ----------------
+  part('B · Il tuo personaggio', 'La card in Home con foto, ruolo e numeri.');
+  v('B1', 'Attuale', '', homeHeroHTML(), true);
+  v('B2', 'Riga sottile', 'minimal: una riga sola', `<div class="flat row2" style="padding:10px">${portrait(p.name, 40, { party: me })}<div class="sp"><b class="w">${esc(p.name)}</b><div class="lbl2 y ell">${esc(roleLabel())}</div></div><div class="num w" style="text-align:right">${fmt1(mp.poll)}%<div class="m" style="font-size:11px">fama ${fmt0(p.fama)}</div></div></div>`);
+  v('B3', 'Tessera di partito', 'editoriale: come un documento', `<div style="border:2px solid #ffe14d;padding:12px;background:#0d0d0d"><div class="row2" style="align-items:flex-start">${portrait(p.name, 64, { party: me })}<div class="sp mono" style="font-size:12px;line-height:1.7"><div class="lbl2 y">TESSERA N. ${String(G.week * 37 + 1042).padStart(6, '0')}</div><div class="w" style="font-family:var(--serif);font-size:17px">${esc(p.name.toUpperCase())}</div><div>PARTITO ........ <span class="w">${esc(mp.short)}</span></div><div>RUOLO .......... <span class="w">${esc(roleLabel())}</span></div><div>SONDAGGIO ...... <span class="y">${fmt1(mp.poll)}%</span></div><div>FAMA / STRESS .. <span class="w">${fmt0(p.fama)} / ${fmt0(p.stress)}</span></div></div></div></div>`);
+  v('B4', 'Solo numeri', 'compatta: niente foto', `<div class="flat" style="padding:12px"><div class="lbl2">${esc(p.name)} · ${esc(roleLabel())}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px">${[['Sondaggio', fmt1(mp.poll) + '%', 'poll'], [g ? 'Governo' : 'Notorietà', g ? fmt0(g.approval) + '%' : fmt0(partyNoto(me)) + '%', g ? 'appr' : 'noto'], ['Fama', fmt0(p.fama), 'fama']].map(([l, val, k]) => `<div><div class="big" style="font-size:24px">${val}</div><div class="lbl2" style="margin:3px 0">${l}</div>${spark(histOf(k, 12), '#ffe14d', 90, 22)}</div>`).join('')}</div></div>`);
+
+  // ---------------- C. DA FARE ORA ----------------
+  part('C · Da fare ora', 'Le cose urgenti della settimana.');
+  v('C1', 'Attuale', 'righe con icona', `<div class="todo">${todo.slice(0, 3).map(n => `<div class="todo-i u${n.u}"><span class="nico">${icon(n.ico, 18)}</span><span class="grow ellipsis">${esc(n.t)}</span>${icon('chevron', 16)}</div>`).join('')}</div>`, true);
+  v('C2', 'Lista numerata', 'minimal', todo.map((n, i) => `<div class="row2" style="padding:8px 0;border-bottom:1px solid #222"><span class="num ${n.u >= 2 ? 'r' : 'y'}" style="font-size:20px;width:22px">${i + 1}</span><div class="sp"><div class="w ell" style="font-size:14px">${esc(n.t)}</div>${n.sub ? `<div class="m ell" style="font-size:12px">${esc(n.sub)}</div>` : ''}</div></div>`).join(''));
+  v('C3', 'Pillole scorrevoli', 'compatta: una riga che scorre', `<div style="display:flex;gap:8px;overflow-x:auto">${todo.map(n => `<span class="chipy" style="height:34px;flex:none;border-color:${n.u >= 2 ? '#ff5a4f' : '#ffe14d'}">${icon(n.ico, 14)} ${esc(n.t.length > 26 ? n.t.slice(0, 25) + '…' : n.t)}</span>`).join('')}</div>`);
+  v('C4', 'Checklist', 'da spuntare', todo.map(n => `<div class="row2" style="padding:7px 0"><span style="width:20px;height:20px;border:2px solid ${n.u >= 2 ? '#ff5a4f' : '#ffe14d'};flex:none"></span><span class="w sp" style="font-size:14px">${esc(n.t)}</span></div>`).join(''));
+
+  // ---------------- D. AZIONI ----------------
+  part('D · Azioni', 'Le cose che puoi fare ogni settimana.');
+  v('D1', 'Attuale', 'griglia 4 colonne', `<div class="acts">${acts.slice(0, 8).map(a => `<div class="act-t" style="--ac:${a.ac}"><span class="ai">${icon(a.ico)}</span><span class="an">${esc(a.n)}</span><span class="ac">${a.cost ? '⚡' + a.cost : 'gratis'}</span></div>`).join('')}</div>`, true);
+  v('D2', 'Lista compatta', 'minimal: nome e costo', acts.map(a => `<div class="row2" style="padding:9px 0;border-bottom:1px solid #222"><span style="color:${a.ac}">${icon(a.ico, 18)}</span><span class="w sp">${esc(a.n)}</span><span class="num y">${a.cost ? '⚡' + a.cost : '–'}</span></div>`).join(''));
+  v('D3', 'Tasti larghi', '2 colonne, testo grande', `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${acts.slice(0, 8).map(a => `<div style="background:#141414;border-left:4px solid ${a.ac};padding:10px"><div class="w" style="font-weight:800;font-size:13.5px;line-height:1.2">${esc(a.n)}</div><div class="m" style="font-size:12px;margin-top:4px">${a.cost ? '⚡ ' + a.cost : 'gratis'}</div></div>`).join('')}</div>`);
+  v('D4', 'Icone grandi', '3 colonne, solo icone e nome corto', `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">${acts.slice(0, 9).map(a => `<div style="text-align:center"><div style="width:58px;height:58px;margin:0 auto;display:grid;place-items:center;background:${a.ac};color:#000">${icon(a.ico, 26)}</div><div class="w" style="font-size:11.5px;margin-top:5px;line-height:1.2;min-height:2.4em">${esc(a.n)}</div></div>`).join('')}</div>`);
+
+  // ---------------- E. CATALOGO LEGGI ----------------
+  part('E · Catalogo leggi', 'Le leggi in vigore che puoi cambiare.');
+  v('E1', 'Attuale', 'cartelline', laws.slice(0, 2).map(l => lawCardHTML(l)).join(''), true);
+  v('E2', 'Tabella', 'minimal: una riga per legge', laws.map(l => `<div class="row2" style="padding:8px 0;border-bottom:1px solid #222"><span style="width:4px;align-self:stretch;background:${CAT_COLOR[l.cat] || '#ffe14d'}"></span><div class="sp"><div class="w ell" style="font-size:14px;font-weight:700">${esc(l.nome)}</div><div class="m ell" style="font-size:12px">${esc(l.opts[G.laws[l.id]].t)}</div></div>${icon('chevron', 14)}</div>`).join(''));
+  v('E3', 'Tessere 2 colonne', 'compatta', `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${laws.slice(0, 4).map(l => `<div style="background:#141414;border-top:4px solid ${CAT_COLOR[l.cat] || '#ffe14d'};padding:9px"><div class="lbl2" style="color:${CAT_COLOR[l.cat]}">${esc(l.cat)}</div><div class="w" style="font-weight:800;font-size:13px;line-height:1.25;margin-top:3px">${esc(l.nome)}</div><div class="m" style="font-size:11.5px;margin-top:4px">${esc(l.opts[G.laws[l.id]].t)}</div></div>`).join('')}</div>`);
+  v('E4', 'Per categoria', 'gruppi apribili', ['Pensioni', 'Fisco', 'Lavoro'].map((c, i) => { const ls = visibleLaws().filter(l => l.cat === c); return `<div style="border-bottom:1px solid #222;padding:9px 0"><div class="row2"><span style="color:${CAT_COLOR[c]}">${icon(CAT_ICON[c], 16)}</span><b class="w sp">${c}</b><span class="m num">${ls.length}</span><span class="y">${i === 0 ? '▾' : '▸'}</span></div>${i === 0 ? ls.slice(0, 3).map(l => `<div class="m ell" style="font-size:12.5px;padding:5px 0 0 26px"><span class="w">${esc(l.nome)}</span> · ${esc(l.opts[G.laws[l.id]].t)}</div>`).join('') : ''}</div>`; }).join(''));
+
+  // ---------------- F. PROVVEDIMENTI IN PARLAMENTO ----------------
+  part('F · In Parlamento', 'Le leggi in discussione.');
+  v('F1', 'Attuale', 'fascicolo', bills.slice(0, 1).map(billCard).join(''), true);
+  v('F2', 'Riga con barra', 'compatta', bills.map(b => { const pr = predictVote(b), tot = (pr.yes + pr.no) || 1; return `<div style="padding:9px 0;border-bottom:1px solid #222"><div class="row2"><b class="w sp ell">${esc(billName(b))}</b><span class="num ${pr.passed ? 'g' : 'r'}" style="font-size:12px">${pr.passed ? 'PASSA' : 'NO'}</span></div><div class="m ell" style="font-size:12px;margin:3px 0 6px">${esc(stageLabel(b))}</div><div class="bar2" style="--c:#3ddc84"><i style="width:${pr.yes / tot * 100}%"></i></div></div>`; }).join(''));
+  v('F3', 'Percorso a tappe', 'editoriale: si vede dove si trova', bills.slice(0, 2).map(b => `<div style="padding:8px 0 12px"><b class="w">${esc(billName(b))}</b><div style="display:flex;margin-top:10px">${b.stages.map((s, i) => `<div style="flex:1;text-align:center"><div style="height:4px;background:${i < b.stage ? '#ffe14d' : i === b.stage ? '#fff' : '#333'}"></div><div style="font-size:9.5px;margin-top:4px" class="${i === b.stage ? 'w' : 'm'}">${esc(stepShort(s))}</div></div>`).join('')}</div></div>`).join(''));
+  v('F4', 'Scheda voto', 'minimal: solo esito previsto', bills.map(b => { const pr = predictVote(b); return `<div class="row2" style="padding:7px 0;border-bottom:1px solid #222"><span class="num" style="width:58px;font-size:12px;color:${pr.passed ? '#3ddc84' : '#ff5a4f'}">${pr.yes}–${pr.no}</span><span class="w sp ell" style="font-size:13.5px">${esc(billName(b))}</span></div>`; }).join(''));
+
+  // ---------------- G. INDICATORI ----------------
+  part('G · Indicatori economici', 'Il tab Conti.');
+  v('G1', 'Attuale', 'riquadri con grafico', `<div class="grid2">${kpis.slice(0, 2).map(([l, val, c, k]) => `<div class="kpi"><div class="l">${l}</div><div class="row between"><div class="v ${c === 'r' ? 'bad' : 'good'}">${val}</div>${spark(histOf(k, 12), c === 'r' ? '#ff9c9c' : '#7ee8b8', 58, 24)}</div></div>`).join('')}</div>`, true);
+  v('G2', 'Tabella', 'minimal', kpis.map(([l, val, c]) => `<div class="row2" style="padding:7px 0;border-bottom:1px solid #222"><span class="w sp">${l}</span><span class="num ${c}" style="font-size:16px">${val}</span></div>`).join(''));
+  v('G3', 'Righello', 'quanto manca alla soglia', [['Deficit', e.deficit, 3, 6, '%'], ['Spread', e.spread, 200, 400, ''], ['Disoccupazione', e.dis, 7.5, 12, '%']].map(([l, val, thr, max, u]) => `<div style="margin:8px 0 14px"><div class="row2"><span class="w sp">${l}</span><b class="num ${val > thr ? 'r' : 'g'}">${fmt1(val)}${u}</b></div><div class="bar2" style="margin-top:6px;--c:${val > thr ? '#ff5a4f' : '#3ddc84'}"><i style="width:${Math.min(100, val / max * 100)}%"></i><s style="position:absolute;top:-4px;bottom:-4px;width:2px;background:#fff;left:${thr / max * 100}%"></s></div><div class="m" style="font-size:11px;margin-top:3px">soglia ${thr}${u}</div></div>`).join(''));
+  v('G4', 'Cruscotto', 'un numero alla volta, grande', `<div class="row2" style="overflow-x:auto;gap:8px">${kpis.map(([l, val, c]) => `<div style="flex:none;width:120px;padding:12px;background:#141414;border-bottom:4px solid ${c === 'r' ? '#ff5a4f' : '#3ddc84'}"><div class="lbl2">${l}</div><div class="big ${c}" style="font-size:26px;margin-top:6px">${val}</div></div>`).join('')}</div>`);
+
+  // ---------------- H. SONDAGGI ----------------
+  part('H · Sondaggi', 'La classifica dei partiti.');
+  v('H1', 'Attuale', 'riga con logo e grafico', `<div class="card tight"><div class="list">${ids.slice(0, 3).map(id => `<div class="li">${partyMark(id, 30)}<div class="grow"><b class="small">${esc(P(id).name)}</b><div class="bar mt"><i style="width:${P(id).poll * 3}%;--c:${P(id).color}"></i></div></div><b>${fmt1(P(id).poll)}%</b></div>`).join('')}</div></div>`, true);
+  v('H2', 'Classifica', 'con la posizione', ids.map((id, i) => `<div class="row2" style="padding:6px 0;border-bottom:1px solid #222"><span class="num y" style="width:20px">${i + 1}</span>${partyMark(id, 22)}<span class="w sp">${esc(P(id).short)}</span><span class="num w">${fmt1(P(id).poll)}%</span></div>`).join(''));
+  v('H3', 'Barre orizzontali', 'si confrontano a colpo d’occhio', ids.map(id => `<div style="margin:6px 0"><div class="row2" style="font-size:12px"><span class="w sp">${esc(P(id).short)}</span><span class="num w">${fmt1(P(id).poll)}</span></div><div class="bar2" style="height:10px;--c:${P(id).color}"><i style="width:${P(id).poll / 30 * 100}%"></i></div></div>`).join(''));
+  v('H4', 'Mosaico', 'area proporzionale ai voti', `<div style="display:flex;flex-wrap:wrap;height:120px;gap:2px">${ids.map(id => `<div style="flex:${P(id).poll} 1 0;min-width:40px;background:${P(id).color};display:flex;align-items:flex-end;padding:5px;color:#fff;font-size:11px;font-weight:800">${esc(P(id).short)} ${fmt0(P(id).poll)}%</div>`).join('')}</div>`);
+
+  // ---------------- I. EVENTO ----------------
+  part('I · Evento e decisione', 'Quando succede qualcosa e devi scegliere.');
+  const ev = eventView({ id: 'sbarchi_opp', ctx: {} });
+  v('I1', 'Attuale', 'card con scelte', `<div class="evcard" style="padding:14px"><h3 class="w">${esc(ev.title)}</h3><div class="txt small mt">${esc(ev.text)}</div>${ev.choices.slice(0, 2).map(c => `<div class="choice"><div class="t">${esc(c.t)}</div>${fxChips(c.fx)}</div>`).join('')}</div>`, true);
+  v('I2', 'Notizia e numeri', 'minimal: scelte numerate', `<div class="lbl2 r">ULTIM’ORA</div><div class="w" style="font-family:var(--serif);font-size:20px;line-height:1.15;margin:6px 0">${esc(ev.title)}</div><div class="m" style="font-size:13px">${esc(ev.text)}</div>${ev.choices.map((c, i) => `<div class="row2" style="padding:9px 0;border-top:1px solid #222;margin-top:6px"><span class="num y" style="font-size:22px;width:22px">${i + 1}</span><span class="w sp" style="font-size:14px">${esc(c.t)}</span></div>`).join('')}`);
+  v('I3', 'Carte da scegliere', 'le scelte scorrono di lato', `<b class="w">${esc(ev.title)}</b><div style="display:flex;gap:8px;overflow-x:auto;margin-top:10px">${ev.choices.map(c => `<div style="flex:none;width:200px;padding:12px;background:#141414;border:2px solid #ffe14d"><div class="w" style="font-weight:800;font-size:13.5px">${esc(c.t)}</div><div class="m" style="font-size:11.5px;margin-top:6px;line-height:1.4">${(() => { const pc = fxProCon(c.fx); return pc.pro.map(x => '<span class="g">▲ ' + esc(x.t) + '</span>').concat(pc.contro.map(x => '<span class="r">▼ ' + esc(x.t) + '</span>')).slice(0, 3).join('<br>'); })()}</div></div>`).join('')}</div>`);
+  v('I4', 'Chat', 'come un messaggio dello staff', `<div class="row2" style="align-items:flex-start">${portrait('Giulia Martini', 34, { female: true })}<div style="background:#1c1c1c;padding:10px;font-size:13.5px" class="w"><b class="y">Portavoce</b><br>${esc(ev.title)}. ${esc(ev.text)}</div></div>${ev.choices.map(c => `<div style="margin:6px 0 0 auto;max-width:80%;background:#ffe14d;color:#000;padding:8px 10px;font-size:13px;font-weight:700;text-align:right">${esc(c.t)}</div>`).join('')}`);
+
+  // ---------------- J. MENU IN BASSO ----------------
+  part('J · Menu in basso', 'La barra con le sezioni.');
+  v('J1', 'Attuale', 'pillola con etichetta', `<div style="position:relative;height:66px"><nav class="tabs-mobile2" style="position:absolute;left:0;right:0;bottom:0">${navHTML().replace(/^<nav class="tabs-mobile2">/, '').replace(/<\/nav>$/, '')}</nav></div>`, true);
+  const tabs = [['home', 'Home'], ['doc', 'Leggi'], ['vote', 'Aula'], ['map', 'Italia'], ['chart', 'Partiti'], ['euro', 'Conti']];
+  v('J2', 'Etichette sotto', 'classica, tutte le voci leggibili', `<div style="display:flex;border-top:2px solid #2e2e2e;padding-top:8px">${tabs.map(([i, n], k) => `<div style="flex:1;text-align:center;color:${k === 0 ? '#ffe14d' : '#9a9a9a'}">${icon(i, 20)}<div style="font-size:10.5px;font-weight:800;margin-top:2px">${n}</div></div>`).join('')}</div>`);
+  v('J3', 'Linea attiva', 'minimal: solo icone', `<div style="display:flex;background:#141414">${tabs.map(([i], k) => `<div style="flex:1;text-align:center;padding:12px 0;color:${k === 0 ? '#fff' : '#777'};border-top:3px solid ${k === 0 ? '#ffe14d' : 'transparent'}">${icon(i, 20)}</div>`).join('')}</div>`);
+  v('J4', 'Blocco attivo', 'la sezione attiva diventa un tasto giallo pieno', `<div style="display:flex;gap:4px">${tabs.map(([i, n], k) => `<div style="flex:${k === 0 ? 2.2 : 1};display:flex;align-items:center;justify-content:center;gap:6px;height:48px;background:${k === 0 ? '#ffe14d' : '#141414'};color:${k === 0 ? '#000' : '#9a9a9a'};font-weight:800;font-size:12px">${icon(i, 18)}${k === 0 ? n.toUpperCase() : ''}</div>`).join('')}</div>`);
+
+  // ---------------- K. RIEPILOGO SETTIMANA ----------------
+  part('K · Riepilogo della settimana', 'Quello che compare quando passa una settimana.');
+  const news = G.news.slice(0, 4);
+  v('K1', 'Attuale', 'telegiornale', `<div class="tgw" style="padding:10px"><div class="lbl2 r">TG PALAZZO · ORE 20</div><div class="w" style="font-weight:800;margin-top:6px">${esc(news[0] ? news[0].t : '')}</div></div>`, true);
+  v('K2', 'Scontrino', 'minimal: elenco con i cambi', `<div class="mono" style="font-size:12.5px;line-height:1.8;color:#ddd;background:#0d0d0d;border:1px solid #333;padding:10px"><div class="y">SETTIMANA ${G.week + 1} · ${fmtDate(G.week, true).toUpperCase()}</div><div>${esc(mp.short)} ........... ${fmt1(mp.poll)}% <span class="${dP >= 0 ? 'g' : 'r'}">${dP >= 0 ? '+' : ''}${fmt1(dP)}</span></div><div>GOVERNO ......... ${g ? fmt0(g.approval) : '–'}%</div><div>SPREAD .......... ${fmt0(e.spread)}</div><div style="border-top:1px dashed #444;margin-top:6px;padding-top:6px">${news.slice(0, 3).map(n => '· ' + esc(n.t.length > 60 ? n.t.slice(0, 59) + '…' : n.t)).join('<br>')}</div></div>`);
+  v('K3', 'Prima pagina', 'editoriale: titolo di giornale', `<div style="background:#f3eee2;color:#111;padding:12px"><div style="font-family:var(--serif);font-size:13px;text-align:center;border-bottom:2px solid #111;padding-bottom:4px">IL QUOTIDIANO DI ROMA</div><div style="font-family:var(--serif);font-size:20px;line-height:1.15;margin-top:8px">${esc(news[0] ? news[0].t : '')}</div><div style="display:flex;gap:10px;margin-top:8px;font-size:12px;border-top:1px solid #111;padding-top:6px"><span>${esc(mp.short)} ${fmt1(mp.poll)}%</span><span>Gov ${g ? fmt0(g.approval) : '–'}%</span><span>Spread ${fmt0(e.spread)}</span></div></div>`);
+  v('K4', 'Tre numeri', 'compatta: solo cosa è cambiato', `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">${[[mp.short, fmt1(mp.poll) + '%', dP], ['Governo', g ? fmt0(g.approval) + '%' : '–', 0.4], ['Spread', fmt0(e.spread), -2]].map(([l, val, d]) => `<div style="background:#141414;padding:10px;text-align:center"><div class="lbl2">${esc(l)}</div><div class="big" style="font-size:24px;margin:4px 0">${val}</div><div class="num ${d >= 0 ? 'g' : 'r'}" style="font-size:12px">${d >= 0 ? '▲' : '▼'} ${fmt1(Math.abs(d))}</div></div>`).join('')}</div>`);
+
+  // ---------------- L. STAFF E ALLEATI ----------------
+  part('L · Staff e alleati', 'Le persone intorno a te.');
+  v('L1', 'Attuale', 'quattro riquadri', staffHTML(), true);
+  v('L2', 'Elenco', 'minimal', Object.keys(STAFF_ROLES).map(r => { const s = G.staff && G.staff[r]; return `<div class="row2" style="padding:7px 0;border-bottom:1px solid #222">${s ? portrait(s.n, 30, { female: !!s.f }) : `<span style="width:30px;height:30px;border:1px dashed #555;display:inline-block"></span>`}<span class="w sp">${esc(STAFF_ROLES[r].n)}</span><span class="${s ? 'y' : 'm'}" style="font-size:12px">${s ? '★'.repeat(s.liv) : 'da scegliere'}</span></div>`; }).join(''));
+  v('L3', 'Volti in fila', 'compatta: solo foto, nome sotto', `<div style="display:flex;gap:10px;overflow-x:auto">${Object.keys(STAFF_ROLES).map(r => { const s = G.staff && G.staff[r]; return `<div style="flex:none;width:70px;text-align:center">${s ? portrait(s.n, 56, { female: !!s.f }) : `<span style="width:56px;height:56px;border:2px dashed #555;display:inline-grid;place-items:center;color:#ffe14d">${icon('plus', 20)}</span>`}<div class="w" style="font-size:11px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(STAFF_ROLES[r].n)}</div></div>`; }).join('')}</div>`);
+
+  document.getElementById('out').innerHTML = V.join('');
+}
+window.addEventListener('load', () => setTimeout(() => {
+  try {
+    newGame({ mode: 'fondatore', diff: 'media', player: { name: 'Andrea Rossi', art: 'il', age: 42, region: 'LAZ', bg: 'gio' }, party: { name: 'Italia Domani', short: 'ID', symbol: '★', color: '#7b2ff7', ax: { eco: 1, soc: 2, eu: 0, imm: 4, amb: 2, giu: 2, terr: 0, ist: 3 }, people: ['Marco Bianchi', 'Giulia Conti', 'Luca Ferri', 'Sara Gallo'] } });
+    for (let i = 0; i < 14; i++) { advanceWeek(); G.queue = []; }
+    G.parties.MIO.seatsC = Math.max(G.parties.MIO.seatsC, 30); G.player.parl = 'C';
+    build();
+  } catch (e) { document.getElementById('out').innerHTML = '<p class="lead">Errore: ' + e.message + '</p>'; console.error(e); }
+}, 50));
+</script>
+</body>
+</html>
