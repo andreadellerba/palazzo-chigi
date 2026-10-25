@@ -685,3 +685,28 @@ html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolut
 .sum-flags .sfl b { font-size: 11px; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .sum-flags .sfl span { font-size: 9.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; padding: 0; background: none; border: 0; }
 .sum-flags .rflag { border-radius: 50%; padding: 0; border: 0; background: none; }
+/* calendario che sfoglia */
+.wkflip { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; pointer-events: none; background: rgba(3,6,16,.35); animation: fade .15s both; transition: opacity .25s; }
+.wkflip.out { opacity: 0; }
+.wkflip .cal { position: relative; width: 150px; height: 170px; perspective: 600px; }
+.wkflip .pg { position: absolute; inset: 0; border-radius: 18px; background: #fbf7ee; color: #1a1405; box-shadow: 0 18px 40px rgba(0,0,0,.45); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+.wkflip .pg::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 34px; background: #c8102e; }
+.wkflip .wd { position: relative; margin-top: -8px; margin-bottom: 14px; color: #fff; font-size: 12px; font-weight: 900; letter-spacing: .12em; }
+.wkflip .wn { font-family: var(--serif); font-weight: 900; font-size: 64px; line-height: 1; }
+.wkflip .ww { font-size: 11px; color: #6b5f45; font-weight: 700; margin-top: 6px; }
+.wkflip .pg.from { transform-origin: 50% 0; animation: calflip .55s .08s cubic-bezier(.5,0,.75,0) both; backface-visibility: hidden; }
+@keyframes calflip { to { transform: rotateX(-100deg) translateY(-10px); opacity: 0; } }
+/* avanza veloce */
+.fab2 { position: fixed; right: 25px; bottom: calc(var(--safe-b) + 160px); z-index: 19; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; gap: 0; color: #fff; background: rgba(124,58,237,.55); border: 1px solid rgba(255,255,255,.25); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.fab2 .lic { width: 15px; height: 15px; margin: 0 -4px; }
+.fab2:active { transform: scale(.92); }
+html.pwa .fab2 { position: absolute; }
+/* Home compatta */
+.card.hcomp h3 { font-size: 20px; }
+.card.hcomp .role-l { margin-top: 2px; }
+.st4s.s3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* vicepremier dalla lista */
+.vpb { flex: none; height: 26px; padding: 0 8px; border-radius: 8px; font-size: 11px; font-weight: 900; border: 1px solid var(--line2); color: var(--muted); background: rgba(255,255,255,.04); }
+.vpb.on { background: linear-gradient(135deg, var(--oroD), var(--oro2)); color: #1a1405; border-color: transparent; }
+.tabtip { border-color: rgba(56,189,248,.45); }
+.tabtip > .row > .lic { color: #38bdf8; }

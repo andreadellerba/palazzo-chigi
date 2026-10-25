@@ -702,6 +702,31 @@ html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolut
 .sum-flags .sfl b { font-size: 11px; color: var(--cream); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .sum-flags .sfl span { font-size: 9.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; padding: 0; background: none; border: 0; }
 .sum-flags .rflag { border-radius: 50%; padding: 0; border: 0; background: none; }
+/* calendario che sfoglia */
+.wkflip { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; pointer-events: none; background: rgba(3,6,16,.35); animation: fade .15s both; transition: opacity .25s; }
+.wkflip.out { opacity: 0; }
+.wkflip .cal { position: relative; width: 150px; height: 170px; perspective: 600px; }
+.wkflip .pg { position: absolute; inset: 0; border-radius: 18px; background: #fbf7ee; color: #1a1405; box-shadow: 0 18px 40px rgba(0,0,0,.45); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
+.wkflip .pg::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 34px; background: #c8102e; }
+.wkflip .wd { position: relative; margin-top: -8px; margin-bottom: 14px; color: #fff; font-size: 12px; font-weight: 900; letter-spacing: .12em; }
+.wkflip .wn { font-family: var(--serif); font-weight: 900; font-size: 64px; line-height: 1; }
+.wkflip .ww { font-size: 11px; color: #6b5f45; font-weight: 700; margin-top: 6px; }
+.wkflip .pg.from { transform-origin: 50% 0; animation: calflip .55s .08s cubic-bezier(.5,0,.75,0) both; backface-visibility: hidden; }
+@keyframes calflip { to { transform: rotateX(-100deg) translateY(-10px); opacity: 0; } }
+/* avanza veloce */
+.fab2 { position: fixed; right: 25px; bottom: calc(var(--safe-b) + 160px); z-index: 19; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; gap: 0; color: #fff; background: rgba(124,58,237,.55); border: 1px solid rgba(255,255,255,.25); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.fab2 .lic { width: 15px; height: 15px; margin: 0 -4px; }
+.fab2:active { transform: scale(.92); }
+html.pwa .fab2 { position: absolute; }
+/* Home compatta */
+.card.hcomp h3 { font-size: 20px; }
+.card.hcomp .role-l { margin-top: 2px; }
+.st4s.s3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* vicepremier dalla lista */
+.vpb { flex: none; height: 26px; padding: 0 8px; border-radius: 8px; font-size: 11px; font-weight: 900; border: 1px solid var(--line2); color: var(--muted); background: rgba(255,255,255,.04); }
+.vpb.on { background: linear-gradient(135deg, var(--oroD), var(--oro2)); color: #1a1405; border-color: transparent; }
+.tabtip { border-color: rgba(56,189,248,.45); }
+.tabtip > .row > .lic { color: #38bdf8; }
 
 </style>
 </head>
@@ -6196,12 +6221,7 @@ function postRender() {
 function homeTab() {
   const p = G.player, mp = myParty(), g = G.gov;
   let h = tipsHTML();
-  h += `<div class="card hero center" style="--pc:${mp.color}">
-    <span class="av-badge" onclick="openAvatarEditor()">${portrait(p.name, 78, { party: myPid() })}<span class="pbadge" style="--c:${mp.color}">${partyMark(myPid(), 26)}</span><span class="edit">${icon('edit')}</span></span>
-    <h2 class="mt">${esc(p.name)}</h2><div class="role-l">${esc(roleLabel())}</div>
-    ${g ? `<div class="row wrap" style="gap:4px;justify-content:center;margin-top:10px">${g.parties.map(partyChip).join('')}</div>` : ''}
-    <div class="st4s">${stat4('Sondaggio', fmt1(mp.poll) + '%', 'poll', '#c4a5ff')}${stat4('Notorietà', fmt0(partyNoto(myPid())) + '%', 'noto', '#22d3ee')}${g ? stat4(isPremier() ? 'Tuo governo' : 'Governo', fmt0(g.approval) + '%', 'appr', '#ffd60a') : stat4('Fama', fmt0(p.fama), 'fama', '#f0abfc')}${isLeader() ? stat4('Fama', fmt0(p.fama), 'fama', '#f0abfc') : stat4('Col leader', relNum(p.rap), 'rap', relColorHex(p.rap))}</div>
-    <div class="minirow"><span>${icon('coin')} ${euro(G.funds)}</span><span>${icon('sun')} Stress ${fmt0(p.stress)}</span><span>${icon('building')} ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</span></div></div>`;
+  h += homeHeroHTML();
   // da fare ora
   const all = notifications(), todo = all.slice(0, 3);
   if (todo.length) h += sec('Da fare ora', all.length > 3 ? `<button class="btn sm" onclick="openNotifications()">Tutte</button>` : '') + `<div class="todo">${todo.map((n, i) => `<button class="todo-i u${n.u}" style="animation-delay:${i * 60}ms" onclick="${n.on}"><span class="nico ${n.u >= 2 ? 'u2' : n.u ? 'u1' : ''}">${emoIcon(n.ico, 19)}</span><span class="grow ellipsis">${esc(n.t)}</span>${icon('chevron', 16)}</button>`).join('')}</div>`;
@@ -6608,6 +6628,7 @@ function openMenu() {
     ${menuItem('save', 'Salva partita', 'Tre slot sul telefono', 'closeSheet();openSave()')}
     ${menuItem('upload', 'Sposta la partita', 'Su un altro telefono: file o testo', 'closeSheet();openTransfer()')}
     ${menuItem('search', 'Diagnostica', 'Gli ultimi errori, da mandarmi', 'closeSheet();openDiagnostics()')}
+    ${menuItem('radio', 'Suoni', soundOn() ? 'Attivi: tocca per spegnerli' : 'Spenti: tocca per accenderli', 'setSound(!soundOn());closeSheet();toast(soundOn() ? \'Suoni attivi\' : \'Suoni spenti\')')}
     ${menuItem('cap', 'Tutorial', 'Rivedi la guida passo passo', 'closeSheet();startTutorial(0)')}
     ${menuItem('info', 'Come si gioca', 'Riassunto delle regole', 'closeSheet();openGuide()')}
     ${menuItem('star', 'Crediti', 'Loghi, fonti dei dati, avatar', 'closeSheet();openCredits()')}
@@ -7568,7 +7589,7 @@ function renderCabinet() {
   replaceSheet(`<div class="row between"><div><div class="tiny gold" style="font-weight:800">${f.rimpasto ? 'RIMPASTO' : 'LA SQUADRA DI GOVERNO'}</div><h2>I ministri</h2></div>${f.rimpasto ? '<button class="btn sm" onclick="G.formation=null;closeSheet()">Annulla</button>' : ''}</div>
     <div class="card hero mt"><div class="small muted">Quote attese dagli alleati (in base ai seggi)</div>${f.set.map(p => `<div class="row" style="margin:6px 0">${partyChip(p)}<div class="grow" style="position:relative">${barH(qi[p].w * 100, 100, P(p).color)}<i style="position:absolute;left:${qi[p].q * 100}%;top:-3px;bottom:-3px;width:2px;background:#fff"></i></div><span class="tiny" style="width:84px;text-align:right">${fmt0(qi[p].w * 100)}% / ${fmt0(qi[p].q * 100)}%</span></div>`).join('')}<div class="tiny dim">Barra: peso dei ministeri ottenuti · linea bianca: quota attesa</div>${pactsLine(f.set) ? `<div class="small mt"><b class="gold">${icon('hands', 15)} Promesse fatte in trattativa:</b> ${pactsLine(f.set)}</div>` : ''}</div>
     <div class="row between mt"><span class="small">${filled}/${MINISTRIES.length} ministeri assegnati</span><button class="btn sm" onclick="autoCabinet()">${icon('sparkle')} Completa in automatico</button></div>
-    <div class="mt">${MINISTRIES.map(m => { const n = f.ministers[m.id]; const pp = n ? person(n) : null; const vice = n && f.vice.includes(n); return `<div class="card tight click" onclick="pickMinister('${m.id}')"><div class="row"><div class="grow"><div class="tiny muted">${m.key ? icon('key', 13) + ' ' : ''}${esc(m.n)}</div><b class="small">${n ? esc(n) : '<span class="dim">da nominare</span>'}${vice ? ' <span class="tag o">vicepremier</span>' : ''}</b></div>${pp ? (pp.party === 'TEC' ? '<span class="tag">tecnico</span>' : pp.party === 'IND' ? '<span class="tag">indip.</span>' : partyChip(pp.party)) : ''}${pp ? `<span class="tiny muted" style="width:30px;text-align:right">${pp.comp}/10</span>` : ''}</div></div>`; }).join('')}</div>
+    <div class="mt">${MINISTRIES.map(m => { const n = f.ministers[m.id]; const pp = n ? person(n) : null; const vice = n && f.vice.includes(n); return `<div class="card tight click" onclick="pickMinister('${m.id}')"><div class="row"><div class="grow"><div class="tiny muted">${m.key ? icon('key', 13) + ' ' : ''}${esc(m.n)}</div><b class="small">${n ? esc(n) : '<span class="dim">da nominare</span>'}${vice ? ' <span class="tag o">vicepremier</span>' : ''}</b></div>${pp ? (pp.party === 'TEC' ? '<span class="tag">tecnico</span>' : pp.party === 'IND' ? '<span class="tag">indip.</span>' : partyChip(pp.party)) : ''}${pp ? `<span class="tiny muted" style="width:30px;text-align:right">${pp.comp}/10</span>` : ''}${n && f.set.length > 1 && n !== G.player.name ? `<button class="vpb ${vice ? 'on' : ''}" onclick="event.stopPropagation();toggleViceInline('${m.id}')" title="Vicepremier">VP</button>` : ''}</div></div>`; }).join('')}</div>
     <button class="btn gold block mt2" ${filled === MINISTRIES.length ? '' : 'disabled'} onclick="submitCabinet()">${f.rimpasto ? 'Conferma il rimpasto · ⚡4' : 'Presenta la lista al Quirinale ›'}</button>`);
 }
 function autoCabinet() {
@@ -10411,6 +10432,115 @@ const _storyTickGov = storyTick;
 storyTick = function () { _storyTickGov(); try { euFundsTick(); correntiTick(); } catch (e) { console.error(e); } };
 const _contiTabGov = contiTab;
 contiTab = function () { return _contiTabGov() + euFundsHTML(); };
+
+</script>
+<script>
+// ============================================================
+//  INTERFACCIA: suoni, calendario che sfoglia, avanzamento veloce,
+//  consigli alla prima visita, Home compatta, meno tocchi
+// ============================================================
+
+// ---------- suoni sintetizzati (nessun file da scaricare) ----------
+const SND = { ctx: null };
+function soundOn() { try { return localStorage.getItem(SAVE_PREFIX + 'snd') === '1'; } catch (e) { return false; } }
+function setSound(on) { try { localStorage.setItem(SAVE_PREFIX + 'snd', on ? '1' : '0'); } catch (e) {} if (on) sfx('bell'); }
+function actx() { if (!SND.ctx) { const A = window.AudioContext || window.webkitAudioContext; if (!A) return null; SND.ctx = new A(); } if (SND.ctx.state === 'suspended') SND.ctx.resume(); return SND.ctx; }
+function noiseBuf(c, sec) { const b = c.createBuffer(1, c.sampleRate * sec, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b; }
+function sfx(kind) {
+  if (!soundOn()) return;
+  try {
+    const c = actx(); if (!c) return; const t = c.currentTime, out = c.createGain(); out.gain.value = 0.5; out.connect(c.destination);
+    if (kind === 'page') { // pagina che si gira
+      const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.35); const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.setValueAtTime(900, t); f.frequency.exponentialRampToValueAtTime(3500, t + 0.3); const g = c.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.35, t + 0.05); g.gain.exponentialRampToValueAtTime(0.001, t + 0.33); n.connect(f).connect(g).connect(out); n.start(t);
+    } else if (kind === 'bell') { // campanella dell'aula
+      [880, 1320].forEach((fq, i) => { const o = c.createOscillator(), g = c.createGain(); o.type = 'sine'; o.frequency.value = fq; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.25 / (i + 1), t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1); o.connect(g).connect(out); o.start(t); o.stop(t + 1.2); });
+    } else if (kind === 'applause') { // applausi
+      for (let k = 0; k < 26; k++) { const n = c.createBufferSource(); n.buffer = noiseBuf(c, 0.06); const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = 1500 + Math.random() * 1500; const g = c.createGain(), s = t + Math.random() * 1.4; g.gain.setValueAtTime(0.0001, s); g.gain.exponentialRampToValueAtTime(0.25, s + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, s + 0.06); n.connect(f).connect(g).connect(out); n.start(s); }
+    } else if (kind === 'tap') {
+      const o = c.createOscillator(), g = c.createGain(); o.frequency.value = 520; g.gain.setValueAtTime(0.12, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06); o.connect(g).connect(out); o.start(t); o.stop(t + 0.07);
+    }
+  } catch (e) {}
+}
+
+// ---------- calendario che sfoglia ----------
+function weekFlip(from, to) {
+  const el = document.createElement('div'); el.className = 'wkflip';
+  const pg = w => { const d = dateOf(w); return `<div class="wd">${MESI[d.getMonth()].toUpperCase()} ${d.getFullYear()}</div><div class="wn">${d.getDate()}</div><div class="ww">settimana ${w + 1}</div>`; };
+  el.innerHTML = `<div class="cal"><div class="pg to">${pg(to)}</div><div class="pg from">${pg(from)}</div></div>`;
+  document.body.appendChild(el); sfx('page');
+  setTimeout(() => el.classList.add('out'), 620); setTimeout(() => el.remove(), 900);
+}
+const _nextWeekUi = nextWeek;
+nextWeek = function () {
+  if (G.phase !== 'normale' || G.queue.length) return _nextWeekUi();
+  const from = G.week; _nextWeekUi();
+  if (G.week !== from) { weekFlip(from, G.week); const s = G.lastSummary; if (s && s.votes && s.votes.length) setTimeout(() => sfx('bell'), 500); }
+};
+
+// ---------- avanza fino al prossimo evento importante ----------
+function fastForward() {
+  if (G.phase !== 'normale' || G.queue.length) return nextWeek();
+  const from = G.week, before = { poll: myParty().poll, appr: G.gov ? G.gov.approval : null, spread: G.econ.spread };
+  let s = null, n = 0, auto = [];
+  while (n < 8) {
+    auto = runRoutine();
+    s = advanceWeek(); if (!s) break; n++;
+    G.queue = s.specials.map(x => ({ sp: x })).concat(G.queue);
+    if (G.queue.length || G.phase !== 'normale' || pendingVoteIds().length || (G.cal.election - G.week <= 3 && G.cal.election > G.week)) break;
+  }
+  saveGame('auto'); renderGame(); vib(12);
+  if (G.week !== from) weekFlip(from, G.week);
+  if (s) { showWeekSummary(s, before, auto); if (n > 1) toast(`Avanzato di ${n} settimane`, 'good'); }
+}
+const _fabHTMLUi = fabHTML;
+fabHTML = function () {
+  const h = _fabHTMLUi();
+  if (G.phase !== 'normale' || G.queue.length) return h;
+  return h + `<button class="fab2" onclick="fastForward()" title="Avanza fino al prossimo evento">${icon('arrowr', 16)}${icon('arrowr', 16)}</button>`;
+};
+
+// ---------- consigli alla prima visita di ogni sezione ----------
+const TAB_TIPS = {
+  home: 'Qui trovi chi sei, cosa fare adesso e le azioni della settimana. Il cerchio in basso a destra fa passare una settimana; quello piccolo sopra salta fino al prossimo evento importante.',
+  leggi: 'Il catalogo delle leggi in vigore. Toccane una per vedere com’è oggi e come potresti cambiarla, oppure usa «Regola le leggi attuali» per spostare i cursori e vedere subito cosa sale e cosa scende.',
+  aula: 'Camera e Senato: chi ha i seggi e cosa si vota. Ogni card mostra com’è la legge oggi, cosa diventerebbe e quanti sì e no sono previsti. Toccala per i dettagli.',
+  italia: 'La mappa: tocca una regione per vedere chi governa e quanto è forte il tuo partito. Le icone sono gli eventi in corso.',
+  partiti: 'Sondaggi (anche per istituto, età e zona), schede dei partiti e alleanze. Da qui costruisci la tua coalizione.',
+  conti: 'L’economia: PIL, deficit, debito, spread. Il colore dice se il valore sta migliorando o peggiorando nelle ultime settimane.',
+};
+function tabTipHTML(tab) {
+  G.flags.tabTips = G.flags.tabTips || {};
+  if (G.flags.tabTips[tab] || !TAB_TIPS[tab]) return '';
+  return `<div class="card tight tabtip"><div class="row" style="align-items:flex-start">${icon('info', 18)}<div class="grow small">${TAB_TIPS[tab]}</div></div><div class="right mt"><button class="btn sm" onclick="G.flags.tabTips['${tab}']=1;renderGame()">Ho capito</button></div></div>`;
+}
+const _tabContentUi = tabContent;
+tabContent = function () { return tabTipHTML(UI.tab) + _tabContentUi(); };
+
+// ---------- Home compatta: 3 numeri chiave ----------
+function homeHeroHTML() {
+  const p = G.player, mp = myParty(), g = G.gov;
+  const second = g ? stat4(isPremier() ? 'Tuo governo' : 'Governo', fmt0(g.approval) + '%', 'appr', '#ffd60a') : stat4('Notorietà', fmt0(partyNoto(myPid())) + '%', 'noto', '#22d3ee');
+  const third = isLeader() ? stat4('Fama', fmt0(p.fama), 'fama', '#f0abfc') : stat4('Col leader', relNum(p.rap), 'rap', relColorHex(p.rap));
+  return `<div class="card hero hcomp" style="--pc:${mp.color}">
+    <div class="row"><span class="av-badge" onclick="openAvatarEditor()">${portrait(p.name, 58, { party: myPid() })}<span class="pbadge" style="--c:${mp.color}">${partyMark(myPid(), 20)}</span></span>
+      <div class="grow"><h3>${esc(p.name)}</h3><div class="role-l">${esc(roleLabel())}</div>${g ? `<div class="row wrap" style="gap:3px;margin-top:5px">${g.parties.map(partyChip).join('')}</div>` : ''}</div></div>
+    <div class="st4s s3">${stat4('Sondaggio', fmt1(mp.poll) + '%', 'poll', '#c4a5ff')}${second}${third}</div>
+    <div class="minirow"><span>${icon('coin')} ${euro(G.funds)}</span><span>${icon('sun')} Stress ${fmt0(p.stress)}</span><span>${icon('building')} ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</span></div></div>`;
+}
+
+// ---------- meno tocchi: vicepremier direttamente dalla lista ----------
+function toggleViceInline(mid) {
+  const f = G.formation, n = f.ministers[mid]; if (!n) return;
+  if (f.vice.includes(n)) f.vice = f.vice.filter(x => x !== n);
+  else if (f.vice.length < 2) f.vice.push(n);
+  else return toast('Al massimo due vicepremier: prima togline uno', 'bad');
+  const sh = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null, st = sh ? sh.scrollTop : 0;
+  renderCabinet(); vib(6);
+  const s2 = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null; if (s2) s2.scrollTop = st;
+}
+// applausi insieme ai coriandoli
+const _confettiUi = confetti;
+confetti = function (...a) { sfx('applause'); return _confettiUi.apply(this, a); };
 
 </script>
 </body>

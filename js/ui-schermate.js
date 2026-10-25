@@ -85,12 +85,7 @@ function postRender() {
 function homeTab() {
   const p = G.player, mp = myParty(), g = G.gov;
   let h = tipsHTML();
-  h += `<div class="card hero center" style="--pc:${mp.color}">
-    <span class="av-badge" onclick="openAvatarEditor()">${portrait(p.name, 78, { party: myPid() })}<span class="pbadge" style="--c:${mp.color}">${partyMark(myPid(), 26)}</span><span class="edit">${icon('edit')}</span></span>
-    <h2 class="mt">${esc(p.name)}</h2><div class="role-l">${esc(roleLabel())}</div>
-    ${g ? `<div class="row wrap" style="gap:4px;justify-content:center;margin-top:10px">${g.parties.map(partyChip).join('')}</div>` : ''}
-    <div class="st4s">${stat4('Sondaggio', fmt1(mp.poll) + '%', 'poll', '#c4a5ff')}${stat4('Notorietà', fmt0(partyNoto(myPid())) + '%', 'noto', '#22d3ee')}${g ? stat4(isPremier() ? 'Tuo governo' : 'Governo', fmt0(g.approval) + '%', 'appr', '#ffd60a') : stat4('Fama', fmt0(p.fama), 'fama', '#f0abfc')}${isLeader() ? stat4('Fama', fmt0(p.fama), 'fama', '#f0abfc') : stat4('Col leader', relNum(p.rap), 'rap', relColorHex(p.rap))}</div>
-    <div class="minirow"><span>${icon('coin')} ${euro(G.funds)}</span><span>${icon('sun')} Stress ${fmt0(p.stress)}</span><span>${icon('building')} ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</span></div></div>`;
+  h += homeHeroHTML();
   // da fare ora
   const all = notifications(), todo = all.slice(0, 3);
   if (todo.length) h += sec('Da fare ora', all.length > 3 ? `<button class="btn sm" onclick="openNotifications()">Tutte</button>` : '') + `<div class="todo">${todo.map((n, i) => `<button class="todo-i u${n.u}" style="animation-delay:${i * 60}ms" onclick="${n.on}"><span class="nico ${n.u >= 2 ? 'u2' : n.u ? 'u1' : ''}">${emoIcon(n.ico, 19)}</span><span class="grow ellipsis">${esc(n.t)}</span>${icon('chevron', 16)}</button>`).join('')}</div>`;
@@ -497,6 +492,7 @@ function openMenu() {
     ${menuItem('save', 'Salva partita', 'Tre slot sul telefono', 'closeSheet();openSave()')}
     ${menuItem('upload', 'Sposta la partita', 'Su un altro telefono: file o testo', 'closeSheet();openTransfer()')}
     ${menuItem('search', 'Diagnostica', 'Gli ultimi errori, da mandarmi', 'closeSheet();openDiagnostics()')}
+    ${menuItem('radio', 'Suoni', soundOn() ? 'Attivi: tocca per spegnerli' : 'Spenti: tocca per accenderli', 'setSound(!soundOn());closeSheet();toast(soundOn() ? \'Suoni attivi\' : \'Suoni spenti\')')}
     ${menuItem('cap', 'Tutorial', 'Rivedi la guida passo passo', 'closeSheet();startTutorial(0)')}
     ${menuItem('info', 'Come si gioca', 'Riassunto delle regole', 'closeSheet();openGuide()')}
     ${menuItem('star', 'Crediti', 'Loghi, fonti dei dati, avatar', 'closeSheet();openCredits()')}
