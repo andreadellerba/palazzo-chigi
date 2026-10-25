@@ -1061,6 +1061,13 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .tb5 .ib5 { position: absolute; right: -6px; top: 50%; transform: translateY(-50%); margin: 0; }
 .tb5 { font-size: clamp(9px, 2.55vw, 12px); padding-left: 28px; padding-right: 30px; } .tb5 .s4 { flex: none; overflow: visible; }
 .tb5 .s4 em, .tb5 em { font-size: 1em !important; font-weight: 600; margin-left: 2px; }
+.opt .bgt { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Info: testo in fila, maiuscolo, diviso da punti, va a capo */
+.info6 { text-align: center; line-height: 1.9; font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.info6 .i6 { color: #fff; cursor: pointer; }
+.info6 .i6.u2 { color: var(--bad); } .info6 .i6.u1 { color: #ffe14d; } .info6 .i6.dl6 { color: #9a9a9a; }
+.info6 .sep6 { font-style: normal; color: #555; margin: 0 7px; }
+.info6 .i6 { white-space: nowrap; display: inline-block; }
 
 </style>
 </head>
@@ -1365,6 +1372,23 @@ const TALKSHOWS = [
 
 // Percorsi di provenienza del tuo personaggio
 const BACKGROUNDS = [
+  { id: 'ope', n: 'Operaio', car: 6, comp: 4, integ: 8, fama: 2, fondi: 5, d: '+ credibilità tra i lavoratori, sindacati vicini', bonus: { sind: 15 } },
+  { id: 'pre', n: 'Precario / rider', car: 7, comp: 4, integ: 7, fama: 3, fondi: 2, d: '+ voce dei giovani e dei precari', bonus: { sind: 10 } },
+  { id: 'art', n: 'Artigiano', car: 6, comp: 5, integ: 7, fama: 2, fondi: 15, d: '+ voce delle piccole imprese', bonus: { conf: 8 } },
+  { id: 'com', n: 'Commerciante', car: 6, comp: 5, integ: 6, fama: 3, fondi: 25, d: '+ rapporto con i negozianti e il territorio', bonus: { conf: 6 } },
+  { id: 'agr', n: 'Agricoltore', car: 5, comp: 5, integ: 8, fama: 3, fondi: 20, d: '+ forte nelle campagne e nel mondo agricolo', bonus: {} },
+  { id: 'ins', n: 'Insegnante', car: 6, comp: 7, integ: 8, fama: 3, fondi: 10, d: '+ credibilità su scuola e giovani', bonus: { sind: 8 } },
+  { id: 'nur', n: 'Infermiere', car: 6, comp: 6, integ: 9, fama: 3, fondi: 8, d: '+ credibilità sulla sanità, simpatia popolare', bonus: { sind: 6 } },
+  { id: 'pol', n: 'Poliziotto', car: 6, comp: 5, integ: 8, fama: 5, fondi: 10, d: '+ forte sulla sicurezza', bonus: { mag: 5 } },
+  { id: 'vvf', n: 'Vigile del fuoco', car: 7, comp: 5, integ: 9, fama: 6, fondi: 8, d: '+ eroe delle emergenze, molto amato', bonus: {} },
+  { id: 'ric', n: 'Ricercatore', car: 5, comp: 8, integ: 8, fama: 2, fondi: 8, d: '+ competenza, credibilità con l’Europa', bonus: { ue: 5 } },
+  { id: 'vol', n: 'Volontario / terzo settore', car: 6, comp: 5, integ: 9, fama: 4, fondi: 8, d: '+ vicino alla Chiesa e al volontariato', bonus: { chiesa: 15 } },
+  { id: 'gen', n: 'Genitore a tempo pieno', car: 6, comp: 5, integ: 8, fama: 1, fondi: 5, d: '+ credibilità su famiglia e natalità', bonus: { chiesa: 5 } },
+  { id: 'pens', n: 'Pensionato', car: 5, comp: 6, integ: 8, fama: 3, fondi: 25, d: '+ voce degli anziani, tanto tempo libero', bonus: {} },
+  { id: 'dip', n: 'Diplomatico', car: 5, comp: 8, integ: 8, fama: 4, fondi: 30, d: '+ Bruxelles e Quirinale si fidano', bonus: { ue: 15, quir: 10 } },
+  { id: 'chef', n: 'Chef / ristoratore', car: 7, comp: 5, integ: 6, fama: 10, fondi: 50, d: '+ volto noto, vicino alle imprese', bonus: { conf: 5, media: 5 } },
+  { id: 'spo', n: 'Campione sportivo', car: 8, comp: 4, integ: 7, fama: 18, fondi: 60, d: '+ fama altissima, poca esperienza politica', bonus: { media: 10 } },
+  { id: 'act', n: 'Attore / cantante', car: 9, comp: 3, integ: 6, fama: 18, fondi: 70, d: '+ carisma e fama, poca competenza', bonus: { media: 15 } },
   { id: 'avv', n: 'Avvocato',               car: 6, comp: 7, integ: 6, fama: 4,  fondi: 30, d: '+ competenza su giustizia', bonus: { giu: 1 } },
   { id: 'imp', n: 'Imprenditore',           car: 6, comp: 6, integ: 5, fama: 8,  fondi: 80, d: '+ fondi e rapporto con le imprese', bonus: { conf: 15 } },
   { id: 'sind', n: 'Sindacalista',          car: 7, comp: 5, integ: 7, fama: 6,  fondi: 15, d: '+ rapporto con i sindacati', bonus: { sind: 20 } },
@@ -6270,7 +6294,7 @@ function renderSetup() {
     <label class="lbl">Età: <b id="agev">${SETUP.player.age}</b> anni</label><input type="range" min="25" max="72" value="${SETUP.player.age}" oninput="SETUP.player.age=+this.value;$('#agev').textContent=this.value">
     <label class="lbl">Regione d’origine (il tuo bacino elettorale)</label><select onchange="SETUP.player.region=this.value">${REGIONS_DEF.map(r => `<option value="${r.id}" ${r.id === SETUP.player.region ? 'selected' : ''}>${r.n}</option>`).join('')}</select>
     <label class="lbl">Da dove vieni</label>
-    ${BACKGROUNDS.map(b => `<div class="opt ${SETUP.player.bg === b.id ? 'on' : ''}" onclick="SETUP.player.bg='${b.id}';renderSetup()"><div class="row between"><div class="t" style="font-size:15px">${b.n}</div><div class="tiny muted">Carisma ${b.car} · Competenza ${b.comp} · Integrità ${b.integ}</div></div><div class="small muted">${b.d}</div></div>`).join('')}`;
+    ${BACKGROUNDS.map(b => `<div class="opt ${SETUP.player.bg === b.id ? 'on' : ''}" onclick="SETUP.player.bg='${b.id}';renderSetup()"><div class="t bgt">${b.n}</div><div class="tiny muted" style="margin-top:3px">Carisma ${b.car} · Competenza ${b.comp} · Integrità ${b.integ} · Fama ${b.fama}</div><div class="small muted" style="margin-top:2px">${b.d}</div></div>`).join('')}`;
   }
   if (st === 'Partito' && SETUP.mode === 'fondatore') {
     const pa = SETUP.party;
@@ -11476,7 +11500,8 @@ function infoHTML() {
   G.referendums.filter(r => !r.done).forEach(r => dl.push({ w: r.w, i: 'pen', t: 'Referendum' }));
   dl.sort((a, b) => a.w - b.w);
   const on = x => x.i === 'vote' ? "UI.partiti='alleanze';goTab('partiti')" : x.i === 'map' ? "goTab('italia')" : x.i === 'euro' ? "infoExplain('manovra')" : x.i === 'building' ? "infoExplain('quirinale')" : "infoExplain('referendum')";
-  return sec('Info') + `<div class="pills3">${todo.map(n => `<button class="p3 u${n.u}" onclick="${n.on}">${icon(n.ico, 14)}<span>${esc(n.t)}</span></button>`).join('')}${dl.map(x => `<button class="p3 due3" onclick="${on(x)}">${icon(x.i, 14)}<span>${esc(x.t)} · ${weeksLeft(x.w)}</span></button>`).join('')}</div>`;
+  const items = todo.map(n => `<a class="i6 u${n.u}" onclick="${n.on}">${esc(n.t)}</a>`).concat(dl.map(x => `<a class="i6 dl6" onclick="${on(x)}">${esc(x.t)} ${weeksLeft(x.w)}</a>`));
+  return sec('Info') + `<div class="info6">${items.join('<i class="sep6">·</i>')}</div>`;
 }
 
 // ---------- niente più tasto «avanti veloce» ----------

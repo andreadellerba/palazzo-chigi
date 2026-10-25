@@ -120,7 +120,8 @@ function infoHTML() {
   G.referendums.filter(r => !r.done).forEach(r => dl.push({ w: r.w, i: 'pen', t: 'Referendum' }));
   dl.sort((a, b) => a.w - b.w);
   const on = x => x.i === 'vote' ? "UI.partiti='alleanze';goTab('partiti')" : x.i === 'map' ? "goTab('italia')" : x.i === 'euro' ? "infoExplain('manovra')" : x.i === 'building' ? "infoExplain('quirinale')" : "infoExplain('referendum')";
-  return sec('Info') + `<div class="pills3">${todo.map(n => `<button class="p3 u${n.u}" onclick="${n.on}">${icon(n.ico, 14)}<span>${esc(n.t)}</span></button>`).join('')}${dl.map(x => `<button class="p3 due3" onclick="${on(x)}">${icon(x.i, 14)}<span>${esc(x.t)} · ${weeksLeft(x.w)}</span></button>`).join('')}</div>`;
+  const items = todo.map(n => `<a class="i6 u${n.u}" onclick="${n.on}">${esc(n.t)}</a>`).concat(dl.map(x => `<a class="i6 dl6" onclick="${on(x)}">${esc(x.t)} ${weeksLeft(x.w)}</a>`));
+  return sec('Info') + `<div class="info6">${items.join('<i class="sep6">·</i>')}</div>`;
 }
 
 // ---------- niente più tasto «avanti veloce» ----------

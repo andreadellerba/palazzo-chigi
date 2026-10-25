@@ -1044,3 +1044,10 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .tb5 .ib5 { position: absolute; right: -6px; top: 50%; transform: translateY(-50%); margin: 0; }
 .tb5 { font-size: clamp(9px, 2.55vw, 12px); padding-left: 28px; padding-right: 30px; } .tb5 .s4 { flex: none; overflow: visible; }
 .tb5 .s4 em, .tb5 em { font-size: 1em !important; font-weight: 600; margin-left: 2px; }
+.opt .bgt { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* Info: testo in fila, maiuscolo, diviso da punti, va a capo */
+.info6 { text-align: center; line-height: 1.9; font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.info6 .i6 { color: #fff; cursor: pointer; }
+.info6 .i6.u2 { color: var(--bad); } .info6 .i6.u1 { color: #ffe14d; } .info6 .i6.dl6 { color: #9a9a9a; }
+.info6 .sep6 { font-style: normal; color: #555; margin: 0 7px; }
+.info6 .i6 { white-space: nowrap; display: inline-block; }

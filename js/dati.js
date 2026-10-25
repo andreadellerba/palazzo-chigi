@@ -294,6 +294,23 @@ const TALKSHOWS = [
 
 // Percorsi di provenienza del tuo personaggio
 const BACKGROUNDS = [
+  { id: 'ope', n: 'Operaio', car: 6, comp: 4, integ: 8, fama: 2, fondi: 5, d: '+ credibilità tra i lavoratori, sindacati vicini', bonus: { sind: 15 } },
+  { id: 'pre', n: 'Precario / rider', car: 7, comp: 4, integ: 7, fama: 3, fondi: 2, d: '+ voce dei giovani e dei precari', bonus: { sind: 10 } },
+  { id: 'art', n: 'Artigiano', car: 6, comp: 5, integ: 7, fama: 2, fondi: 15, d: '+ voce delle piccole imprese', bonus: { conf: 8 } },
+  { id: 'com', n: 'Commerciante', car: 6, comp: 5, integ: 6, fama: 3, fondi: 25, d: '+ rapporto con i negozianti e il territorio', bonus: { conf: 6 } },
+  { id: 'agr', n: 'Agricoltore', car: 5, comp: 5, integ: 8, fama: 3, fondi: 20, d: '+ forte nelle campagne e nel mondo agricolo', bonus: {} },
+  { id: 'ins', n: 'Insegnante', car: 6, comp: 7, integ: 8, fama: 3, fondi: 10, d: '+ credibilità su scuola e giovani', bonus: { sind: 8 } },
+  { id: 'nur', n: 'Infermiere', car: 6, comp: 6, integ: 9, fama: 3, fondi: 8, d: '+ credibilità sulla sanità, simpatia popolare', bonus: { sind: 6 } },
+  { id: 'pol', n: 'Poliziotto', car: 6, comp: 5, integ: 8, fama: 5, fondi: 10, d: '+ forte sulla sicurezza', bonus: { mag: 5 } },
+  { id: 'vvf', n: 'Vigile del fuoco', car: 7, comp: 5, integ: 9, fama: 6, fondi: 8, d: '+ eroe delle emergenze, molto amato', bonus: {} },
+  { id: 'ric', n: 'Ricercatore', car: 5, comp: 8, integ: 8, fama: 2, fondi: 8, d: '+ competenza, credibilità con l’Europa', bonus: { ue: 5 } },
+  { id: 'vol', n: 'Volontario / terzo settore', car: 6, comp: 5, integ: 9, fama: 4, fondi: 8, d: '+ vicino alla Chiesa e al volontariato', bonus: { chiesa: 15 } },
+  { id: 'gen', n: 'Genitore a tempo pieno', car: 6, comp: 5, integ: 8, fama: 1, fondi: 5, d: '+ credibilità su famiglia e natalità', bonus: { chiesa: 5 } },
+  { id: 'pens', n: 'Pensionato', car: 5, comp: 6, integ: 8, fama: 3, fondi: 25, d: '+ voce degli anziani, tanto tempo libero', bonus: {} },
+  { id: 'dip', n: 'Diplomatico', car: 5, comp: 8, integ: 8, fama: 4, fondi: 30, d: '+ Bruxelles e Quirinale si fidano', bonus: { ue: 15, quir: 10 } },
+  { id: 'chef', n: 'Chef / ristoratore', car: 7, comp: 5, integ: 6, fama: 10, fondi: 50, d: '+ volto noto, vicino alle imprese', bonus: { conf: 5, media: 5 } },
+  { id: 'spo', n: 'Campione sportivo', car: 8, comp: 4, integ: 7, fama: 18, fondi: 60, d: '+ fama altissima, poca esperienza politica', bonus: { media: 10 } },
+  { id: 'act', n: 'Attore / cantante', car: 9, comp: 3, integ: 6, fama: 18, fondi: 70, d: '+ carisma e fama, poca competenza', bonus: { media: 15 } },
   { id: 'avv', n: 'Avvocato',               car: 6, comp: 7, integ: 6, fama: 4,  fondi: 30, d: '+ competenza su giustizia', bonus: { giu: 1 } },
   { id: 'imp', n: 'Imprenditore',           car: 6, comp: 6, integ: 5, fama: 8,  fondi: 80, d: '+ fondi e rapporto con le imprese', bonus: { conf: 15 } },
   { id: 'sind', n: 'Sindacalista',          car: 7, comp: 5, integ: 7, fama: 6,  fondi: 15, d: '+ rapporto con i sindacati', bonus: { sind: 20 } },

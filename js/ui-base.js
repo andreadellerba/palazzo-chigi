@@ -289,7 +289,7 @@ function renderSetup() {
     <label class="lbl">Età: <b id="agev">${SETUP.player.age}</b> anni</label><input type="range" min="25" max="72" value="${SETUP.player.age}" oninput="SETUP.player.age=+this.value;$('#agev').textContent=this.value">
     <label class="lbl">Regione d’origine (il tuo bacino elettorale)</label><select onchange="SETUP.player.region=this.value">${REGIONS_DEF.map(r => `<option value="${r.id}" ${r.id === SETUP.player.region ? 'selected' : ''}>${r.n}</option>`).join('')}</select>
     <label class="lbl">Da dove vieni</label>
-    ${BACKGROUNDS.map(b => `<div class="opt ${SETUP.player.bg === b.id ? 'on' : ''}" onclick="SETUP.player.bg='${b.id}';renderSetup()"><div class="row between"><div class="t" style="font-size:15px">${b.n}</div><div class="tiny muted">Carisma ${b.car} · Competenza ${b.comp} · Integrità ${b.integ}</div></div><div class="small muted">${b.d}</div></div>`).join('')}`;
+    ${BACKGROUNDS.map(b => `<div class="opt ${SETUP.player.bg === b.id ? 'on' : ''}" onclick="SETUP.player.bg='${b.id}';renderSetup()"><div class="t bgt">${b.n}</div><div class="tiny muted" style="margin-top:3px">Carisma ${b.car} · Competenza ${b.comp} · Integrità ${b.integ} · Fama ${b.fama}</div><div class="small muted" style="margin-top:2px">${b.d}</div></div>`).join('')}`;
   }
   if (st === 'Partito' && SETUP.mode === 'fondatore') {
     const pa = SETUP.party;
