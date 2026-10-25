@@ -8633,10 +8633,16 @@ function openDeal(pid, cid) {
   if (G.flags.listsDeposited === G.cal.election) return toast('Liste già depositate: alleanze bloccate fino al voto', 'bad');
   const b = dealBase(pid, cid);
   if (b.block && !b.override) {
-    const who = b.kind === 'join' ? b.block : (never(myPid(), pid) ? pid : b.block);
+    // veto diretto (quel partito non vuole TE) o indiretto (un alleato non vuole il partito che inviti)
+    const direct = b.kind === 'join' ? never(myPid(), b.block) : never(myPid(), pid);
+    const who = b.kind === 'join' ? b.block : (direct ? pid : b.block);
     const r = rel(who, myPid());
-    openSheet(`<div class="center">${medal('lock', 76, '#ff9c9c')}<h2 class="mt">Veto</h2><p class="muted">${esc(P(who).short)} ${b.kind === 'join' || never(myPid(), pid) ? `non si siede al tavolo con ${esc(myParty().short)}` : `non si alleerà mai con ${esc(P(pid).short)}`}: le distanze sono troppe.</p></div>
-      ${never(myPid(), who) ? `<div class="card tight"><div class="small">Un veto si può superare solo con un rapporto <b>ottimo</b> con ${esc(P(who).leader)} (almeno +55). Oggi: <b style="color:${relColorHex(r)}">${relNum(r)}</b>.</div>${barH(r + 100, 200, relColor(r), true)}<div class="tiny muted mt">Incontri riservati, voti comuni in aula e interviste concilianti avvicinano i leader.</div></div><button class="btn block mt" onclick="closeSheet();doIncontro('${who}')">${icon('cup')} Incontro riservato con ${esc(firstName(P(who).leader))} · ⚡1</button>` : ''}`);
+    const msg = direct ? `${esc(P(who).short)} non si siede al tavolo con ${esc(myParty().short)}: le distanze sono troppe.`
+      : b.kind === 'join' ? `Nella coalizione c’è ${esc(P(who).short)}, che non si alleerà mai con ${esc(myParty().short)}.`
+      : `${esc(P(who).short)}, che è nella tua coalizione, non si alleerà mai con ${esc(P(pid).short)}.`;
+    openSheet(`<div class="center">${medal('lock', 76, '#ff9c9c')}<h2 class="mt">Veto</h2><p class="muted">${msg}</p></div>
+      ${direct ? `<div class="card tight"><div class="small">Il veto è contro di te: si supera solo con un rapporto <b>ottimo</b> con ${esc(P(who).leader)} (${esc(P(who).short)}), almeno +55. Oggi: <b style="color:${relColorHex(r)}">${relNum(r)}</b>.</div>${barH(r + 100, 200, relColor(r), true)}<div class="tiny muted mt">Incontri riservati, voti comuni in aula e interviste concilianti avvicinano i leader.</div></div><button class="btn block mt" onclick="closeSheet();doIncontro('${who}')">${icon('cup')} Incontro riservato con ${esc(P(who).leader)} · ⚡1</button>`
+      : `<div class="card tight"><div class="small">Il veto non dipende da te ma dai partiti: ${esc(P(who).short)} e ${esc(P(b.kind === 'join' ? myPid() : pid).short)} non staranno mai nella stessa alleanza. Per farlo dovresti rinunciare a uno dei due.</div></div>`}`);
     return;
   }
   DEAL = { pid, cid: cid || null, offers: {}, law: null, patience: 3, log: [] };
