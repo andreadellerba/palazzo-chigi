@@ -558,6 +558,7 @@ function billsTick() {
       const v = computeVote(b, s.h, { fiducia: b.fiducia });
       b.votes.push({ w: G.week, h: s.h, yes: v.yes, no: v.no, abst: v.abst, passed: v.passed, fiducia: v.fiducia, r: s.r, twoThirds: v.twoThirds, by: v.by });
       if (G._wk) G._wk.votes.push({ bill: b, v });
+      if (v.rebels) { b.votes[b.votes.length - 1].rebels = v.rebels; if (typeof rebelNews === 'function') rebelNews(b, v); }
       if (v.fiducia) {
         G.stats.fiducie += isPremier() ? 1 : 0;
         if (G.gov) G.gov.parties.forEach(p => { G.gov.sat[p] = clamp((G.gov.sat[p] || 50) - 2 * D().partner, 0, 100); });

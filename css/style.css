@@ -672,3 +672,9 @@ html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolut
 .sg { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
 .sg:first-of-type { margin-top: 8px; }
 .sg .btn.sm { flex: none; }
+.ptab { font-size: 12.5px; }
+.ptab .pr { display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(var(--pc, 4), minmax(0, 1fr)); align-items: center; gap: 4px; padding: 5px 0; border-bottom: 1px solid var(--line); }
+.ptab .pr:last-child { border-bottom: 0; }
+.ptab .pr > span:not(:first-child), .ptab .pr > b { text-align: right; font-variant-numeric: tabular-nums; }
+.ptab .ph b { font-size: 10.5px; color: var(--muted); letter-spacing: .04em; }
+.ptab .pr.me { background: rgba(214,178,94,.08); border-radius: 8px; }
