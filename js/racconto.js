@@ -471,12 +471,14 @@ function toggleRoutine(id) {
 function runRoutine() {
   const done = [];
   if (!G.routine || G.phase !== 'normale') return done;
+  // le ricorrenti possono usare al massimo metà del capitale della settimana: il resto è tuo
+  const floor = G.pc - Math.floor(G.pc / 2);
   Object.keys(G.routine).forEach(id => {
     const a = ACTIONS.find(x => x.id === id);
     if (!a || usedThisWeek(id)) return;
     let ok = false; try { ok = a.show(); } catch (e) { }
     if (!ok) return;
-    if (G.pc < actionCost(a) || G.funds < (a.funds || 0)) { done.push({ n: `Saltata: ${a.n} (${G.pc < actionCost(a) ? 'capitale politico' : 'fondi'} insufficiente)`, ico: 'alert', skip: true }); return; }
+    if (G.pc - actionCost(a) < floor || G.funds < (a.funds || 0)) { done.push({ n: `Saltata: ${a.n} (${G.pc - actionCost(a) < floor ? 'oltre metà del capitale' : 'fondi insufficienti'})`, ico: 'alert', skip: true }); return; }
     if (ROUTINE_AUTO[id]) { if (!spendPC(actionCost(a))) return; markUsed(id); if (a.funds) G.funds -= a.funds; const t = ROUTINE_AUTO[id](); if (t) done.push({ n: t, ico: ACT_ICON[id] || a.ico }); return; }
     if (id === 'comizio') {
       const reg = REGIONS_DEF.find(x => x.id === routineTarget('comizio')) || REGIONS_DEF.slice().sort((x, y) => (y.el / (G.myReg[y.id] || 1)) - (x.el / (G.myReg[x.id] || 1)))[0];

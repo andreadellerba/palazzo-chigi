@@ -267,3 +267,17 @@ function fixBtnCosts(root) {
   });
 }
 new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType === 1) fixBtnCosts(n.parentNode || n); }); }).observe(document.documentElement, { childList: true, subtree: true });
+
+// ---------- azioni ricorrenti: quante sono, quanto costano, e si possono togliere ----------
+function routineList() { return Object.keys(G.routine || {}).map(id => ({ id, a: ACTIONS.find(x => x.id === id) })).filter(x => x.a); }
+function routineLineHTML() {
+  const L = routineList(); if (!L.length) return '';
+  const cost = L.reduce((s, x) => s + actionCost(x.a), 0);
+  return `<button class="rt9" onclick="openRoutines()">↻ ${L.length} ricorrent${L.length > 1 ? 'i' : 'e'} · ⚡${cost} a settimana ›</button>`;
+}
+function openRoutines() {
+  const L = routineList();
+  openSheet(`${head('Azioni ricorrenti', 'Partono da sole a inizio settimana')}
+    <p class="small muted">Usano al massimo <b>metà</b> del capitale politico della settimana: il resto resta a te. Quelle che non ci stanno vengono saltate e lo vedi nel riepilogo.</p>
+    <div class="list5">${L.map(x => { const tg = routineTarget(x.id); const tn = tg ? (G.parties[tg] ? P(tg).short : (REGIONS_DEF.find(r => r.id === tg) || {}).n || tg) : 'scelta automatica'; return `<div class="m5"><span class="mi5">${icon(ACT_ICON[x.id] || x.a.ico, 18)}</span><span class="grow"><b>${esc(x.a.n)}</b><em>${esc(tn)} · ⚡${actionCost(x.a)}</em></span><button class="btn sm" onclick="delete G.routine['${x.id}'];closeSheet();renderGame();${L.length > 1 ? 'openRoutines()' : ''}">Togli</button></div>`; }).join('')}</div>`);
+}

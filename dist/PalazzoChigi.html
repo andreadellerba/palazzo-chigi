@@ -1086,6 +1086,9 @@ html.bru .call .cbtn .no .lic > * { transform: none !important; }
 .btn.gold .bc9, .btn.pri .bc9 { color: inherit; }
 .hero2-sub { justify-content: center; text-align: center; text-transform: uppercase; letter-spacing: .05em; font-size: 10.5px; font-weight: 700; }
 .call .cbtn .no .lic { transform: rotate(135deg) !important; } /* cornetta abbassata, come su iPhone */
+.rt9 { display: block; width: 100%; text-align: left; padding: 8px 2px 10px; font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #ffe14d; }
+.rt9 .m { text-transform: none; letter-spacing: 0; font-weight: 600; }
+.rt9 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 </style>
 </head>
@@ -6871,7 +6874,7 @@ function homeTab() {
   const recs = recommendedActions(), rec = recs.map(r => r.id);
   const acts = availableActions().sort((a, b) => (rec.includes(b.id) && !b.done ? 1 : 0) - (rec.includes(a.id) && !a.done ? 1 : 0) || (a.done ? 1 : 0) - (b.done ? 1 : 0));
   const PLAN = typeof planPreview === 'function' ? planPreview() : { ids: [], pc: 0 };
-  h += sec('Azioni', planStarHTML(PLAN)) +
+  h += sec('Azioni', planStarHTML(PLAN)) + (typeof routineLineHTML === 'function' ? routineLineHTML() : '') +
     `<div class="acts2">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="a2 ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${PLAN.ids.includes(a.id) ? 'plan' : ''}" style="--ac:${a.ac}" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai2">${a.done ? icon('check', 18) : icon(ACT_ICON[a.id] || a.ico || 'star', 18)}</span><span class="an2">${esc(a.n)}${PLAN.ids.includes(a.id) ? ' <i class="y">★</i>' : ''}${G.routine && G.routine[a.id] ? ` <i class="g">${icon('refresh', 11)}</i>` : ''}</span><span class="ac2">${a.done ? 'FATTA' : a.cost ? '⚡' + a.cost : 'GRATIS'}</span></button>`; }).join('')}</div>
     <div class="tiny muted center mt">★ consigliate · ↻ ricorrenti: aprila e attiva «Ripeti ogni settimana» per farla in automatico</div>`;
   // staff e social
@@ -9239,12 +9242,14 @@ function toggleRoutine(id) {
 function runRoutine() {
   const done = [];
   if (!G.routine || G.phase !== 'normale') return done;
+  // le ricorrenti possono usare al massimo metà del capitale della settimana: il resto è tuo
+  const floor = G.pc - Math.floor(G.pc / 2);
   Object.keys(G.routine).forEach(id => {
     const a = ACTIONS.find(x => x.id === id);
     if (!a || usedThisWeek(id)) return;
     let ok = false; try { ok = a.show(); } catch (e) { }
     if (!ok) return;
-    if (G.pc < actionCost(a) || G.funds < (a.funds || 0)) { done.push({ n: `Saltata: ${a.n} (${G.pc < actionCost(a) ? 'capitale politico' : 'fondi'} insufficiente)`, ico: 'alert', skip: true }); return; }
+    if (G.pc - actionCost(a) < floor || G.funds < (a.funds || 0)) { done.push({ n: `Saltata: ${a.n} (${G.pc - actionCost(a) < floor ? 'oltre metà del capitale' : 'fondi insufficienti'})`, ico: 'alert', skip: true }); return; }
     if (ROUTINE_AUTO[id]) { if (!spendPC(actionCost(a))) return; markUsed(id); if (a.funds) G.funds -= a.funds; const t = ROUTINE_AUTO[id](); if (t) done.push({ n: t, ico: ACT_ICON[id] || a.ico }); return; }
     if (id === 'comizio') {
       const reg = REGIONS_DEF.find(x => x.id === routineTarget('comizio')) || REGIONS_DEF.slice().sort((x, y) => (y.el / (G.myReg[y.id] || 1)) - (x.el / (G.myReg[x.id] || 1)))[0];
@@ -11683,6 +11688,20 @@ function fixBtnCosts(root) {
   });
 }
 new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType === 1) fixBtnCosts(n.parentNode || n); }); }).observe(document.documentElement, { childList: true, subtree: true });
+
+// ---------- azioni ricorrenti: quante sono, quanto costano, e si possono togliere ----------
+function routineList() { return Object.keys(G.routine || {}).map(id => ({ id, a: ACTIONS.find(x => x.id === id) })).filter(x => x.a); }
+function routineLineHTML() {
+  const L = routineList(); if (!L.length) return '';
+  const cost = L.reduce((s, x) => s + actionCost(x.a), 0);
+  return `<button class="rt9" onclick="openRoutines()">↻ ${L.length} ricorrent${L.length > 1 ? 'i' : 'e'} · ⚡${cost} a settimana ›</button>`;
+}
+function openRoutines() {
+  const L = routineList();
+  openSheet(`${head('Azioni ricorrenti', 'Partono da sole a inizio settimana')}
+    <p class="small muted">Usano al massimo <b>metà</b> del capitale politico della settimana: il resto resta a te. Quelle che non ci stanno vengono saltate e lo vedi nel riepilogo.</p>
+    <div class="list5">${L.map(x => { const tg = routineTarget(x.id); const tn = tg ? (G.parties[tg] ? P(tg).short : (REGIONS_DEF.find(r => r.id === tg) || {}).n || tg) : 'scelta automatica'; return `<div class="m5"><span class="mi5">${icon(ACT_ICON[x.id] || x.a.ico, 18)}</span><span class="grow"><b>${esc(x.a.n)}</b><em>${esc(tn)} · ⚡${actionCost(x.a)}</em></span><button class="btn sm" onclick="delete G.routine['${x.id}'];closeSheet();renderGame();${L.length > 1 ? 'openRoutines()' : ''}">Togli</button></div>`; }).join('')}</div>`);
+}
 
 </script>
 <script>

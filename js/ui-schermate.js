@@ -93,7 +93,7 @@ function homeTab() {
   const recs = recommendedActions(), rec = recs.map(r => r.id);
   const acts = availableActions().sort((a, b) => (rec.includes(b.id) && !b.done ? 1 : 0) - (rec.includes(a.id) && !a.done ? 1 : 0) || (a.done ? 1 : 0) - (b.done ? 1 : 0));
   const PLAN = typeof planPreview === 'function' ? planPreview() : { ids: [], pc: 0 };
-  h += sec('Azioni', planStarHTML(PLAN)) +
+  h += sec('Azioni', planStarHTML(PLAN)) + (typeof routineLineHTML === 'function' ? routineLineHTML() : '') +
     `<div class="acts2">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="a2 ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${PLAN.ids.includes(a.id) ? 'plan' : ''}" style="--ac:${a.ac}" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai2">${a.done ? icon('check', 18) : icon(ACT_ICON[a.id] || a.ico || 'star', 18)}</span><span class="an2">${esc(a.n)}${PLAN.ids.includes(a.id) ? ' <i class="y">★</i>' : ''}${G.routine && G.routine[a.id] ? ` <i class="g">${icon('refresh', 11)}</i>` : ''}</span><span class="ac2">${a.done ? 'FATTA' : a.cost ? '⚡' + a.cost : 'GRATIS'}</span></button>`; }).join('')}</div>
     <div class="tiny muted center mt">★ consigliate · ↻ ricorrenti: aprila e attiva «Ripeti ogni settimana» per farla in automatico</div>`;
   // staff e social
