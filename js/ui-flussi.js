@@ -334,7 +334,8 @@ function showEvent(item) {
   clearTimeout(window._evTimer);
   const tm = ev.timer ? `<div class="timer mt"><i style="animation-duration:${ev.timer}s"></i></div><div class="tiny warn center" style="margin-top:4px;font-weight:800">Hai ${ev.timer} secondi, poi decide il tuo staff</div>` : '';
   if (ev.timer) window._evTimer = setTimeout(() => { if (window._ev && window._ev.item === item && !window._ev.done) { window._ev.staff = true; chooseEvent(staffPick(v.choices)); } }, ev.timer * 1000);
-  openSheet(`<div class="evcard">${eventTopHTML(ev, item, v)}${tm}
+  if (typeof eventChatHTML === 'function') openSheet(`${tm}${eventChatHTML(ev, item, v)}`, { locked: true });
+  else openSheet(`<div class="evcard">${eventTopHTML(ev, item, v)}${tm}
     <div class="mt">${v.choices.map((ch, i) => `<button class="choice" style="animation-delay:${200 + i * 80}ms" onclick="chooseEvent(${i})"><div class="t">${esc(ch.t)}</div>${fxChips(ch.fx, ch.run && !ch.fx ? '<span class="n">• esito incerto</span>' : '')}</button>`).join('')}</div></div>`, { locked: true });
   setTimeout(() => { if (typeof animCounters === 'function') animCounters(); }, 250);
 }

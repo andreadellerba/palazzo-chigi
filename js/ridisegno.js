@@ -1,0 +1,106 @@
+// ============================================================
+//  RIDISEGNO (scelte dell'utente da proposte-7):
+//  A4 testata a barra · B2 personaggio in una riga · C3 da fare a pillole
+//  D2 azioni in lista · E4+E2 leggi per categoria · F1 con popup Oggi/Diventa
+//  H2 classifica · I4 eventi in chat · J4 menu attaccato in basso · L2 staff in elenco
+// ============================================================
+
+// ---------- J4: menu con i nuovi nomi e icone ----------
+(function () {
+  const S = d => SVG(d);
+  const set = {
+    home: ['Home', S('<path d="M3 11 12 4l9 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5h4v5"/>')],
+    leggi: ['Decreti', S('<path d="M7 3h10v18l-5-3-5 3V3Z"/><path d="M10 8h4M10 12h4"/>')],
+    aula: ['Parlamento', S('<path d="M3 18a9 9 0 0 1 18 0"/><path d="M7.5 18a4.5 4.5 0 0 1 9 0"/><path d="M2 21h20"/>')],
+    italia: ['Nazione', S('<path d="M9 3c1 2 3 2 3 4s2 3 2 5 3 2 4 3l2 2-2 1-2-1-1 3-2-1v-3l-3-3-1-3-2-2V4Z"/><path d="M6 17l2 1-1 2-2-1Z"/>')],
+    partiti: ['Partiti', S('<path d="M5 21V4"/><path d="M5 4h12l-2 4 2 4H5"/>')],
+    conti: ['Economia', S('<path d="M3 17l5-5 4 3 7-8"/><path d="M15 7h4v4"/>')],
+  };
+  TABS.forEach(t => { if (set[t.id]) { t.n = set[t.id][0]; t.svg = set[t.id][1]; } });
+})();
+navHTML = function () {
+  const live = typeof pendingVoteIds === 'function' ? pendingVoteIds().length : 0;
+  return `<nav class="nav4">${TABS.map(t => `<button type="button" class="n4 ${UI.tab === t.id ? 'on' : ''}" onclick="goTab('${t.id}')" title="${t.n}">${t.svg}${UI.tab === t.id ? `<span>${t.n}</span>` : ''}${t.id === 'aula' && live && UI.tab !== 'aula' ? `<i class="bd">${live}</i>` : ''}</button>`).join('')}</nav>`;
+};
+
+// ---------- A4: testata a barra ----------
+topbar = function () {
+  const mp = myParty();
+  const old = G.hist.polls.length > 5 ? G.hist.polls[G.hist.polls.length - 5].p[myPid()] : mp.poll;
+  const d = mp.poll - (old || mp.poll), n = urgentCount();
+  const third = topbarThird().replace('class="stat"', 'class="s4"').replace('>Forza gov.<', '>Forza<').replace('>Coalizione<', '>Coal.<').replace('>Col leader<', '>Leader<').replace('>Maggioranza<', '>Magg.<').replace('>Soglia 3%<', '>Soglia<');
+  return `<div class="topbar t4"><div class="tb4">
+    <span class="dt">${(d0 => `${d0.getDate()} ${MESI3[d0.getMonth()].toUpperCase()} ${String(d0.getFullYear()).slice(2)}`)(dateOf(G.week))}</span>
+    <span class="s4 y" onclick="toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')">⚡${G.pc}</span>
+    <span class="s4" onclick="goTab('partiti')">${esc(mp.short)} <b>${fmt1(mp.poll)}%</b><em class="${d >= 0 ? 'g' : 'r'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</em></span>
+    ${G.gov ? `<span class="s4" onclick="openGovernment()">GOV <b style="color:${pctColor(G.gov.approval * 1.4)}">${fmt0(G.gov.approval)}%</b></span>` : ''}
+    ${third}
+    <button class="ib4" onclick="openNotifications()">${icon('bell', 16)}${n ? `<i class="bd">${n}</i>` : ''}</button><button class="ib4" onclick="openMenu()">${icon('menu', 16)}</button>
+  </div><div class="role4">${esc(roleLabel())}</div></div>`;
+};
+
+// ---------- B2: il personaggio in una riga ----------
+homeHeroHTML = function () {
+  const p = G.player, mp = myParty(), g = G.gov;
+  return `<div class="hero2" style="--pc:${mp.color}"><span class="av-badge" onclick="openAvatarEditor()">${portrait(p.name, 44, { party: myPid() })}</span>
+    <div class="grow" style="min-width:0"><b class="nm">${esc(p.name)}</b><div class="rl ellipsis">${esc(roleLabel())}</div></div>
+    <div class="nums"><div><span>Sondaggio</span><b>${fmt1(mp.poll)}%</b></div>${g ? `<div><span>Governo</span><b style="color:${pctColor(g.approval * 1.4)}">${fmt0(g.approval)}%</b></div>` : ''}</div></div>
+    <div class="hero2-sub">${icon('coin', 13)} ${euro(G.funds)} · fama ${fmt0(p.fama)} · stress ${fmt0(p.stress)} · ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</div>`;
+};
+
+// ---------- L2: staff in elenco ----------
+staffHTML = function () {
+  ensureStory();
+  return `<div class="list2">${Object.keys(STAFF_ROLES).map(r => { const s = G.staff[r]; return `<button class="r2" onclick="openStaff('${r}')">${s ? portrait(s.n, 32, { female: !!s.f }) : `<span class="ph2">${icon('plus', 14)}</span>`}<span class="grow"><b>${esc(STAFF_ROLES[r].n)}</b>${s ? `<em>${esc(s.n)}</em>` : ''}</span><span class="${s ? 'y' : 'm'}">${s ? '★'.repeat(s.liv) : 'da scegliere'}</span></button>`; }).join('')}</div>`;
+};
+
+// ---------- E4 + E2: catalogo per categoria, aperto mostra la tabella ----------
+UI.lawOpen = UI.lawOpen || {};
+function lawRowHTML(l, opt, extra) {
+  const now = G.laws[l.id], busy = G.bills.find(b => !b.dead && b.lawId === l.id);
+  return `<div class="lr" onclick="openLaw('${l.id}'${opt !== undefined ? ',' + opt : ''})"><i style="background:${CAT_COLOR[l.cat] || '#ffe14d'}"></i><div class="grow" style="min-width:0"><b class="ellipsis">${esc(opt !== undefined ? l.opts[opt].t : l.nome)}</b><span class="ellipsis">${opt !== undefined ? esc(l.nome) : esc(l.opts[now].t)}</span>${extra || ''}</div>${busy ? `<em class="y">in aula</em>` : ''}${icon('chevron', 14)}</div>`;
+}
+lawListHTML = function () {
+  if (UI.lawMetric) {
+    const best = bestLawsFor(UI.lawMetric, 15).filter(x => visibleLaws().includes(x.l));
+    return best.length ? `<div class="tbl2">${best.map(x => lawRowHTML(x.l, x.i, effChipsHTML(x.effs, x.mine))).join('')}</div>` : '<div class="muted center mt2">Nessuna riforma disponibile.</div>';
+  }
+  const q = UI.lawQ.trim().toLowerCase();
+  const all = visibleLaws().filter(l => !q || (l.nome + ' ' + l.attuale + ' ' + l.opts.map(o => o.t).join(' ')).toLowerCase().includes(q));
+  if (!all.length) return '<div class="muted center mt2">Nessuna legge trovata</div>';
+  if (q) return `<div class="tbl2">${all.map(l => lawRowHTML(l)).join('')}</div>`;
+  return Object.keys(LAW_CATS).filter(c => all.some(l => l.cat === c)).map(c => {
+    const ls = all.filter(l => l.cat === c), open = !!UI.lawOpen[c];
+    return `<div class="cat4 ${open ? 'open' : ''}"><button class="ch4" onclick="UI.lawOpen['${c}']=!UI.lawOpen['${c}'];$('#lawlist').innerHTML=lawListHTML()"><span style="color:${CAT_COLOR[c] || '#ffe14d'}">${icon(CAT_ICON[c] || 'folder', 16)}</span><b class="grow">${esc(c)}</b><span class="m">${ls.length}</span><span class="y">${open ? '▾' : '▸'}</span></button>${open ? `<div class="tbl2">${ls.map(l => lawRowHTML(l)).join('')}</div>` : ''}</div>`;
+  }).join('');
+};
+
+// ---------- F1: Oggi / Diventa con spiegazione a comparsa ----------
+function lawOptPop(id, opt, ev) {
+  if (ev) ev.stopPropagation();
+  const l = getLaw(id); if (!l) return;
+  const S = typeof SPIEGA !== 'undefined' && SPIEGA[id], o = S && S.o && S.o[opt];
+  const el = document.createElement('div'); el.className = 'pop4';
+  el.innerHTML = `<div class="pb4"><div class="lbl4">${esc(l.nome)}</div><h3>${esc(l.opts[opt].t)}</h3><p>${esc(l.opts[opt].d || '')}</p>${S ? `<p class="m">${esc(S.s)}</p>` : ''}${o ? `<div class="k4">In pratica</div><p>${esc(o[0])}</p><div class="gp4"><div><span class="g">Ci guadagna</span>${esc(o[1])}</div><div><span class="r">Ci perde</span>${esc(o[2])}</div></div>` : ''}<div class="tiny m center mt">tocca ovunque per chiudere</div></div>`;
+  el.onclick = () => el.remove();
+  document.body.appendChild(el);
+}
+billChangeHTML = function (b) {
+  if (b.type === 'manovra') { const c = b.measures.reduce((s, id) => s + (BUDGET_BY_ID[id] ? BUDGET_BY_ID[id].c : 0), 0); return `<div class="bchg"><span class="o">${b.measures.length} misure di spesa e coperture</span><span class="n">${c > 0 ? '+' : ''}${fmt1(c)} mld sul deficit</span></div>`; }
+  if (!b.lawId) return '';
+  const l = getLaw(b.lawId), from = b.type === 'dl' && b.dlFrom !== undefined ? b.dlFrom : b.from;
+  return `<div class="bchg"><span class="o" onclick="lawOptPop('${b.lawId}',${from},event)"><i>Oggi</i>${esc(l.opts[from].t)}</span><span class="ar">${icon('chevron', 14)}</span><span class="n" onclick="lawOptPop('${b.lawId}',${b.opt},event)"><i>Diventa</i>${esc(l.opts[b.opt].t)}</span></div>`;
+};
+
+// ---------- I4: eventi come chat ----------
+const LOOK_KICKER = { tv: 'In diretta TV', paper: 'Sui giornali', call: 'Al telefono', social: 'Sui social', chat: 'In chat' };
+function eventChatHTML(ev, item, v) {
+  const c = item.ctx || {}, look = ev.look || (typeof EVENT_LOOK !== 'undefined' && EVENT_LOOK[ev.id]);
+  let face, who;
+  if (c.p && G.parties[c.p]) { face = leaderPortrait(c.p, 40); who = P(c.p).leader; }
+  else if (c.n && person(c.n)) { face = portrait(c.n, 40, { party: person(c.n).party }); who = c.n; }
+  else { const s = G.staff && (G.staff.portavoce || G.staff.gabinetto); face = s ? portrait(s.n, 40, { female: !!s.f }) : `<span class="ph2">${icon('phone', 18)}</span>`; who = s ? s.n + ' · staff' : 'Il tuo staff'; }
+  return `<div class="ev4"><div class="kk">${esc(LOOK_KICKER[look] || 'Notizia')} · ${fmtDate(G.week, true)}</div>
+    <div class="msg">${face}<div class="bb"><span class="who">${esc(who)}</span><b>${esc(v.title)}</b><p>${esc(v.text)}</p></div></div>
+    ${v.choices.map((ch, i) => `<div class="ans" onclick="chooseEvent(${i})"><div class="ab">${esc(ch.t)}</div><div class="fx4">${fxChips(ch.fx, ch.run && !ch.fx ? '<span class="n">• esito incerto</span>' : '')}</div></div>`).join('')}</div>`;
+}
