@@ -299,7 +299,8 @@ function showWeekSummary(s, before, auto) {
   const v0 = s.votes.find(x => x.v && x.v.by);
   // V4: il riepilogo come telegiornale delle 20
   const j = typeof anchor === 'function' ? anchor() : null;
-  openSheet(`<div class="tgw"><div class="live"><i></i>TG PALAZZO · ORE 20</div><div class="dt">${fmtDate(G.week).toUpperCase()} · SETTIMANA ${G.week}</div>${j ? `<div class="face">${jPortrait(j, 78)}</div><div class="who">${esc(j.n)}</div>` : ''}
+  const goOn = `<button class="btn ${G.queue.length ? 'gold' : 'pri'} block" onclick="closeSheet();${G.queue.length ? 'setTimeout(processQueue,280)' : ''}">${G.queue.length ? `Continua · ${G.queue.length} da decidere ›` : 'Continua'}</button>`;
+  openSheet(`<div class="wk-top">${goOn}</div><div class="tgw"><div class="live"><i></i>TG PALAZZO · ORE 20</div><div class="dt">${fmtDate(G.week).toUpperCase()} · SETTIMANA ${G.week}</div>${j ? `<div class="face">${jPortrait(j, 78)}</div><div class="who">${esc(j.n)}</div>` : ''}
     <div class="lt"><span class="a">${top && top.k === 'bad' ? 'ULTIM’ORA' : 'IN APERTURA'}</span><div class="b">${top ? esc(top.t) : 'Settimana tranquilla nei palazzi della politica'}</div></div>
     <div class="crawl"><span>${rest.length ? rest.slice(0, 6).map(n => esc(n.t)).join(' · ') + ' ·' : 'Nessun’altra notizia dai palazzi della politica ·'}</span></div></div>
     <div class="grid3 mt">${kpi(esc(myParty().short), fmt1(myParty().poll) + '%', (dPoll >= 0 ? '▲ ' : '▼ ') + fmt1(Math.abs(dPoll)), dPoll >= 0, myParty().color)}

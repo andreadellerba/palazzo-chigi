@@ -88,11 +88,11 @@ function homeTab() {
   h += homeHeroHTML();
   // da fare ora
   const all = notifications(), todo = all.slice(0, 3);
-  if (todo.length) h += sec('Da fare ora', all.length > 3 ? `<button class="btn sm" onclick="openNotifications()">Tutte</button>` : '') + `<div class="pills3">${all.map(n => `<button class="p3 u${n.u}" onclick="${n.on}">${icon(n.ico, 14)}<span>${esc(n.t)}</span></button>`).join('')}</div>`;
+  h += typeof infoHTML === 'function' ? infoHTML() : '';
   // azioni a medaglie
   const recs = recommendedActions(), rec = recs.map(r => r.id);
   const acts = availableActions().sort((a, b) => (rec.includes(b.id) && !b.done ? 1 : 0) - (rec.includes(a.id) && !a.done ? 1 : 0) || (a.done ? 1 : 0) - (b.done ? 1 : 0));
-  h += sec('Azioni', `<button class="btn sm gold" onclick="autoPlan()">${icon('star')} Pianifica</button>`) +
+  h += sec('Azioni', `<button class="starb" onclick="autoPlan()" title="Pianifica la settimana">${icon('star', 15)}</button>`) +
     `<div class="acts2">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="a2 ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${star ? 'rec' : ''}" style="--ac:${a.ac}" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai2">${a.done ? icon('check', 18) : icon(ACT_ICON[a.id] || a.ico || 'star', 18)}</span><span class="an2">${esc(a.n)}${star ? ' <i class="y">★</i>' : ''}${G.routine && G.routine[a.id] ? ` <i class="g">${icon('refresh', 11)}</i>` : ''}</span><span class="ac2">${a.done ? 'FATTA' : a.cost ? '⚡' + a.cost : 'GRATIS'}</span></button>`; }).join('')}</div>
     <div class="tiny muted center mt">★ consigliate · ↻ ricorrenti: aprila e attiva «Ripeti ogni settimana» per farla in automatico</div>`;
   // staff e social
@@ -102,15 +102,6 @@ function homeTab() {
   if (isPremier() && g.parties.length > 1) h += sec('Alleati') + `<div class="scrollx">${g.parties.filter(x => x !== myPid()).map(x => `<div class="due center" onclick="openParty('${x}')">${leaderPortrait(x, 46)}<b>${esc(P(x).short)}</b><div class="bar thin" style="width:80px"><i style="width:${g.sat[x]}%;--c:${pctColor(g.sat[x])}"></i></div><span class="dw" style="color:${pctColor(g.sat[x])}">${g.sat[x] >= 60 ? 'Soddisfatto' : g.sat[x] >= 35 ? 'Inquieto' : 'Furioso'}</span></div>`).join('')}</div>`;
   // carriera
   if (!isLeader()) h += sec('Carriera') + `<div class="card tight"><div class="progress">${RANKS.map((r, i) => `<i class="${i < p.rank ? 'd' : i === p.rank ? 'c' : ''}"></i>`).join('')}</div><div class="row between tiny mt"><b>${esc(RANKS[p.rank].n)}</b><span class="muted">seguito ${fmt0(p.seguito)}%</span></div><div class="tiny muted mt">${careerHint()}</div></div>`;
-  // in arrivo
-  const dl = [];
-  if (G.cal.election > G.week) dl.push({ w: G.cal.election, i: 'vote', t: 'Elezioni politiche' });
-  const y = yearOf(G.week); dl.push({ w: weekOf(`${monthOf(G.week) > 9 ? y + 1 : y}-10-10`), i: 'euro', t: 'Manovra' });
-  Object.entries(G.regions).sort((a, b) => a[1].next - b[1].next).slice(0, 2).forEach(([rid, st]) => dl.push({ w: st.next, i: 'map', t: `Regionali ${regionName(rid)}` }));
-  if (G.cal.quirinale > G.week) dl.push({ w: G.cal.quirinale, i: 'building', t: 'Nuovo Capo dello Stato' });
-  G.referendums.filter(r => !r.done).forEach(r => dl.push({ w: r.w, i: 'pen', t: 'Referendum' }));
-  dl.sort((a, b) => a.w - b.w);
-  h += sec('In arrivo') + `<div class="scrollx">${dl.map(x => `<div class="due"><span class="di">${icon(x.i)}</span><b>${esc(x.t)}</b><span class="dw">${weeksLeft(x.w)}</span></div>`).join('')}</div>`;
   return h;
 }
 function newsRow(n) { return `<div class="news-item"><span class="w">${fmtDate(n.w, true).replace(/ \d{4}$/, '')}</span><span class="nk-${n.k}">${esc(n.t)}</span></div>`; }
@@ -131,9 +122,8 @@ function leggiTab() {
     <div class="scrollx mt"><span class="tiny muted" style="align-self:center;flex:none">Voglio migliorare</span>${Object.keys(METRICS).map(m => `<button class="fchip ${UI.lawMetric === m ? 'on' : ''}" onclick="UI.lawMetric=UI.lawMetric==='${m}'?null:'${m}';renderGame()">${icon(METRIC_ICON[m])} ${METRICS[m].n}</button>`).join('')}</div>`;
   const live = G.bills.filter(b => !b.dead).length;
   h += `<div class="card tight mt click" onclick="goTab('aula')"><div class="row">${medal('vote', 44)}<div class="grow"><b>${live} provvedimenti in Parlamento</b><div class="small muted">Tuoi, del governo e degli altri partiti</div></div>${icon('chevron', 18)}</div></div>`;
-  if (isPremier() || isLeader() || G.player.parl) h += `<button class="btn block" onclick="openCustomLaw()">${icon('pen')} Scrivi una nuova legge</button>`;
-  h += `<button class="btn gold block mt" onclick="openTuner()">${icon('gear')} Regola le leggi attuali</button>`;
-  h += sec(UI.lawMetric ? `Per migliorare: ${METRICS[UI.lawMetric].n}` : 'Il catalogo delle leggi') + `<div id="lawlist">${lawListHTML()}</div>`;
+  h += `<button class="btn block" onclick="openTuner()">${icon('gear')} Regola le leggi attuali</button>`;
+  h += sec(UI.lawMetric ? `Per migliorare: ${METRICS[UI.lawMetric].n}` : 'Leggi') + `<div id="lawlist">${lawListHTML()}</div>`;
   if (G.enacted.length) h += sec('Ultime leggi cambiate') + `<div class="card tight"><div class="list">${G.enacted.slice(0, 12).map(e => { const l = getLaw(e.id); return `<div class="li click" onclick="openLaw('${e.id}')">${icon(CAT_ICON[l.cat] || 'doc')}<div class="grow"><div class="small"><b>${esc(l.opts[e.to].t)}</b></div><div class="tiny muted">${fmtDate(e.w, true)} · ${{ player: 'tuo governo', aigov: 'governo', parl: 'Parlamento', playerparl: 'tua proposta', revert: 'annullata', consulta: 'Consulta' }[e.by] || ''}</div></div></div>`; }).join('')}</div></div>`;
   return h;
 }
@@ -161,13 +151,13 @@ function openLaw(id, sel) {
   LAWSEL = { id, sel };
   const imp = impactOf(l, cur, sel);
   let h = `<div class="sheet-head"><div class="row grow">${medal(CAT_ICON[l.cat] || 'doc', 52)}<div class="grow"><h2 style="font-size:22px">${esc(l.nome)}</h2><div class="tiny muted">${esc(l.rif)}</div></div></div><button class="xbtn" onclick="closeSheet()">${icon('x', 18)}</button></div>`;
-  h += `<div class="qcard"><span class="tiny gold" style="font-weight:900;letter-spacing:.1em">COM’È OGGI</span><div style="margin-top:4px"><b>${esc(l.opts[cur].t)}</b></div><div class="small muted" style="margin-top:4px">${esc(cur === l.cur ? l.attuale : l.opts[cur].d)}</div></div>`;
-  h += `<div class="mt">${explainHTML(l, sel)}</div>`;
+  h += `<div class="qcard click" onclick="lawOptPop('${id}',${cur},event)"><span class="tiny gold" style="font-weight:900;letter-spacing:.1em">COM’È OGGI</span><div style="margin-top:4px"><b class="infolink">${esc(l.opts[cur].t)}</b></div><div class="small muted" style="margin-top:4px">${esc(cur === l.cur ? l.attuale : l.opts[cur].d)}</div></div>`;
+  h += `<div class="tiny muted center mt">Tocca il nome di una legge per la spiegazione completa</div>`;
   h += sec('Le riforme possibili');
   l.opts.forEach((op, i) => {
     if (i === cur) return;
     const dc = (op.costo || 0) - (l.opts[cur].costo || 0);
-    h += `<button class="choice ${i === sel ? 'sel' : ''}" onclick="openLawRefresh('${id}',${i})"><div class="row between"><span class="t">${esc(op.t)}</span>${Math.abs(dc) > 0.05 ? `<span class="tag ${dc > 0 ? 'b' : 'g'}">${dc > 0 ? '+' : ''}${fmt1(dc)} mld</span>` : ''}</div>${i === sel ? `<div class="small muted" style="margin-top:4px">${esc(op.d)}</div>` : ''}${effChipsHTML(effectsOf(l, cur, i), lawGain(myPid(), l, cur, i))}${i === sel ? axisMini(l, op.pos) : ''}</button>`;
+    h += `<button class="choice ${i === sel ? 'sel' : ''}" onclick="openLawRefresh('${id}',${i})"><div class="row between"><span class="t infolink" onclick="event.stopPropagation();openLawRefresh('${id}',${i});lawOptPop('${id}',${i})">${esc(op.t)}</span>${Math.abs(dc) > 0.05 ? `<span class="tag ${dc > 0 ? 'b' : 'g'}">${dc > 0 ? '+' : ''}${fmt1(dc)} mld</span>` : ''}</div>${i === sel ? `<div class="small muted" style="margin-top:4px">${esc(op.d)}</div>` : ''}${effChipsHTML(effectsOf(l, cur, i), lawGain(myPid(), l, cur, i))}${i === sel ? axisMini(l, op.pos) : ''}</button>`;
   });
   h += `<div class="row wrap mt" style="gap:4px"><span class="tiny good" style="font-weight:800">A FAVORE</span>${imp.fav.map(partyChip).join('') || '<span class="tiny dim">nessuno</span>'}</div><div class="row wrap mt" style="gap:4px"><span class="tiny bad" style="font-weight:800">CONTRO</span>${imp.contr.map(partyChip).join('') || '<span class="tiny dim">nessuno</span>'}</div>
     <details class="mt"><summary class="small gold">${icon('scales', 16)} Tutti i pro e contro</summary><div class="mt">${proConHTML(imp, { noParties: true })}</div></details>`;
@@ -287,7 +277,7 @@ function openBill(id) {
   else { const l = getLaw(b.lawId); imp = impactOf(l, b.type === 'dl' ? (b.dlFrom !== undefined ? b.dlFrom : b.from) : G.laws[b.lawId], b.opt); }
   let h = head(esc(billName(b)), `${b.proposer === 'GOV' ? (G.gov ? esc(G.gov.name) : 'Governo') : b.proposer === 'PLAYER' ? 'tua proposta' : esc(P(b.proposer).name)}`);
   h += `<div class="row wrap" style="gap:6px">${kindTag(b)}</div><div class="mt">${iterHTML(b)}</div>`;
-  if (b.lawId) { const l = getLaw(b.lawId); h += `<div class="change mt"><div><span class="tiny muted">OGGI</span><b>${esc(l.opts[b.from].t)}</b></div><span class="arrow">${icon('chevron')}</span><div><span class="tiny muted">DIVENTEREBBE</span><b>${esc(l.opts[b.opt].t)}</b></div></div><div class="mt">${explainHTML(l, b.opt)}</div>`; }
+  if (b.lawId) { const l = getLaw(b.lawId); h += `<div class="change mt"><div class="click" onclick="lawOptPop('${b.lawId}',${b.from},event)"><span class="tiny muted">OGGI</span><b class="infolink">${esc(l.opts[b.from].t)}</b></div><span class="arrow">${icon('chevron')}</span><div class="click" onclick="lawOptPop('${b.lawId}',${b.opt},event)"><span class="tiny muted">DIVENTA</span><b class="infolink">${esc(l.opts[b.opt].t)}</b></div></div><div class="tiny muted center mt">Tocca «Oggi» o «Diventa» per la spiegazione completa</div>`; }
   if (b.type === 'manovra') h += `<div class="card tight mt"><div class="small">${b.measures.map(id => `<div class="row between" style="padding:3px 0"><span>${esc(BUDGET_BY_ID[id].n)}</span><b class="${BUDGET_BY_ID[id].c > 0 ? 'bad' : 'good'}">${BUDGET_BY_ID[id].c > 0 ? '+' : ''}${fmt1(BUDGET_BY_ID[id].c)}</b></div>`).join('')}</div></div>`;
   h += `<div class="mt">${proConHTML(imp)}</div>`;
   { // i tasti che prima stavano sulla card
@@ -424,7 +414,7 @@ function alleanzeHTML() {
     if (isLeader() && !locked) {
       if (!mine && !myC) { const big = c.members.slice().sort((a, b) => P(b).poll - P(a).poll)[0]; h += `<button class="btn pri block mt" onclick="openDeal('${big}','${c.id}')">${icon('hands')} Tratta per entrare in ${esc(c.name)}</button>`; }
       if (mine) {
-        if (c.cand !== 'PLAYER' && !(c.id === 'csx' && !c.cand)) h += `<button class="btn gold block mt" onclick="askPremiership('${c.id}')">${icon('crown')} Chiedi la candidatura a premier · ⚡4</button>`;
+        if (c.cand !== 'PLAYER' && !(c.id === 'csx' && !c.cand)) h += `<button class="btn block mt" onclick="askPremiership('${c.id}')">${icon('crown')} Chiedi la candidatura a premier · ⚡4</button>`;
         if (c.id === 'csx' && !c.cand && !(G.primarie && G.primarie.player)) h += `<button class="btn gold block mt" onclick="joinPrimarie()">${icon('vote')} Candidati alle primarie · ⚡3</button>`;
         if (G.primarie && G.primarie.player && !G.primarie.done) h += `<div class="small gold mt">Sei candidato alle primarie (spinta ${fmt1(G.primarie.boost || 0)}). Usa «Campagna per le primarie» nelle azioni.</div>`;
         const others = PIDS().filter(id => !c.members.includes(id));

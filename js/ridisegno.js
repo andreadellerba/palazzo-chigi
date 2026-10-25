@@ -23,30 +23,6 @@ navHTML = function () {
   return `<nav class="nav4">${TABS.map(t => `<button type="button" class="n4 ${UI.tab === t.id ? 'on' : ''}" onclick="goTab('${t.id}')" title="${t.n}">${t.svg}${UI.tab === t.id ? `<span>${t.n}</span>` : ''}${t.id === 'aula' && live && UI.tab !== 'aula' ? `<i class="bd">${live}</i>` : ''}</button>`).join('')}</nav>`;
 };
 
-// ---------- A4: testata a barra ----------
-topbar = function () {
-  const mp = myParty();
-  const old = G.hist.polls.length > 5 ? G.hist.polls[G.hist.polls.length - 5].p[myPid()] : mp.poll;
-  const d = mp.poll - (old || mp.poll), n = urgentCount();
-  const third = topbarThird().replace('class="stat"', 'class="s4"').replace('>Forza gov.<', '>Forza<').replace('>Coalizione<', '>Coal.<').replace('>Col leader<', '>Leader<').replace('>Maggioranza<', '>Magg.<').replace('>Soglia 3%<', '>Soglia<');
-  return `<div class="topbar t4"><div class="tb4">
-    <span class="dt">${(d0 => `${d0.getDate()} ${MESI3[d0.getMonth()].toUpperCase()} ${String(d0.getFullYear()).slice(2)}`)(dateOf(G.week))}</span>
-    <span class="s4 y" onclick="toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')">⚡${G.pc}</span>
-    <span class="s4" onclick="goTab('partiti')">${esc(mp.short)} <b>${fmt1(mp.poll)}%</b><em class="${d >= 0 ? 'g' : 'r'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</em></span>
-    ${G.gov ? `<span class="s4" onclick="openGovernment()">GOV <b style="color:${pctColor(G.gov.approval * 1.4)}">${fmt0(G.gov.approval)}%</b></span>` : ''}
-    ${third}
-    <button class="ib4" onclick="openNotifications()">${icon('bell', 16)}${n ? `<i class="bd">${n}</i>` : ''}</button><button class="ib4" onclick="openMenu()">${icon('menu', 16)}</button>
-  </div><div class="role4">${esc(roleLabel())}</div></div>`;
-};
-
-// ---------- B2: il personaggio in una riga ----------
-homeHeroHTML = function () {
-  const p = G.player, mp = myParty(), g = G.gov;
-  return `<div class="hero2" style="--pc:${mp.color}"><span class="av-badge" onclick="openAvatarEditor()">${portrait(p.name, 44, { party: myPid() })}</span>
-    <div class="grow" style="min-width:0"><b class="nm">${esc(p.name)}</b><div class="rl ellipsis">${esc(roleLabel())}</div></div>
-    <div class="nums"><div><span>Sondaggio</span><b>${fmt1(mp.poll)}%</b></div>${g ? `<div><span>Governo</span><b style="color:${pctColor(g.approval * 1.4)}">${fmt0(g.approval)}%</b></div>` : ''}</div></div>
-    <div class="hero2-sub">${icon('coin', 13)} ${euro(G.funds)} · fama ${fmt0(p.fama)} · stress ${fmt0(p.stress)} · ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</div>`;
-};
 
 // ---------- L2: staff in elenco ----------
 staffHTML = function () {
@@ -104,3 +80,68 @@ function eventChatHTML(ev, item, v) {
     <div class="msg">${face}<div class="bb"><span class="who">${esc(who)}</span><b>${esc(v.title)}</b><p>${esc(v.text)}</p></div></div>
     ${v.choices.map((ch, i) => `<div class="ans" onclick="chooseEvent(${i})"><div class="ab">${esc(ch.t)}</div><div class="fx4">${fxChips(ch.fx, ch.run && !ch.fx ? '<span class="n">• esito incerto</span>' : '')}</div></div>`).join('')}</div>`;
 }
+
+// ---------- testata: a tutta larghezza, voci divise da un punto, capitale politico in fondo ----------
+topbar = function () {
+  const mp = myParty(), d0 = dateOf(G.week);
+  const old = G.hist.polls.length > 5 ? G.hist.polls[G.hist.polls.length - 5].p[myPid()] : mp.poll;
+  const d = mp.poll - (old || mp.poll);
+  const third = topbarThird().replace('class="stat"', 'class="s4"').replace('>Forza gov.<', '>Forza<').replace('>Coalizione<', '>Coal.<').replace('>Col leader<', '>Leader<').replace('>Maggioranza<', '>Magg.<').replace('>Soglia 3%<', '>Soglia<');
+  const dot = '<i class="dot5">·</i>';
+  return `<div class="topbar t5"><div class="tb5">
+    <span class="dt">${d0.getDate()} ${MESI3[d0.getMonth()].toUpperCase()} ${String(d0.getFullYear()).slice(2)}</span>${dot}
+    <span class="s4" onclick="goTab('partiti')">${esc(mp.short)} <b>${fmt1(mp.poll)}%</b><em class="${d >= 0 ? 'g' : 'r'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</em></span>${dot}
+    ${third}${dot}
+    <span class="s4 y" onclick="toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')">⚡${G.pc}</span>
+    <button class="ib5" onclick="openMenu()">${icon('menu', 18)}</button>
+  </div></div>`;
+};
+
+// ---------- il tuo personaggio: testo che va a capo, centrato sull'avatar; «Fiducia» ----------
+homeHeroHTML = function () {
+  const p = G.player, mp = myParty(), g = G.gov;
+  return `<div class="hero2" style="--pc:${mp.color}"><span class="av-badge" onclick="openAvatarEditor()">${portrait(p.name, 48, { party: myPid() })}</span>
+    <div class="grow tx2"><b class="nm">${esc(p.name)}</b><div class="rl">${esc(roleLabel())}</div></div>
+    <div class="nums"><div><span>Sondaggio</span><b>${fmt1(mp.poll)}%</b></div>${g ? `<div><span>Fiducia</span><b style="color:${pctColor(g.approval * 1.4)}">${fmt0(g.approval)}%</b></div>` : ''}</div></div>
+    <div class="hero2-sub">${icon('coin', 13)} ${euro(G.funds)} · fama ${fmt0(p.fama)} · stress ${fmt0(p.stress)} · ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</div>`;
+};
+
+// ---------- Info: cose da fare (solo politica e governo) + scadenze in arrivo ----------
+function infoHTML() {
+  const skip = /^(Sfida aperta|Capitale politico|Sei molto stressato)/;
+  const todo = notifications().filter(n => !skip.test(n.t));
+  const dl = [];
+  if (G.cal.election > G.week) dl.push({ w: G.cal.election, i: 'vote', t: 'Elezioni politiche' });
+  const y = yearOf(G.week); dl.push({ w: weekOf(`${monthOf(G.week) > 9 ? y + 1 : y}-10-10`), i: 'euro', t: 'Manovra' });
+  Object.entries(G.regions).sort((a, b) => a[1].next - b[1].next).slice(0, 2).forEach(([rid, st]) => dl.push({ w: st.next, i: 'map', t: `Regionali ${regionName(rid)}` }));
+  if (G.cal.quirinale > G.week) dl.push({ w: G.cal.quirinale, i: 'building', t: 'Nuovo Capo dello Stato' });
+  G.referendums.filter(r => !r.done).forEach(r => dl.push({ w: r.w, i: 'pen', t: 'Referendum' }));
+  dl.sort((a, b) => a.w - b.w);
+  return sec('Info') + `<div class="pills3">${todo.map(n => `<button class="p3 u${n.u}" onclick="${n.on}">${icon(n.ico, 14)}<span>${esc(n.t)}</span></button>`).join('')}${dl.map(x => `<span class="p3 due3">${icon(x.i, 14)}<span>${esc(x.t)} · ${weeksLeft(x.w)}</span></span>`).join('')}</div>`;
+}
+
+// ---------- niente più tasto «avanti veloce» ----------
+fabHTML = _fabHTMLUi;
+
+// ---------- logo nuovo: facciata di Palazzo Chigi in giallo su nero ----------
+
+// facciata di Palazzo Chigi su piazza Colonna, gialla su nero
+function chigiSVG() {
+  const Y = '#ffe14d', K = '#000';
+  let w = '';
+  const cols = [16, 25, 34, 61, 70, 79];
+  cols.forEach(x => { w += `<rect x="${x}" y="45" width="5" height="9" fill="${K}"/><path d="M${x - 1} 45 L${x + 2.5} 42 L${x + 6} 45Z" fill="${K}"/>`; });
+  cols.forEach(x => { w += `<rect x="${x}" y="60" width="5" height="8" fill="${K}"/>`; });
+  cols.forEach(x => { w += `<rect x="${x}" y="74" width="5" height="7" fill="${K}"/>`; });
+  [43, 52].forEach(x => { w += `<rect x="${x}" y="45" width="5" height="9" fill="${K}"/><path d="M${x - 1} 45 L${x + 2.5} 42 L${x + 6} 45Z" fill="${K}"/>`; });
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="${K}"/><g transform="translate(15 15.4) scale(.7)">
+    <path d="M50 8V30" stroke="${Y}" stroke-width="1.6"/><rect x="50.8" y="8" width="4.4" height="7" fill="#009246"/><rect x="55.2" y="8" width="4.4" height="7" fill="#fff"/><rect x="59.6" y="8" width="4.4" height="7" fill="#ce2b37"/>
+    <rect x="12" y="30" width="76" height="4" fill="${Y}"/><rect x="7" y="34" width="86" height="5" fill="${Y}"/>
+    <rect x="10" y="39" width="80" height="48" fill="${Y}"/>
+    <rect x="10" y="56" width="80" height="1.6" fill="${K}"/><rect x="10" y="70.5" width="80" height="1.6" fill="${K}"/>
+    ${w}
+    <rect x="40" y="58" width="20" height="2.4" fill="${K}"/><rect x="41" y="60.4" width="1.6" height="3.6" fill="${K}"/><rect x="57.4" y="60.4" width="1.6" height="3.6" fill="${K}"/>
+    <path d="M44 87V77a6 6 0 0 1 12 0v10Z" fill="${K}"/><rect x="39.5" y="72" width="2.4" height="15" fill="${K}"/><rect x="58.1" y="72" width="2.4" height="15" fill="${K}"/>
+    <rect x="4" y="87" width="92" height="4" fill="${Y}"/></g></svg>`;
+}
+logoChigi = function (size) { return `<span class="logo-chigi lg2" style="--ls:${size}px">${chigiSVG()}</span>`; };
