@@ -1069,6 +1069,11 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .info6 .sep6 { font-style: normal; color: #555; margin: 0 7px; }
 .info6 .i6 { white-space: nowrap; display: inline-block; }
 .info6 { text-align: left; }
+/* chiamate: due cornette grandi, dritte, senza riquadro */
+.call .cbtn button .lic { width: 62px !important; height: 62px !important; padding: 0 !important; background: none !important; transform: none !important; stroke-width: 1.4; box-shadow: none !important; border: 0 !important; }
+.call .cbtn .no .lic { color: var(--bad); fill: var(--bad); }
+.call .cbtn .si .lic { color: var(--good); fill: var(--good); }
+html.bru .call .cbtn .no .lic > * { transform: none !important; }
 
 </style>
 </head>
@@ -8918,7 +8923,7 @@ function openCall(sp) {
   ensureStory();
   const v = callView(sp.c); window._call = { sp, v };
   openSheet(`<div class="call"><div class="ring">${v.face}</div><div class="cn">${esc(v.who)}</div><div class="cs">${esc(v.sub)} · chiamata in arrivo</div>
-    <div class="cbtn"><button class="no" onclick="declineCall()">${icon('phone')}<span>Rifiuta</span></button><button class="si" onclick="answerCall()">${icon('phone')}<span>Rispondi</span></button></div></div>`, { locked: true });
+    <div class="cbtn"><button class="no" onclick="declineCall()">${icon('handset')}<span>Rifiuta</span></button><button class="si" onclick="answerCall()">${icon('handset')}<span>Rispondi</span></button></div></div>`, { locked: true });
   vib(40);
 }
 function declineCall() {
@@ -11634,6 +11639,9 @@ homeHeroHTML = function () {
     <div class="nums">${(cc => `<div onclick="UI.partiti='alleanze';goTab('partiti')" style="cursor:pointer"><span>${cc ? 'Coalizione' : 'Partito'}</span><b>${fmt1(cc ? cc.members.reduce((s, m) => s + (G.parties[m] ? P(m).poll : 0), 0) : mp.poll)}%</b></div>`)(coalitionOf(myPid()))}<div onclick="openMyApproval()" style="cursor:pointer"><span>Gradimento</span><b style="color:${pctColor(a.v * 1.4)}">${fmt0(a.v)}%</b></div></div></div>
     <div class="hero2-sub">${icon('coin', 13)} ${euro(G.funds)} · fama ${fmt0(p.fama)} · stress ${fmt0(p.stress)} · ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</div>`;
 };
+
+// cornetta del telefono (chiamate in arrivo)
+ICON_PATHS.handset = '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>';
 
 </script>
 <script>

@@ -177,7 +177,7 @@ function openCall(sp) {
   ensureStory();
   const v = callView(sp.c); window._call = { sp, v };
   openSheet(`<div class="call"><div class="ring">${v.face}</div><div class="cn">${esc(v.who)}</div><div class="cs">${esc(v.sub)} · chiamata in arrivo</div>
-    <div class="cbtn"><button class="no" onclick="declineCall()">${icon('phone')}<span>Rifiuta</span></button><button class="si" onclick="answerCall()">${icon('phone')}<span>Rispondi</span></button></div></div>`, { locked: true });
+    <div class="cbtn"><button class="no" onclick="declineCall()">${icon('handset')}<span>Rifiuta</span></button><button class="si" onclick="answerCall()">${icon('handset')}<span>Rispondi</span></button></div></div>`, { locked: true });
   vib(40);
 }
 function declineCall() {

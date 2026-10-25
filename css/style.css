@@ -1052,3 +1052,8 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .info6 .sep6 { font-style: normal; color: #555; margin: 0 7px; }
 .info6 .i6 { white-space: nowrap; display: inline-block; }
 .info6 { text-align: left; }
+/* chiamate: due cornette grandi, dritte, senza riquadro */
+.call .cbtn button .lic { width: 62px !important; height: 62px !important; padding: 0 !important; background: none !important; transform: none !important; stroke-width: 1.4; box-shadow: none !important; border: 0 !important; }
+.call .cbtn .no .lic { color: var(--bad); fill: var(--bad); }
+.call .cbtn .si .lic { color: var(--good); fill: var(--good); }
+html.bru .call .cbtn .no .lic > * { transform: none !important; }
