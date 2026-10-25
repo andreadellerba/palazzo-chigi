@@ -1060,3 +1060,10 @@ html.bru .call .cbtn .no .lic > * { transform: none !important; }
 /* menu in basso: i tasti scendono fino al bordo del telefono, icone sopra la barra dei gesti */
 .nav4 { padding-bottom: 0; }
 .n4 { height: calc(52px + var(--safe-b)); padding-bottom: var(--safe-b); }
+/* tasti su una riga: etichetta a sinistra (tagliata con … se serve), costo a destra */
+.btn { white-space: nowrap; }
+.btn .bl9 { min-width: 0; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 8px; }
+.btn.hc9 { justify-content: space-between; gap: 10px; }
+.btn.hc9:not(.block) { justify-content: center; }
+.btn .bc9 { flex: none; color: #ffe14d; font-weight: 800; }
+.btn.gold .bc9, .btn.pri .bc9 { color: inherit; }

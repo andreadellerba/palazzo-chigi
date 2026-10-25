@@ -817,7 +817,7 @@ function offerMinistry() {
   openSheet(`${head(`Nasce il ${esc(G.gov.name)}`, `${esc(myParty().short)} ottiene ${mine.length} ministeri`)}
     <p class="small muted">Vuoi entrare personalmente nel governo? Diventerai anche vicepresidente del Consiglio.</p>
     ${mine.map(k => `<button class="choice" onclick="takeMinistry('${k}')"><div class="t">${esc(MIN_BY_ID[k].n)}</div><div class="tiny muted">al posto di ${esc(G.gov.ministers[k])}</div></button>`).join('')}
-    <button class="btn block mt" onclick="closeSheet()">No, resto leader di partito fuori dal governo</button>`);
+    <button class="btn block mt" onclick="closeSheet()">No, resto fuori dal governo</button>`);
 }
 function takeMinistry(k) {
   G.gov.ministers[k] = G.player.name; G.player.minister = k; if (!G.gov.vice.includes(G.player.name)) G.gov.vice.push(G.player.name);

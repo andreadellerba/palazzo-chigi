@@ -254,3 +254,16 @@ homeHeroHTML = function () {
 
 // cornetta del telefono (chiamate in arrivo)
 ICON_PATHS.handset = '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>';
+
+// ---------- tasti: il costo «· ⚡N» va a destra sulla stessa riga, niente punto e niente a capo ----------
+function fixBtnCosts(root) {
+  (root || document).querySelectorAll('.btn:not(.c9), .choice .t, .a2 .an2').forEach(b => {
+    b.classList.add('c9');
+    // il ⚡ può essere già diventato l'icona <i class="pcu">
+    const m = b.innerHTML.match(/^([\s\S]*?)\s*·\s*((?:⚡️?|<i class="pcu"><\/i>)\s*\d+(?:\s*·\s*[^<]+)?)\s*(›?)\s*$/);
+    if (!m || !b.classList.contains('btn')) return;
+    b.innerHTML = `<span class="bl9">${m[1]}${m[3] ? ' ›' : ''}</span><span class="bc9">${m[2].replace(/\s*·\s*/g, ' ')}</span>`;
+    b.classList.add('hc9');
+  });
+}
+new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType === 1) fixBtnCosts(n.parentNode || n); }); }).observe(document.documentElement, { childList: true, subtree: true });

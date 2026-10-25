@@ -1077,6 +1077,13 @@ html.bru .call .cbtn .no .lic > * { transform: none !important; }
 /* menu in basso: i tasti scendono fino al bordo del telefono, icone sopra la barra dei gesti */
 .nav4 { padding-bottom: 0; }
 .n4 { height: calc(52px + var(--safe-b)); padding-bottom: var(--safe-b); }
+/* tasti su una riga: etichetta a sinistra (tagliata con … se serve), costo a destra */
+.btn { white-space: nowrap; }
+.btn .bl9 { min-width: 0; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 8px; }
+.btn.hc9 { justify-content: space-between; gap: 10px; }
+.btn.hc9:not(.block) { justify-content: center; }
+.btn .bc9 { flex: none; color: #ffe14d; font-weight: 800; }
+.btn.gold .bc9, .btn.pri .bc9 { color: inherit; }
 
 </style>
 </head>
@@ -6961,7 +6968,7 @@ function lawActionsHTML(l, sel) {
     if (canParl) btns.push(`<button class="btn pri block" onclick="doPropose('${l.id}',${sel},'${l.cost ? 'cost' : 'ddl'}')">${icon('doc')} Presenta una proposta di legge · ⚡2</button>`);
     if (role() === 'alleato') btns.push(`<button class="btn block" onclick="doUltimatum('${l.id}',${sel})">${icon('fist')} Ultimatum al premier · ⚡3</button>`);
     if (G.player.minister && MIN_BY_ID[G.player.minister].cats.includes(l.cat)) btns.push(`<button class="btn gold block" onclick="doMinisterPropose('${l.id}',${sel})">${icon('building')} Proponi dal tuo ministero · ⚡2</button>`);
-    if (isLeader() && !inGov(myPid()) && !l.cost) btns.push(`<button class="btn block" onclick="doReferendum('${l.id}',${sel})">${icon('pen')} Referendum abrogativo (500.000 firme) · ⚡4</button>`);
+    if (isLeader() && !inGov(myPid()) && !l.cost) btns.push(`<button class="btn block" onclick="doReferendum('${l.id}',${sel})">${icon('pen')} Referendum abrogativo · ⚡4</button>`);
     if (!canParl && !btns.length) btns.push(`<div class="small muted center">Per presentare leggi devi essere in Parlamento o guidare un partito con parlamentari.</div>`);
   }
   if (isLeader()) {
@@ -8127,7 +8134,7 @@ function offerMinistry() {
   openSheet(`${head(`Nasce il ${esc(G.gov.name)}`, `${esc(myParty().short)} ottiene ${mine.length} ministeri`)}
     <p class="small muted">Vuoi entrare personalmente nel governo? Diventerai anche vicepresidente del Consiglio.</p>
     ${mine.map(k => `<button class="choice" onclick="takeMinistry('${k}')"><div class="t">${esc(MIN_BY_ID[k].n)}</div><div class="tiny muted">al posto di ${esc(G.gov.ministers[k])}</div></button>`).join('')}
-    <button class="btn block mt" onclick="closeSheet()">No, resto leader di partito fuori dal governo</button>`);
+    <button class="btn block mt" onclick="closeSheet()">No, resto fuori dal governo</button>`);
 }
 function takeMinistry(k) {
   G.gov.ministers[k] = G.player.name; G.player.minister = k; if (!G.gov.vice.includes(G.player.name)) G.gov.vice.push(G.player.name);
@@ -11650,6 +11657,19 @@ homeHeroHTML = function () {
 
 // cornetta del telefono (chiamate in arrivo)
 ICON_PATHS.handset = '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>';
+
+// ---------- tasti: il costo «· ⚡N» va a destra sulla stessa riga, niente punto e niente a capo ----------
+function fixBtnCosts(root) {
+  (root || document).querySelectorAll('.btn:not(.c9), .choice .t, .a2 .an2').forEach(b => {
+    b.classList.add('c9');
+    // il ⚡ può essere già diventato l'icona <i class="pcu">
+    const m = b.innerHTML.match(/^([\s\S]*?)\s*·\s*((?:⚡️?|<i class="pcu"><\/i>)\s*\d+(?:\s*·\s*[^<]+)?)\s*(›?)\s*$/);
+    if (!m || !b.classList.contains('btn')) return;
+    b.innerHTML = `<span class="bl9">${m[1]}${m[3] ? ' ›' : ''}</span><span class="bc9">${m[2].replace(/\s*·\s*/g, ' ')}</span>`;
+    b.classList.add('hc9');
+  });
+}
+new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if (n.nodeType === 1) fixBtnCosts(n.parentNode || n); }); }).observe(document.documentElement, { childList: true, subtree: true });
 
 </script>
 <script>

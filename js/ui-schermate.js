@@ -192,7 +192,7 @@ function lawActionsHTML(l, sel) {
     if (canParl) btns.push(`<button class="btn pri block" onclick="doPropose('${l.id}',${sel},'${l.cost ? 'cost' : 'ddl'}')">${icon('doc')} Presenta una proposta di legge · ⚡2</button>`);
     if (role() === 'alleato') btns.push(`<button class="btn block" onclick="doUltimatum('${l.id}',${sel})">${icon('fist')} Ultimatum al premier · ⚡3</button>`);
     if (G.player.minister && MIN_BY_ID[G.player.minister].cats.includes(l.cat)) btns.push(`<button class="btn gold block" onclick="doMinisterPropose('${l.id}',${sel})">${icon('building')} Proponi dal tuo ministero · ⚡2</button>`);
-    if (isLeader() && !inGov(myPid()) && !l.cost) btns.push(`<button class="btn block" onclick="doReferendum('${l.id}',${sel})">${icon('pen')} Referendum abrogativo (500.000 firme) · ⚡4</button>`);
+    if (isLeader() && !inGov(myPid()) && !l.cost) btns.push(`<button class="btn block" onclick="doReferendum('${l.id}',${sel})">${icon('pen')} Referendum abrogativo · ⚡4</button>`);
     if (!canParl && !btns.length) btns.push(`<div class="small muted center">Per presentare leggi devi essere in Parlamento o guidare un partito con parlamentari.</div>`);
   }
   if (isLeader()) {
