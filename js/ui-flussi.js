@@ -666,6 +666,7 @@ function renderManovra() {
       <div class="small mt"><span class="${r.ue[2]}">${icon(r.ue[0], 16)}</span> Bruxelles: <b class="${r.ue[2]}">${r.ue[1]}</b></div>
       <div class="row wrap small mt" style="gap:10px"><span>Spread ${r.spreadEst > 0 ? `<b class="bad">+${fmt0(r.spreadEst)}</b>` : '<b class="good">stabile</b>'}</span><span>PIL <b>${sgn(r.pil)}</b></span><span>Consenso <b class="${r.pop >= 0 ? 'good' : 'bad'}">${sgn(r.pop * 0.6)}</b></span></div>
       <div class="row wrap mt" style="gap:4px">${Object.keys(r.sat).map(p => `<span class="tag ${r.sat[p] > 0 ? 'g' : r.sat[p] < 0 ? 'b' : ''}">${esc(P(p).short)} ${icon(r.sat[p] > 0 ? 'smile' : r.sat[p] < 0 ? 'frown' : 'user', 14)}</span>`).join('')}</div></div>
+    ${manovraGuideHTML(r)}
     <p class="small muted">Scegli spese e coperture. Le misure valgono per un anno; le riforme strutturali restano. ${G.econ.flex ? '' : 'Puoi ottenere flessibilità con una «Missione a Bruxelles» tra settembre e novembre.'}</p>
     ${sec('Spese e tagli di tasse')}${(MAN.menu || BUDGET_MEASURES).filter(m => m.g === 'Spese').map(mrow).join('')}
     ${sec('Coperture')}${(MAN.menu || BUDGET_MEASURES).filter(m => m.g === 'Coperture').map(mrow).join('')}
@@ -673,6 +674,25 @@ function renderManovra() {
     ${fisLaws.map(l => { const cur = MAN.laws[l.id] !== undefined ? MAN.laws[l.id] : G.laws[l.id]; return `<div class="card tight"><b class="small">${icon(LAW_CATS[l.cat] || 'doc', 14)} ${esc(l.nome)}</b><select class="mt" onchange="setManLaw('${l.id}',+this.value)">${l.opts.map((o, i) => `<option value="${i}" ${i === cur ? 'selected' : ''}>${i === G.laws[l.id] ? '• ' : ''}${esc(o.t)}${(o.costo || 0) !== (l.opts[G.laws[l.id]].costo || 0) ? ` (${(o.costo - (l.opts[G.laws[l.id]].costo || 0)) > 0 ? '+' : ''}${fmt1(o.costo - (l.opts[G.laws[l.id]].costo || 0))} mld)` : ''}</option>`).join('')}</select></div>`; }).join('')}
     <button class="btn gold block mt2" onclick="submitManovra()">${icon('building')} Approva in Consiglio dei ministri</button>
     <div class="tiny dim center mt">Poi la manovra va al Senato e alla Camera: va approvata entro il 31 dicembre.</div>`);
+}
+// spiegazione della manovra con i numeri di questa partita
+function manovraGuideHTML(r) {
+  const pn = G.econ.pilNom, pt = pn / 100;
+  const room = (r.lim - r.def) * pt, roomT = (r.lim - r.tend) * pt;
+  const roomTxt = room >= 0.05 ? `<b class="good">Puoi spendere ancora circa ${fmt0(room)} miliardi</b> restando sotto il limite UE.` : `<b class="bad">Sei sopra il limite di circa ${fmt0(-room)} miliardi</b>: servono coperture o tagli per rientrare.`;
+  const row = (t, d) => `<div class="mg"><b>${t}</b><span>${d}</span></div>`;
+  return `<div class="card tight mt"><div class="small">${icon('info', 16)} ${roomTxt}</div>
+    <details class="mt"><summary class="small gold" style="font-weight:800">Come leggere questi numeri ›</summary><div class="mgs">
+      ${row(`Deficit ${MAN.year}`, `Quanto lo Stato spenderà <b>nel ${MAN.year}</b> più di quanto incassa, in percentuale del PIL. La manovra decide i conti dell’anno che viene, non quelli di quest’anno. Un punto di deficit vale circa <b>${fmt0(pt)} miliardi</b>.`)}
+      ${row('Tendenziale', `Il deficit che avresti senza fare niente: ${fmt1(r.tend)}%. Da lì partono le tue scelte${roomT > 0 ? `; già così avresti circa ${fmt0(roomT)} miliardi di margine` : '; già così sei sopra il limite'}.`)}
+      ${row('Saldo misure', 'La somma delle tue scelte. <b class="bad">Più</b> vuol dire che spendi o tagli tasse (il deficit sale), <b class="good">meno</b> che risparmi o trovi entrate (il deficit scende).')}
+      ${row('I miliardi risparmiati', 'Non finiscono in un salvadanaio: abbassano il deficit e quindi il debito. Così lo spread scende, le agenzie di rating ti promuovono e l’anno dopo hai più spazio.')}
+      ${row('Limite UE', `Il tetto concordato con Bruxelles: ${fmt1(r.lim)}%. Sopra rischi la procedura per deficit eccessivo e la sfiducia dei mercati.`)}
+      ${row('Spread', 'Quanto in più paghiamo di interessi rispetto alla Germania. Sale se spendi troppo in deficit: più interessi, meno soldi per il resto.')}
+      ${row('PIL', 'La crescita dell’economia. Alcune spese (investimenti, tagli alle tasse sul lavoro) la aiutano; le coperture con nuove tasse la frenano.')}
+      ${row('Consenso', 'Come reagiscono gli elettori. Bonus e tagli di tasse piacciono subito; tagli e tasse nuove no.')}
+      ${row('Partiti', 'Le faccine dicono se gli alleati sono contenti: se scontenti, in aula possono creare problemi.')}
+    </div></details></div>`;
 }
 function toggleMeasure(id) { if (MAN.sel.has(id)) MAN.sel.delete(id); else MAN.sel.add(id); vib(6); const sh = layers[layers.length - 1].el.querySelector('.sheet'); const st = sh.scrollTop; renderManovra(); sh.scrollTop = st; }
 function setManLaw(id, opt) { if (opt === G.laws[id]) delete MAN.laws[id]; else MAN.laws[id] = opt; const sh = layers[layers.length - 1].el.querySelector('.sheet'); const st = sh.scrollTop; renderManovra(); sh.scrollTop = st; }

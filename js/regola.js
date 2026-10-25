@@ -41,8 +41,8 @@ function renderTuner() {
     const pos = ord.findIndex(x => x.i === sel), curPos = ord.findIndex(x => x.i === cur), changed = sel !== cur;
     const dc = (l.opts[sel].costo || 0) - (l.opts[cur].costo || 0);
     h += `<div class="card tight ${changed ? 'tuned' : ''}"><div class="row between"><b class="small">${esc(l.nome)}</b>${busy.has(l.id) ? `<span class="tag w">in Parlamento</span>` : changed ? `<span class="tag ${dc > 0.05 ? 'b' : dc < -0.05 ? 'g' : ''}">${dc > 0 ? '+' : ''}${fmt1(dc)} mld</span>` : ''}</div>
-      <div class="tune-val ${changed ? 'gold' : ''}">${esc(l.opts[sel].t)}</div>
-      <div class="tune-rail"><input type="range" min="0" max="${ord.length - 1}" step="1" value="${pos}" ${busy.has(l.id) ? 'disabled' : ''} oninput="tuneSet('${l.id}', +this.value)"><i class="now" style="left:calc(${curPos / Math.max(1, ord.length - 1)} * (100% - 26px) + 13px)" title="oggi"></i></div>
+      <div class="tune-val ${changed ? 'gold' : ''}" id="tv-${l.id}">${esc(l.opts[sel].t)}</div>
+      <div class="tune-rail"><button class="tune-arr" ${busy.has(l.id) || pos <= 0 ? 'disabled' : ''} onclick="tuneSet('${l.id}', ${pos - 1})">‹</button><div class="tr-in"><input type="range" min="0" max="${ord.length - 1}" step="1" value="${pos}" ${busy.has(l.id) ? 'disabled' : ''} oninput="tunePreview('${l.id}', +this.value)" onchange="tuneSet('${l.id}', +this.value)"><i class="now" style="left:calc(${curPos / Math.max(1, ord.length - 1)} * (100% - 26px) + 13px)" title="oggi"></i></div><button class="tune-arr" ${busy.has(l.id) || pos >= ord.length - 1 ? 'disabled' : ''} onclick="tuneSet('${l.id}', ${pos + 1})">›</button></div>
       <div class="row between tiny dim"><span>${esc(AXES[l.ax].l)}</span><span>oggi: ${esc(l.opts[cur].t)}</span><span>${esc(AXES[l.ax].r)}</span></div>
       ${changed ? effChipsHTML(effectsOf(l, cur, sel), lawGain(myPid(), l, cur, sel)) : ''}</div>`;
   });
@@ -54,10 +54,12 @@ function renderTuner() {
   replaceSheet(h);
   const s2 = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null; if (s2) s2.scrollTop = st;
 }
+// mentre trascini cambia solo l'etichetta: il resto si aggiorna quando lasci il cursore
+function tunePreview(id, pos) { const el = document.getElementById('tv-' + id), o = tuneOrder(getLaw(id))[pos]; if (el && o) { el.textContent = o.o.t; el.classList.toggle('gold', o.i !== G.laws[id]); } }
 function tuneSet(id, pos) {
   const l = getLaw(id), opt = tuneOrder(l)[pos].i;
   if (opt === G.laws[id]) delete TUNE.ch[id]; else TUNE.ch[id] = opt;
-  clearTimeout(TUNE.t); TUNE.t = setTimeout(renderTuner, 60);
+  vib(6); renderTuner();
 }
 function submitTuner() {
   const busy = new Set(G.bills.filter(b => !b.dead && b.lawId).map(b => b.lawId));

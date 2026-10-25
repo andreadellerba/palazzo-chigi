@@ -639,12 +639,49 @@ html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolut
 .tsum.g b { color: var(--good); } .tsum.b b { color: var(--bad); }
 .card.tuned { border-color: var(--oro); box-shadow: 0 0 0 1px var(--oro) inset; }
 .tune-val { font-weight: 700; font-size: 15px; margin: 4px 0 2px; }
-.tune-rail { position: relative; padding: 6px 0; }
+.tune-rail { padding: 6px 0; }
 .tune-rail input { width: 100%; accent-color: var(--oro); height: 26px; margin: 0; }
 .tune-rail .now { position: absolute; top: 0; width: 2px; height: 8px; margin-left: -1px; background: var(--muted); border-radius: 1px; pointer-events: none; }
 .choice.on { border-color: var(--oro); box-shadow: 0 0 0 1px var(--oro) inset; }
 .kpi .v { white-space: nowrap; } .kpi .v .kar { font-size: 11px; margin-left: 3px; vertical-align: 3px; }
 .tabs-mobile2 .tbtn .tl::before { content: none; }
+/* card dei provvedimenti in Parlamento: fascicolo compatto (L3) */
+.bfold { position: relative; padding-top: 20px; margin-bottom: 12px; cursor: pointer; animation: fadeUp .35s both; }
+.bfold .btab { position: absolute; top: 0; left: 12px; display: inline-flex; align-items: center; gap: 4px; height: 21px; padding: 0 10px; border-radius: 9px 9px 0 0; background: var(--vc); color: #10131f; font-size: 10.5px; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; }
+.bfold .btab .lic { width: 12px; height: 12px; stroke-width: 2.4; }
+.bfold .bbody { padding: 11px 13px 12px; border-radius: 4px 16px 16px 16px; background: linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.012)), var(--card); border: 1px solid var(--line); border-top: 3px solid var(--vc); transition: transform .12s; }
+.bfold:active .bbody { transform: scale(.985); }
+.bfold .bt { font-family: var(--serif); font-weight: 700; font-size: 16px; line-height: 1.25; color: var(--cream); }
+.bchg { display: flex; align-items: stretch; gap: 6px; margin-top: 8px; font-size: 12.5px; line-height: 1.3; }
+.bchg > span { flex: 1; min-width: 0; padding: 6px 8px; border-radius: 10px; background: rgba(255,255,255,.035); border: 1px solid var(--line); }
+.bchg i { display: block; font-style: normal; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); margin-bottom: 1px; }
+.bchg .o { color: var(--muted); } .bchg .n { color: var(--cream); border-color: var(--line2); } .bchg .n i { color: var(--oro); }
+.bchg .ar { flex: none; padding: 0; border: 0; background: none; display: grid; place-items: center; color: var(--oro); }
+.bsteps { display: flex; align-items: center; gap: 10px; margin-top: 9px; font-size: 12px; color: var(--muted); }
+.bsteps .bh { flex: none; display: inline-flex; align-items: center; gap: 3px; }
+.bsteps .bh i { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--line2); display: inline-block; }
+.bsteps .bh i.d { background: var(--oro); border-color: var(--oro); }
+.bsteps .bh i.n { border-color: var(--oro); box-shadow: 0 0 0 3px rgba(214,178,94,.22); }
+.bsteps .grow { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bmtr { margin-top: 9px; }
+.bmtr .tr { position: relative; height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); }
+.bmtr .tr b { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+.bmtr .tr s { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: #fff; border-radius: 1px; }
+.bmtr .lb { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); margin-top: 5px; }
+.bmtr .lb b { color: var(--text); }
+.mi { display: inline-flex; align-items: center; gap: 1px; font-size: 10.5px; font-weight: 800; margin-right: 4px; }
+.mi.g { color: var(--good); } .mi.b { color: var(--bad); } .mi .lic { width: 12px; height: 12px; }
+.mgs { display: grid; gap: 9px; margin-top: 8px; }
+.mg { font-size: 13px; line-height: 1.45; color: var(--muted); }
+.mg > b { display: block; color: var(--cream); font-size: 13.5px; }
+/* cursori con frecce */
+.tune-rail { display: flex; align-items: center; gap: 6px; }
+.tune-rail .tr-in { position: relative; flex: 1; }
+.tune-arr { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.05); border: 1px solid var(--line2); color: var(--oro2); font-size: 18px; font-weight: 800; }
+.tune-arr:active { transform: scale(.9); background: rgba(214,178,94,.18); }
+.tune-arr[disabled] { opacity: .3; pointer-events: none; }
+.bmtr .tr b { background: var(--good); }
+.bmtr .tr u { position: absolute; right: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--bad); }
 
 </style>
 </head>
@@ -6298,32 +6335,32 @@ function proposerLabel(b) {
   if (b.proposer === 'PLAYER') return `<span class="tag o">${icon('user')} Tua proposta</span>`;
   return partyChip(b.proposer);
 }
+// L3: fascicolo compatto con «oggi → diventa» e contavoti; i tasti stanno nel dettaglio
+const BILL_KN = { ddl: 'Disegno di legge', pdl: 'Proposta di legge', dl: 'Decreto', cost: 'Costituzionale', manovra: 'Manovra' };
+function billChangeHTML(b) {
+  if (b.type === 'manovra') { const c = b.measures.reduce((s, id) => s + (BUDGET_BY_ID[id] ? BUDGET_BY_ID[id].c : 0), 0); return `<div class="bchg"><span class="o">${b.measures.length} misure di spesa e coperture</span><span class="n">${c > 0 ? '+' : ''}${fmt1(c)} mld sul deficit</span></div>`; }
+  if (!b.lawId) return '';
+  const l = getLaw(b.lawId), from = b.type === 'dl' && b.dlFrom !== undefined ? b.dlFrom : b.from;
+  return `<div class="bchg"><span class="o"><i>Oggi</i>${esc(l.opts[from].t)}</span><span class="ar">${icon('chevron', 14)}</span><span class="n"><i>Diventa</i>${esc(l.opts[b.opt].t)}</span></div>`;
+}
 function billCard(b) {
-  const s = b.stages[b.stage] || {};
-  const inAula = s.k === 'aula';
-  let h = `<div class="card vote-card" style="--vc:${b.proposer === 'GOV' ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa'}">
-    <div class="row between">${kindTag(b)}${proposerLabel(b)}</div>
-    <h3 style="margin-top:10px">${esc(billName(b))}</h3>
-    ${b.lawId && getLaw(b.lawId).nome !== billName(b) ? `<div class="small muted">${esc(getLaw(b.lawId).nome)}</div>` : ''}
-    ${b.lawId ? effChipsHTML(effectsOf(getLaw(b.lawId), b.from, b.opt), lawGain(myPid(), getLaw(b.lawId), b.from, b.opt)) : ''}
-    <div class="mt">${iterHTML(b)}</div>
-    <div class="row between small mt"><span>${esc(stageLabel(b))}${s.k === 'comm' && b.wait > 0 && !b.stalled ? ` · ${b.wait} sett.` : ''}</span>${b.type === 'dl' ? `<span class="tag w">${icon('clock')} scade ${fmtDate(b.deadline, true)}</span>` : ''}</div>`;
-  if (isPremier() && b.proposer === 'GOV' && b.type !== 'cost' && inAula) h += fiduciaCompareHTML(b, b.fiducia);
-  else if (inAula) { const pr = predictVote(b); h += `<div class="small mt">Previsione: <b class="${pr.passed ? 'good' : 'bad'}">${pr.passed ? 'passa' : 'bocciata'}</b> <span class="muted">(Sì ${pr.yes}, No ${pr.no}, Astenuti ${pr.abst})</span></div>`; }
-  h += `<div class="row wrap mt" style="gap:6px"><button class="btn sm" onclick="openBill(${b.id})">${icon('scales')} Pro e contro</button>`;
-  if (isPremier() && b.proposer === 'GOV' && b.type !== 'cost' && inAula) h += `<button class="btn sm ${b.fiducia ? 'gold' : ''}" onclick="toggleFiducia(${b.id})">${icon('lock')} ${b.fiducia ? 'Fiducia posta' : 'Porre la fiducia · ⚡3'}</button>`;
-  if (isPremier() && b.proposer === 'GOV' && b.type !== 'manovra') h += `<button class="btn sm" onclick="withdrawBill(${b.id})">Ritira</button>`;
-  if (isLeader() && !inGov(myPid()) && b.proposer === 'GOV') h += `<button class="btn sm" onclick="doObstr(${b.id})">${icon('hand')} Ostruzionismo · ⚡2</button>`;
-  h += `</div>`;
-  if (inAula) {
-    const pend = pendingVoteIds().includes(b.id);
-    const mine = G.myPersonal[b.id] || G.myVotes[b.id];
-    const relevant = G.player.parl === s.h || (isLeader() && seatsOf(myPid(), s.h) > 0);
-    if (pend) h += `<button class="btn gold block mt" onclick="openVotes([${b.id}],true)">${icon('vote')} Al voto questa settimana · Vota</button>`;
-    else if (mine && relevant) h += `<div class="small mt">${icon('vote', 16)} Il tuo voto: <b class="gold">${VLAB[mine]}</b> · risultato la prossima settimana</div>`;
-    else if (!relevant && !(isPremier() && b.proposer === 'GOV')) h += `<div class="tiny muted mt">Non voti su questo testo: ${G.player.parl ? 'si vota nell’altra Camera' : 'non sei in Parlamento'}.</div>`;
-  }
-  return h + `</div>`;
+  const s = b.stages[b.stage] || {}, k = billKind(b), inAula = s.k === 'aula';
+  const col = b.proposer === 'GOV' ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa';
+  const h0 = s.h || 'C', pr = predictVote(b), need = majority(h0), tot = totalSeats(h0), abs = s.r === 2;
+  const pend = inAula && pendingVoteIds().includes(b.id);
+  const mine = G.myPersonal[b.id] || G.myVotes[b.id];
+  const hs = ['C', 'S'].map(h => { const st = b.stages.map((x, i) => ({ x, i })).filter(o => o.x.h === h); return st.length ? `<span class="bh">${h === 'C' ? 'Camera' : 'Senato'} ${st.map(o => `<i class="${o.i < b.stage ? 'd' : o.i === b.stage ? 'n' : ''}"></i>`).join('')}</span>` : ''; }).join('');
+  const effs = b.lawId ? effectsOf(getLaw(b.lawId), b.from, b.opt).slice(0, 5).map(e => `<span class="mi ${e.good ? 'g' : 'b'}">${icon(METRICS[e.k].ico, 13)}${e.up ? '▲' : '▼'}</span>`).join('') : '';
+  let foot = '';
+  if (pend) foot = `<button class="btn gold sm block mt" onclick="event.stopPropagation();openVotes([${b.id}],true)">${icon('vote')} Al voto questa settimana · Vota</button>`;
+  else if (inAula && isPremier() && b.proposer === 'GOV' && b.type !== 'cost') foot = `<button class="btn sm mt ${b.fiducia ? 'gold' : ''}" onclick="event.stopPropagation();toggleFiducia(${b.id})">${icon('lock')} ${b.fiducia ? 'Fiducia posta' : 'Porre la fiducia · ⚡3'}</button>`;
+  else if (mine && inAula) foot = `<div class="tiny mt">${icon('vote', 14)} Il tuo voto: <b class="gold">${VLAB[mine]}</b></div>`;
+  return `<div class="bfold" style="--vc:${col}" onclick="openBill(${b.id})"><span class="btab">${icon(TYPE_INFO[k].i, 12)} ${BILL_KN[k] || TYPE_INFO[k].n}</span><div class="bbody">
+    <div class="row between" style="align-items:flex-start"><div class="bt">${esc(billName(b))}</div>${proposerLabel(b)}</div>
+    ${billChangeHTML(b)}
+    <div class="bsteps">${hs}<span class="grow">${esc(stageLabel(b))}${s.k === 'comm' && b.wait > 0 && !b.stalled ? ` · ${b.wait} sett.` : ''}</span>${b.type === 'dl' ? `<span class="tag w" style="height:22px">${icon('clock', 12)} ${fmtDate(b.deadline, true)}</span>` : ''}</div>
+    <div class="bmtr"><div class="tr"><b style="width:${Math.min(100, pr.yes / tot * 100)}%"></b><u style="width:${Math.min(100, pr.no / tot * 100)}%"></u>${abs ? `<s style="left:${need / tot * 100}%"></s>` : ''}</div><div class="lb"><span><b class="good">Sì ${pr.yes}</b> · <b class="bad">No ${pr.no}</b></span><span>${effs || ''}</span><span class="${pr.passed ? 'good' : 'bad'}" style="font-weight:800">${pr.passed ? 'passerebbe' : 'bocciata'}${abs ? ` (servono ${need})` : ''}</span></div></div>
+    ${foot}</div></div>`;
 }
 function setMyVote(id, v) { if (v) G.myVotes[id] = v; else delete G.myVotes[id]; vib(); renderGame(); }
 function toggleFiducia(id) {
@@ -6343,6 +6380,14 @@ function openBill(id) {
   if (b.lawId) { const l = getLaw(b.lawId); h += `<div class="change mt"><div><span class="tiny muted">OGGI</span><b>${esc(l.opts[b.from].t)}</b></div><span class="arrow">${icon('chevron')}</span><div><span class="tiny muted">DIVENTEREBBE</span><b>${esc(l.opts[b.opt].t)}</b></div></div><div class="mt">${explainHTML(l, b.opt)}</div>`; }
   if (b.type === 'manovra') h += `<div class="card tight mt"><div class="small">${b.measures.map(id => `<div class="row between" style="padding:3px 0"><span>${esc(BUDGET_BY_ID[id].n)}</span><b class="${BUDGET_BY_ID[id].c > 0 ? 'bad' : 'good'}">${BUDGET_BY_ID[id].c > 0 ? '+' : ''}${fmt1(BUDGET_BY_ID[id].c)}</b></div>`).join('')}</div></div>`;
   h += `<div class="mt">${proConHTML(imp)}</div>`;
+  { // i tasti che prima stavano sulla card
+    const s = b.stages[b.stage] || {}, inAula = s.k === 'aula', btn = [];
+    if (inAula && pendingVoteIds().includes(b.id)) btn.push(`<button class="btn gold block" onclick="closeSheet();openVotes([${b.id}],true)">${icon('vote')} Vota ora</button>`);
+    if (isPremier() && b.proposer === 'GOV' && b.type !== 'cost' && inAula) btn.push(`<button class="btn ${b.fiducia ? 'gold' : ''}" onclick="closeSheet();toggleFiducia(${b.id})">${icon('lock')} ${b.fiducia ? 'Togli la fiducia' : 'Porre la fiducia · ⚡3'}</button>`);
+    if (isPremier() && b.proposer === 'GOV' && b.type !== 'manovra') btn.push(`<button class="btn" onclick="closeSheet();withdrawBill(${b.id})">Ritira</button>`);
+    if (isLeader() && !inGov(myPid()) && b.proposer === 'GOV') btn.push(`<button class="btn" onclick="closeSheet();doObstr(${b.id})">${icon('hand')} Ostruzionismo · ⚡2</button>`);
+    if (btn.length) h += `<div class="row wrap mt" style="gap:8px">${btn.join('')}</div>`;
+  }
   if (b.stages[b.stage] && b.stages[b.stage].k === 'aula') h += isPremier() && b.proposer === 'GOV' && b.type !== 'cost' ? fiduciaCompareHTML(b, b.fiducia) : `<div class="card tight mt">${voteBar(predictVote(b), b.stages[b.stage].h === 'C' ? 'Previsione Camera' : 'Previsione Senato')}</div>`;
   openSheet(h);
 }
@@ -7255,6 +7300,7 @@ function renderManovra() {
       <div class="small mt"><span class="${r.ue[2]}">${icon(r.ue[0], 16)}</span> Bruxelles: <b class="${r.ue[2]}">${r.ue[1]}</b></div>
       <div class="row wrap small mt" style="gap:10px"><span>Spread ${r.spreadEst > 0 ? `<b class="bad">+${fmt0(r.spreadEst)}</b>` : '<b class="good">stabile</b>'}</span><span>PIL <b>${sgn(r.pil)}</b></span><span>Consenso <b class="${r.pop >= 0 ? 'good' : 'bad'}">${sgn(r.pop * 0.6)}</b></span></div>
       <div class="row wrap mt" style="gap:4px">${Object.keys(r.sat).map(p => `<span class="tag ${r.sat[p] > 0 ? 'g' : r.sat[p] < 0 ? 'b' : ''}">${esc(P(p).short)} ${icon(r.sat[p] > 0 ? 'smile' : r.sat[p] < 0 ? 'frown' : 'user', 14)}</span>`).join('')}</div></div>
+    ${manovraGuideHTML(r)}
     <p class="small muted">Scegli spese e coperture. Le misure valgono per un anno; le riforme strutturali restano. ${G.econ.flex ? '' : 'Puoi ottenere flessibilità con una «Missione a Bruxelles» tra settembre e novembre.'}</p>
     ${sec('Spese e tagli di tasse')}${(MAN.menu || BUDGET_MEASURES).filter(m => m.g === 'Spese').map(mrow).join('')}
     ${sec('Coperture')}${(MAN.menu || BUDGET_MEASURES).filter(m => m.g === 'Coperture').map(mrow).join('')}
@@ -7262,6 +7308,25 @@ function renderManovra() {
     ${fisLaws.map(l => { const cur = MAN.laws[l.id] !== undefined ? MAN.laws[l.id] : G.laws[l.id]; return `<div class="card tight"><b class="small">${icon(LAW_CATS[l.cat] || 'doc', 14)} ${esc(l.nome)}</b><select class="mt" onchange="setManLaw('${l.id}',+this.value)">${l.opts.map((o, i) => `<option value="${i}" ${i === cur ? 'selected' : ''}>${i === G.laws[l.id] ? '• ' : ''}${esc(o.t)}${(o.costo || 0) !== (l.opts[G.laws[l.id]].costo || 0) ? ` (${(o.costo - (l.opts[G.laws[l.id]].costo || 0)) > 0 ? '+' : ''}${fmt1(o.costo - (l.opts[G.laws[l.id]].costo || 0))} mld)` : ''}</option>`).join('')}</select></div>`; }).join('')}
     <button class="btn gold block mt2" onclick="submitManovra()">${icon('building')} Approva in Consiglio dei ministri</button>
     <div class="tiny dim center mt">Poi la manovra va al Senato e alla Camera: va approvata entro il 31 dicembre.</div>`);
+}
+// spiegazione della manovra con i numeri di questa partita
+function manovraGuideHTML(r) {
+  const pn = G.econ.pilNom, pt = pn / 100;
+  const room = (r.lim - r.def) * pt, roomT = (r.lim - r.tend) * pt;
+  const roomTxt = room >= 0.05 ? `<b class="good">Puoi spendere ancora circa ${fmt0(room)} miliardi</b> restando sotto il limite UE.` : `<b class="bad">Sei sopra il limite di circa ${fmt0(-room)} miliardi</b>: servono coperture o tagli per rientrare.`;
+  const row = (t, d) => `<div class="mg"><b>${t}</b><span>${d}</span></div>`;
+  return `<div class="card tight mt"><div class="small">${icon('info', 16)} ${roomTxt}</div>
+    <details class="mt"><summary class="small gold" style="font-weight:800">Come leggere questi numeri ›</summary><div class="mgs">
+      ${row(`Deficit ${MAN.year}`, `Quanto lo Stato spenderà <b>nel ${MAN.year}</b> più di quanto incassa, in percentuale del PIL. La manovra decide i conti dell’anno che viene, non quelli di quest’anno. Un punto di deficit vale circa <b>${fmt0(pt)} miliardi</b>.`)}
+      ${row('Tendenziale', `Il deficit che avresti senza fare niente: ${fmt1(r.tend)}%. Da lì partono le tue scelte${roomT > 0 ? `; già così avresti circa ${fmt0(roomT)} miliardi di margine` : '; già così sei sopra il limite'}.`)}
+      ${row('Saldo misure', 'La somma delle tue scelte. <b class="bad">Più</b> vuol dire che spendi o tagli tasse (il deficit sale), <b class="good">meno</b> che risparmi o trovi entrate (il deficit scende).')}
+      ${row('I miliardi risparmiati', 'Non finiscono in un salvadanaio: abbassano il deficit e quindi il debito. Così lo spread scende, le agenzie di rating ti promuovono e l’anno dopo hai più spazio.')}
+      ${row('Limite UE', `Il tetto concordato con Bruxelles: ${fmt1(r.lim)}%. Sopra rischi la procedura per deficit eccessivo e la sfiducia dei mercati.`)}
+      ${row('Spread', 'Quanto in più paghiamo di interessi rispetto alla Germania. Sale se spendi troppo in deficit: più interessi, meno soldi per il resto.')}
+      ${row('PIL', 'La crescita dell’economia. Alcune spese (investimenti, tagli alle tasse sul lavoro) la aiutano; le coperture con nuove tasse la frenano.')}
+      ${row('Consenso', 'Come reagiscono gli elettori. Bonus e tagli di tasse piacciono subito; tagli e tasse nuove no.')}
+      ${row('Partiti', 'Le faccine dicono se gli alleati sono contenti: se scontenti, in aula possono creare problemi.')}
+    </div></details></div>`;
 }
 function toggleMeasure(id) { if (MAN.sel.has(id)) MAN.sel.delete(id); else MAN.sel.add(id); vib(6); const sh = layers[layers.length - 1].el.querySelector('.sheet'); const st = sh.scrollTop; renderManovra(); sh.scrollTop = st; }
 function setManLaw(id, opt) { if (opt === G.laws[id]) delete MAN.laws[id]; else MAN.laws[id] = opt; const sh = layers[layers.length - 1].el.querySelector('.sheet'); const st = sh.scrollTop; renderManovra(); sh.scrollTop = st; }
@@ -9274,8 +9339,8 @@ function renderTuner() {
     const pos = ord.findIndex(x => x.i === sel), curPos = ord.findIndex(x => x.i === cur), changed = sel !== cur;
     const dc = (l.opts[sel].costo || 0) - (l.opts[cur].costo || 0);
     h += `<div class="card tight ${changed ? 'tuned' : ''}"><div class="row between"><b class="small">${esc(l.nome)}</b>${busy.has(l.id) ? `<span class="tag w">in Parlamento</span>` : changed ? `<span class="tag ${dc > 0.05 ? 'b' : dc < -0.05 ? 'g' : ''}">${dc > 0 ? '+' : ''}${fmt1(dc)} mld</span>` : ''}</div>
-      <div class="tune-val ${changed ? 'gold' : ''}">${esc(l.opts[sel].t)}</div>
-      <div class="tune-rail"><input type="range" min="0" max="${ord.length - 1}" step="1" value="${pos}" ${busy.has(l.id) ? 'disabled' : ''} oninput="tuneSet('${l.id}', +this.value)"><i class="now" style="left:calc(${curPos / Math.max(1, ord.length - 1)} * (100% - 26px) + 13px)" title="oggi"></i></div>
+      <div class="tune-val ${changed ? 'gold' : ''}" id="tv-${l.id}">${esc(l.opts[sel].t)}</div>
+      <div class="tune-rail"><button class="tune-arr" ${busy.has(l.id) || pos <= 0 ? 'disabled' : ''} onclick="tuneSet('${l.id}', ${pos - 1})">‹</button><div class="tr-in"><input type="range" min="0" max="${ord.length - 1}" step="1" value="${pos}" ${busy.has(l.id) ? 'disabled' : ''} oninput="tunePreview('${l.id}', +this.value)" onchange="tuneSet('${l.id}', +this.value)"><i class="now" style="left:calc(${curPos / Math.max(1, ord.length - 1)} * (100% - 26px) + 13px)" title="oggi"></i></div><button class="tune-arr" ${busy.has(l.id) || pos >= ord.length - 1 ? 'disabled' : ''} onclick="tuneSet('${l.id}', ${pos + 1})">›</button></div>
       <div class="row between tiny dim"><span>${esc(AXES[l.ax].l)}</span><span>oggi: ${esc(l.opts[cur].t)}</span><span>${esc(AXES[l.ax].r)}</span></div>
       ${changed ? effChipsHTML(effectsOf(l, cur, sel), lawGain(myPid(), l, cur, sel)) : ''}</div>`;
   });
@@ -9287,10 +9352,12 @@ function renderTuner() {
   replaceSheet(h);
   const s2 = layers.length ? layers[layers.length - 1].el.querySelector('.sheet') : null; if (s2) s2.scrollTop = st;
 }
+// mentre trascini cambia solo l'etichetta: il resto si aggiorna quando lasci il cursore
+function tunePreview(id, pos) { const el = document.getElementById('tv-' + id), o = tuneOrder(getLaw(id))[pos]; if (el && o) { el.textContent = o.o.t; el.classList.toggle('gold', o.i !== G.laws[id]); } }
 function tuneSet(id, pos) {
   const l = getLaw(id), opt = tuneOrder(l)[pos].i;
   if (opt === G.laws[id]) delete TUNE.ch[id]; else TUNE.ch[id] = opt;
-  clearTimeout(TUNE.t); TUNE.t = setTimeout(renderTuner, 60);
+  vib(6); renderTuner();
 }
 function submitTuner() {
   const busy = new Set(G.bills.filter(b => !b.dead && b.lawId).map(b => b.lawId));

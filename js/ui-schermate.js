@@ -250,32 +250,32 @@ function proposerLabel(b) {
   if (b.proposer === 'PLAYER') return `<span class="tag o">${icon('user')} Tua proposta</span>`;
   return partyChip(b.proposer);
 }
+// L3: fascicolo compatto con «oggi → diventa» e contavoti; i tasti stanno nel dettaglio
+const BILL_KN = { ddl: 'Disegno di legge', pdl: 'Proposta di legge', dl: 'Decreto', cost: 'Costituzionale', manovra: 'Manovra' };
+function billChangeHTML(b) {
+  if (b.type === 'manovra') { const c = b.measures.reduce((s, id) => s + (BUDGET_BY_ID[id] ? BUDGET_BY_ID[id].c : 0), 0); return `<div class="bchg"><span class="o">${b.measures.length} misure di spesa e coperture</span><span class="n">${c > 0 ? '+' : ''}${fmt1(c)} mld sul deficit</span></div>`; }
+  if (!b.lawId) return '';
+  const l = getLaw(b.lawId), from = b.type === 'dl' && b.dlFrom !== undefined ? b.dlFrom : b.from;
+  return `<div class="bchg"><span class="o"><i>Oggi</i>${esc(l.opts[from].t)}</span><span class="ar">${icon('chevron', 14)}</span><span class="n"><i>Diventa</i>${esc(l.opts[b.opt].t)}</span></div>`;
+}
 function billCard(b) {
-  const s = b.stages[b.stage] || {};
-  const inAula = s.k === 'aula';
-  let h = `<div class="card vote-card" style="--vc:${b.proposer === 'GOV' ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa'}">
-    <div class="row between">${kindTag(b)}${proposerLabel(b)}</div>
-    <h3 style="margin-top:10px">${esc(billName(b))}</h3>
-    ${b.lawId && getLaw(b.lawId).nome !== billName(b) ? `<div class="small muted">${esc(getLaw(b.lawId).nome)}</div>` : ''}
-    ${b.lawId ? effChipsHTML(effectsOf(getLaw(b.lawId), b.from, b.opt), lawGain(myPid(), getLaw(b.lawId), b.from, b.opt)) : ''}
-    <div class="mt">${iterHTML(b)}</div>
-    <div class="row between small mt"><span>${esc(stageLabel(b))}${s.k === 'comm' && b.wait > 0 && !b.stalled ? ` · ${b.wait} sett.` : ''}</span>${b.type === 'dl' ? `<span class="tag w">${icon('clock')} scade ${fmtDate(b.deadline, true)}</span>` : ''}</div>`;
-  if (isPremier() && b.proposer === 'GOV' && b.type !== 'cost' && inAula) h += fiduciaCompareHTML(b, b.fiducia);
-  else if (inAula) { const pr = predictVote(b); h += `<div class="small mt">Previsione: <b class="${pr.passed ? 'good' : 'bad'}">${pr.passed ? 'passa' : 'bocciata'}</b> <span class="muted">(Sì ${pr.yes}, No ${pr.no}, Astenuti ${pr.abst})</span></div>`; }
-  h += `<div class="row wrap mt" style="gap:6px"><button class="btn sm" onclick="openBill(${b.id})">${icon('scales')} Pro e contro</button>`;
-  if (isPremier() && b.proposer === 'GOV' && b.type !== 'cost' && inAula) h += `<button class="btn sm ${b.fiducia ? 'gold' : ''}" onclick="toggleFiducia(${b.id})">${icon('lock')} ${b.fiducia ? 'Fiducia posta' : 'Porre la fiducia · ⚡3'}</button>`;
-  if (isPremier() && b.proposer === 'GOV' && b.type !== 'manovra') h += `<button class="btn sm" onclick="withdrawBill(${b.id})">Ritira</button>`;
-  if (isLeader() && !inGov(myPid()) && b.proposer === 'GOV') h += `<button class="btn sm" onclick="doObstr(${b.id})">${icon('hand')} Ostruzionismo · ⚡2</button>`;
-  h += `</div>`;
-  if (inAula) {
-    const pend = pendingVoteIds().includes(b.id);
-    const mine = G.myPersonal[b.id] || G.myVotes[b.id];
-    const relevant = G.player.parl === s.h || (isLeader() && seatsOf(myPid(), s.h) > 0);
-    if (pend) h += `<button class="btn gold block mt" onclick="openVotes([${b.id}],true)">${icon('vote')} Al voto questa settimana · Vota</button>`;
-    else if (mine && relevant) h += `<div class="small mt">${icon('vote', 16)} Il tuo voto: <b class="gold">${VLAB[mine]}</b> · risultato la prossima settimana</div>`;
-    else if (!relevant && !(isPremier() && b.proposer === 'GOV')) h += `<div class="tiny muted mt">Non voti su questo testo: ${G.player.parl ? 'si vota nell’altra Camera' : 'non sei in Parlamento'}.</div>`;
-  }
-  return h + `</div>`;
+  const s = b.stages[b.stage] || {}, k = billKind(b), inAula = s.k === 'aula';
+  const col = b.proposer === 'GOV' ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa';
+  const h0 = s.h || 'C', pr = predictVote(b), need = majority(h0), tot = totalSeats(h0), abs = s.r === 2;
+  const pend = inAula && pendingVoteIds().includes(b.id);
+  const mine = G.myPersonal[b.id] || G.myVotes[b.id];
+  const hs = ['C', 'S'].map(h => { const st = b.stages.map((x, i) => ({ x, i })).filter(o => o.x.h === h); return st.length ? `<span class="bh">${h === 'C' ? 'Camera' : 'Senato'} ${st.map(o => `<i class="${o.i < b.stage ? 'd' : o.i === b.stage ? 'n' : ''}"></i>`).join('')}</span>` : ''; }).join('');
+  const effs = b.lawId ? effectsOf(getLaw(b.lawId), b.from, b.opt).slice(0, 5).map(e => `<span class="mi ${e.good ? 'g' : 'b'}">${icon(METRICS[e.k].ico, 13)}${e.up ? '▲' : '▼'}</span>`).join('') : '';
+  let foot = '';
+  if (pend) foot = `<button class="btn gold sm block mt" onclick="event.stopPropagation();openVotes([${b.id}],true)">${icon('vote')} Al voto questa settimana · Vota</button>`;
+  else if (inAula && isPremier() && b.proposer === 'GOV' && b.type !== 'cost') foot = `<button class="btn sm mt ${b.fiducia ? 'gold' : ''}" onclick="event.stopPropagation();toggleFiducia(${b.id})">${icon('lock')} ${b.fiducia ? 'Fiducia posta' : 'Porre la fiducia · ⚡3'}</button>`;
+  else if (mine && inAula) foot = `<div class="tiny mt">${icon('vote', 14)} Il tuo voto: <b class="gold">${VLAB[mine]}</b></div>`;
+  return `<div class="bfold" style="--vc:${col}" onclick="openBill(${b.id})"><span class="btab">${icon(TYPE_INFO[k].i, 12)} ${BILL_KN[k] || TYPE_INFO[k].n}</span><div class="bbody">
+    <div class="row between" style="align-items:flex-start"><div class="bt">${esc(billName(b))}</div>${proposerLabel(b)}</div>
+    ${billChangeHTML(b)}
+    <div class="bsteps">${hs}<span class="grow">${esc(stageLabel(b))}${s.k === 'comm' && b.wait > 0 && !b.stalled ? ` · ${b.wait} sett.` : ''}</span>${b.type === 'dl' ? `<span class="tag w" style="height:22px">${icon('clock', 12)} ${fmtDate(b.deadline, true)}</span>` : ''}</div>
+    <div class="bmtr"><div class="tr"><b style="width:${Math.min(100, pr.yes / tot * 100)}%"></b><u style="width:${Math.min(100, pr.no / tot * 100)}%"></u>${abs ? `<s style="left:${need / tot * 100}%"></s>` : ''}</div><div class="lb"><span><b class="good">Sì ${pr.yes}</b> · <b class="bad">No ${pr.no}</b></span><span>${effs || ''}</span><span class="${pr.passed ? 'good' : 'bad'}" style="font-weight:800">${pr.passed ? 'passerebbe' : 'bocciata'}${abs ? ` (servono ${need})` : ''}</span></div></div>
+    ${foot}</div></div>`;
 }
 function setMyVote(id, v) { if (v) G.myVotes[id] = v; else delete G.myVotes[id]; vib(); renderGame(); }
 function toggleFiducia(id) {
@@ -295,6 +295,14 @@ function openBill(id) {
   if (b.lawId) { const l = getLaw(b.lawId); h += `<div class="change mt"><div><span class="tiny muted">OGGI</span><b>${esc(l.opts[b.from].t)}</b></div><span class="arrow">${icon('chevron')}</span><div><span class="tiny muted">DIVENTEREBBE</span><b>${esc(l.opts[b.opt].t)}</b></div></div><div class="mt">${explainHTML(l, b.opt)}</div>`; }
   if (b.type === 'manovra') h += `<div class="card tight mt"><div class="small">${b.measures.map(id => `<div class="row between" style="padding:3px 0"><span>${esc(BUDGET_BY_ID[id].n)}</span><b class="${BUDGET_BY_ID[id].c > 0 ? 'bad' : 'good'}">${BUDGET_BY_ID[id].c > 0 ? '+' : ''}${fmt1(BUDGET_BY_ID[id].c)}</b></div>`).join('')}</div></div>`;
   h += `<div class="mt">${proConHTML(imp)}</div>`;
+  { // i tasti che prima stavano sulla card
+    const s = b.stages[b.stage] || {}, inAula = s.k === 'aula', btn = [];
+    if (inAula && pendingVoteIds().includes(b.id)) btn.push(`<button class="btn gold block" onclick="closeSheet();openVotes([${b.id}],true)">${icon('vote')} Vota ora</button>`);
+    if (isPremier() && b.proposer === 'GOV' && b.type !== 'cost' && inAula) btn.push(`<button class="btn ${b.fiducia ? 'gold' : ''}" onclick="closeSheet();toggleFiducia(${b.id})">${icon('lock')} ${b.fiducia ? 'Togli la fiducia' : 'Porre la fiducia · ⚡3'}</button>`);
+    if (isPremier() && b.proposer === 'GOV' && b.type !== 'manovra') btn.push(`<button class="btn" onclick="closeSheet();withdrawBill(${b.id})">Ritira</button>`);
+    if (isLeader() && !inGov(myPid()) && b.proposer === 'GOV') btn.push(`<button class="btn" onclick="closeSheet();doObstr(${b.id})">${icon('hand')} Ostruzionismo · ⚡2</button>`);
+    if (btn.length) h += `<div class="row wrap mt" style="gap:8px">${btn.join('')}</div>`;
+  }
   if (b.stages[b.stage] && b.stages[b.stage].k === 'aula') h += isPremier() && b.proposer === 'GOV' && b.type !== 'cost' ? fiduciaCompareHTML(b, b.fiducia) : `<div class="card tight mt">${voteBar(predictVote(b), b.stages[b.stage].h === 'C' ? 'Previsione Camera' : 'Previsione Senato')}</div>`;
   openSheet(h);
 }
