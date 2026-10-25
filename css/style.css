@@ -1068,3 +1068,4 @@ html.bru .call .cbtn .no .lic > * { transform: none !important; }
 .btn .bc9 { flex: none; color: #ffe14d; font-weight: 800; }
 .btn.gold .bc9, .btn.pri .bc9 { color: inherit; }
 .hero2-sub { justify-content: center; text-align: center; text-transform: uppercase; letter-spacing: .05em; font-size: 10.5px; font-weight: 700; }
+.call .cbtn .no .lic { transform: rotate(135deg) !important; } /* cornetta abbassata, come su iPhone */
