@@ -1049,6 +1049,11 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .m5 em { display: block; font-style: normal; font-size: 11.5px; color: #9a9a9a; margin-top: 2px; }
 .m5 > .lic { flex: none; color: #555; }
 .m5:active { background: #141414; }
+.starb2 { display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px; background: #000; color: #ffe14d; border: 2px solid #ffe14d; font-size: 12px; font-weight: 800; white-space: nowrap; }
+.starb2.off { color: #777; border-color: #333; }
+.a2.plan { box-shadow: inset 4px 0 0 #ffe14d; padding-left: 10px; background: #15130a; }
+.a2.plan .ac2::before { content: "★ "; }
+.tb5 { gap: 3px; } .tb5 .dot5 { margin: 0 -1px; }
 
 </style>
 </head>
@@ -6802,8 +6807,9 @@ function homeTab() {
   // azioni a medaglie
   const recs = recommendedActions(), rec = recs.map(r => r.id);
   const acts = availableActions().sort((a, b) => (rec.includes(b.id) && !b.done ? 1 : 0) - (rec.includes(a.id) && !a.done ? 1 : 0) || (a.done ? 1 : 0) - (b.done ? 1 : 0));
-  h += sec('Azioni', `<button class="starb" onclick="autoPlan()" title="Pianifica la settimana">${icon('star', 15)}</button>`) +
-    `<div class="acts2">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="a2 ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${star ? 'rec' : ''}" style="--ac:${a.ac}" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai2">${a.done ? icon('check', 18) : icon(ACT_ICON[a.id] || a.ico || 'star', 18)}</span><span class="an2">${esc(a.n)}${star ? ' <i class="y">★</i>' : ''}${G.routine && G.routine[a.id] ? ` <i class="g">${icon('refresh', 11)}</i>` : ''}</span><span class="ac2">${a.done ? 'FATTA' : a.cost ? '⚡' + a.cost : 'GRATIS'}</span></button>`; }).join('')}</div>
+  const PLAN = typeof planPreview === 'function' ? planPreview() : { ids: [], pc: 0 };
+  h += sec('Azioni', planStarHTML(PLAN)) +
+    `<div class="acts2">${acts.map((a, i) => { const r = recs.find(x => x.id === a.id); const star = rec.includes(a.id) && !a.done; return `<button class="a2 ${a.ok ? '' : 'off'} ${a.done ? 'done' : ''} ${PLAN.ids.includes(a.id) ? 'plan' : ''} ${star ? 'rec' : ''}" style="--ac:${a.ac}" onclick="${a.id === 'comizio' && r && r.param ? `quickAction('comizio','${r.param}')` : `openAction('${a.id}')`}"><span class="ai2">${a.done ? icon('check', 18) : icon(ACT_ICON[a.id] || a.ico || 'star', 18)}</span><span class="an2">${esc(a.n)}${star ? ' <i class="y">★</i>' : ''}${G.routine && G.routine[a.id] ? ` <i class="g">${icon('refresh', 11)}</i>` : ''}</span><span class="ac2">${a.done ? 'FATTA' : a.cost ? '⚡' + a.cost : 'GRATIS'}</span></button>`; }).join('')}</div>
     <div class="tiny muted center mt">★ consigliate · ↻ ricorrenti: aprila e attiva «Ripeti ogni settimana» per farla in automatico</div>`;
   // staff e social
   h += sec('Il tuo staff') + staffHTML();
@@ -11069,7 +11075,7 @@ fabHTML = function () {
 
 // ---------- consigli alla prima visita di ogni sezione ----------
 const TAB_TIPS = {
-  home: 'Qui trovi chi sei, cosa fare adesso e le azioni della settimana. Il cerchio in basso a destra fa passare una settimana; quello piccolo sopra salta fino al prossimo evento importante.',
+  home: 'Qui trovi chi sei, le Info della settimana e le azioni. Le azioni evidenziate in giallo sono quelle che fa il tasto ★ accanto al titolo. La freccia in basso a destra fa passare la settimana.',
   leggi: 'Il catalogo delle leggi in vigore. Toccane una per vedere com’è oggi e come potresti cambiarla, oppure usa «Regola le leggi attuali» per spostare i cursori e vedere subito cosa sale e cosa scende.',
   aula: 'Camera e Senato: chi ha i seggi e cosa si vota. Ogni card mostra com’è la legge oggi, cosa diventerebbe e quanti sì e no sono previsti. Toccala per i dettagli.',
   italia: 'La mappa: tocca una regione per vedere chi governa e quanto è forte il tuo partito. Le icone sono gli eventi in corso.',
@@ -11417,10 +11423,10 @@ topbar = function () {
   const mp = myParty(), d0 = dateOf(G.week);
   const old = G.hist.polls.length > 5 ? G.hist.polls[G.hist.polls.length - 5].p[myPid()] : mp.poll;
   const d = mp.poll - (old || mp.poll);
-  const third = topbarThird().replace('class="stat"', 'class="s4"').replace('>Forza gov.<', '>Forza<').replace('>Coalizione<', '>Coal.<').replace('>Col leader<', '>Leader<').replace('>Maggioranza<', '>Magg.<').replace('>Soglia 3%<', '>Soglia<');
+  const third = topbarThird().replace('class="stat"', 'class="s4"');
   const dot = '<i class="dot5">·</i>';
   return `<div class="topbar t5"><div class="tb5">
-    <span class="dt">${d0.getDate()} ${MESI3[d0.getMonth()].toUpperCase()} ${String(d0.getFullYear()).slice(2)}</span>${dot}
+    <span class="dt">${fmtDate(G.week).toUpperCase()}</span>${dot}
     <span class="s4" onclick="goTab('partiti')">${esc(mp.short)} <b>${fmt1(mp.poll)}%</b><em class="${d >= 0 ? 'g' : 'r'}">${d >= 0 ? '▲' : '▼'}${fmt1(Math.abs(d))}</em></span>${dot}
     ${third}${dot}
     <span class="s4 y" onclick="toast('Capitale politico: si ricarica ogni settimana (+${pcIncome()})')">⚡${G.pc}</span>
@@ -11519,6 +11525,30 @@ openMenu = function () {
     ${row('door', 'Torna al menu iniziale', 'La partita resta salvata', "closeSheet();saveGame('auto');showSplash()")}</div>
     <div class="tiny m center mt2">Difficoltà ${D().n} · ${G.legislature}ª legislatura</div>`, { full: true });
 };
+
+// ---------- stellina «Pianifica» con anteprima: le azioni che farebbe sono evidenziate ----------
+function planPreview() {
+  if (G.phase !== 'normale') return { ids: [], pc: 0 };
+  const saved = { used: Object.assign({}, G.usedActs || {}), pc: G.pc, funds: G.funds, stress: G.player.stress }, ids = [];
+  try {
+    for (let k = 0; k < 6; k++) {
+      const recs = recommendedActions().filter(r => r.id !== 'tv' && r.id !== 'dibattito' && r.id !== 'riposo');
+      const r = recs[0]; if (!r) break;
+      const a = ACTIONS.find(x => x.id === r.id);
+      if (r.id === 'comizio') { if (G.funds < 20 || G.pc < 1) break; G.pc -= 1; G.funds -= 20; markUsed('comizio'); ids.push('comizio'); continue; }
+      if (a.custom || !a.run) { markUsed(r.id); continue; }
+      const c = actionCost(a); if (G.pc < c) break;
+      G.pc -= c; if (a.funds) G.funds -= a.funds; markUsed(r.id); ids.push(r.id);
+    }
+  } catch (e) { console.error(e); }
+  const spent = saved.pc - G.pc;
+  G.usedActs = saved.used; G.pc = saved.pc; G.funds = saved.funds; G.player.stress = saved.stress;
+  return { ids, pc: spent };
+}
+function planStarHTML(P5) {
+  if (!P5.ids.length) return `<span class="starb2 off">${icon('star', 13)} niente da fare</span>`;
+  return `<button class="starb2" onclick="autoPlan()" title="Fai le azioni evidenziate">${icon('star', 13)} ${P5.ids.length} ${P5.ids.length > 1 ? 'azioni' : 'azione'} · ⚡${P5.pc}</button>`;
+}
 
 </script>
 </body>

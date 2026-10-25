@@ -64,7 +64,7 @@ fabHTML = function () {
 
 // ---------- consigli alla prima visita di ogni sezione ----------
 const TAB_TIPS = {
-  home: 'Qui trovi chi sei, cosa fare adesso e le azioni della settimana. Il cerchio in basso a destra fa passare una settimana; quello piccolo sopra salta fino al prossimo evento importante.',
+  home: 'Qui trovi chi sei, le Info della settimana e le azioni. Le azioni evidenziate in giallo sono quelle che fa il tasto ★ accanto al titolo. La freccia in basso a destra fa passare la settimana.',
   leggi: 'Il catalogo delle leggi in vigore. Toccane una per vedere com’è oggi e come potresti cambiarla, oppure usa «Regola le leggi attuali» per spostare i cursori e vedere subito cosa sale e cosa scende.',
   aula: 'Camera e Senato: chi ha i seggi e cosa si vota. Ogni card mostra com’è la legge oggi, cosa diventerebbe e quanti sì e no sono previsti. Toccala per i dettagli.',
   italia: 'La mappa: tocca una regione per vedere chi governa e quanto è forte il tuo partito. Le icone sono gli eventi in corso.',
