@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Card leggi compatte</title>
+<script>
+// questa pagina usa una partita di prova: non deve mai toccare i salvataggi veri
+(function () { try { const S = Storage.prototype; S.setItem = function () {}; S.removeItem = function () {}; S.clear = function () {}; } catch (e) {} })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+html, body { height: auto !important; min-height: 0 !important; overflow: auto !important; }
+body { padding: max(env(safe-area-inset-top), 20px) 16px 60px; background: radial-gradient(120% 40% at 50% 0%, #1d2d5c, #0a1024 70%) fixed, var(--bg); }
+#app { display: none !important; }
+.pg { max-width: 430px; margin: 0 auto; }
+.pg h1 { font-family: var(--serif); font-weight: 900; font-size: 30px; text-align: center; margin: 12px 0 6px; color: var(--cream); }
+.pg .lead { text-align: center; color: var(--muted); font-size: 14px; line-height: 1.5; margin: 0 0 6px; }
+.pg .lead b { color: var(--oro2); }
+.ph { display: flex; align-items: center; gap: 10px; margin: 34px 0 6px; }
+.ph .code { flex: none; display: inline-grid; place-items: center; min-width: 40px; height: 30px; padding: 0 10px; border-radius: 999px; background: linear-gradient(135deg, #a8842f, #ecd08a); color: #1a1405; font-weight: 900; font-size: 14px; }
+.ph .code.old { background: #2a3560; color: var(--muted); }
+.ph b { font-size: 17px; }
+.pd { color: var(--muted); font-size: 13.5px; line-height: 1.5; margin: 0 0 12px; }
+.stack { display: grid; gap: 10px; }
+
+/* L1 riga sottile */
+.b1 { display: flex; align-items: center; gap: 10px; padding: 10px 12px 10px 0; border-radius: 16px; background: var(--card); border: 1px solid var(--line); cursor: pointer; overflow: hidden; }
+.b1 .vb { align-self: stretch; width: 4px; border-radius: 0 4px 4px 0; background: var(--vc); flex: none; }
+.b1 .t { font-weight: 800; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.b1 .m { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fc { flex: none; font-size: 12px; font-weight: 800; padding: 4px 9px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+.fc.g { color: var(--good); border-color: rgba(52,211,153,.4); background: rgba(52,211,153,.08); }
+.fc.b { color: var(--bad); border-color: rgba(255,107,107,.4); background: rgba(255,107,107,.08); }
+.fc.n { color: var(--muted); border-color: var(--line2); }
+.fc.v { color: #1a1405; background: linear-gradient(135deg, #a8842f, #ecd08a); border-color: transparent; }
+
+/* L2 card compatta con avanzamento */
+.b2 { padding: 12px 14px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--vc); cursor: pointer; }
+.b2 .top { display: flex; gap: 8px; align-items: flex-start; }
+.b2 .t { font-weight: 800; font-size: 15px; line-height: 1.3; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.prog { display: flex; gap: 3px; margin: 10px 0 8px; }
+.prog i { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,.1); }
+.prog i.d { background: var(--oro); }
+.prog i.n { background: linear-gradient(90deg, var(--oro), rgba(214,178,94,.25)); animation: pp 1.6s ease-in-out infinite; }
+@keyframes pp { 50% { opacity: .55; } }
+.b2 .ft { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+.mi { display: inline-flex; align-items: center; gap: 1px; font-size: 11px; font-weight: 800; margin-right: 6px; }
+.mi.g { color: var(--good); } .mi.b { color: var(--bad); }
+
+/* L3 fascicolo */
+.b3 { position: relative; padding-top: 20px; cursor: pointer; }
+.b3 .tab { position: absolute; top: 0; left: 12px; font-size: 10.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 4px 10px 6px; border-radius: 9px 9px 0 0; background: var(--vc); color: #10131f; display: inline-flex; gap: 4px; align-items: center; }
+.b3 .body { padding: 11px 14px; border-radius: 4px 16px 16px 16px; background: var(--card); border: 1px solid var(--line); border-top: 3px solid var(--vc); }
+.b3 .t { font-family: var(--serif); font-weight: 700; font-size: 16px; line-height: 1.25; }
+.steps { display: flex; gap: 10px; margin-top: 8px; font-size: 12px; color: var(--muted); align-items: center; flex-wrap: wrap; }
+.steps .h { display: inline-flex; align-items: center; gap: 3px; }
+.steps .h i { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--line2); display: inline-block; }
+.steps .h i.d { background: var(--oro); border-color: var(--oro); }
+.steps .h i.n { border-color: var(--oro); box-shadow: 0 0 0 3px rgba(214,178,94,.2); }
+.mtr { margin-top: 9px; }
+.mtr .tr { position: relative; height: 6px; border-radius: 3px; background: rgba(255,107,107,.25); }
+.mtr .tr b { position: absolute; left: 0; top: 0; bottom: 0; background: var(--good); border-radius: 3px; }
+.mtr .tr s { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #fff; border-radius: 1px; }
+.mtr .lb { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); margin-top: 5px; }
+
+/* L4 anello dei voti */
+.b4 { display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); cursor: pointer; }
+.ring { flex: none; width: 52px; height: 52px; position: relative; }
+.ring svg { width: 52px; height: 52px; transform: rotate(-90deg); }
+.ring span { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12px; font-weight: 800; }
+.b4 .t { font-weight: 800; font-size: 14.5px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.b4 .m { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+/* L5 per fase */
+.grp { border-radius: 18px; background: var(--card); border: 1px solid var(--line); overflow: hidden; }
+.grp .gh { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--oro2); background: rgba(214,178,94,.06); border-bottom: 1px solid var(--line); }
+.grp .r { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid var(--line); cursor: pointer; }
+.grp .r:last-child { border-bottom: 0; }
+.grp .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--vc); flex: none; }
+.grp .t { font-weight: 700; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.grp .m { font-size: 11.5px; color: var(--muted); }
+
+/* L6 espandibile */
+.b6 { border-radius: 18px; background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--vc); overflow: hidden; }
+.b6 .hd { display: flex; align-items: center; gap: 10px; padding: 11px 12px; cursor: pointer; }
+.b6 .t { font-weight: 800; font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.b6 .m { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.b6 .chev { transition: transform .25s; color: var(--muted); display: inline-flex; }
+.b6.open .chev { transform: rotate(90deg); }
+.b6 .more { display: none; padding: 0 12px 12px; }
+.b6.open .more { display: block; }
+.b6 .more .card { margin: 0; border: 0; background: transparent; padding: 0; box-shadow: none; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+<div class="pg">
+<h1>Card delle leggi</h1>
+<p class="lead">Sei proposte più compatte, fatte con <b>le leggi vere</b> di una partita di prova (i tuoi salvataggi non vengono toccati). Tocca una card per aprire il dettaglio. Dimmi il codice che preferisci, anche misto (es. «L2 con l’anello di L4»).</p>
+<div id="out"><p class="pd" style="text-align:center;margin-top:30px">Preparo una partita di prova…</p></div>
+</div>
+<script src="js/dati.js"></script>
+<script src="js/mappa.js"></script>
+<script src="js/leggi.js"></script>
+<script src="js/manovra.js"></script>
+<script src="js/spiegazioni.js"></script>
+<script src="js/loghi.js"></script>
+<script src="js/motore.js"></script>
+<script src="js/avatar-base.js"></script>
+<script src="js/avatar.js"></script>
+<script src="js/analisi.js"></script>
+<script src="js/interviste.js"></script>
+<script src="js/effetti.js"></script>
+<script src="js/eventi.js"></script>
+<script src="js/eventi2.js"></script>
+<script src="js/eventi3.js"></script>
+<script src="js/eventi4.js"></script>
+<script src="js/provocazioni.js"></script>
+<script src="js/sfide.js"></script>
+<script src="js/ui-base.js"></script>
+<script src="js/questionario.js"></script>
+<script src="js/stile.js"></script>
+<script src="js/ui-schermate.js"></script>
+<script src="js/ui-flussi.js"></script>
+<script src="js/poteri.js"></script>
+<script src="js/racconto.js"></script>
+<script src="js/giornalisti.js"></script>
+<script src="js/discorsi.js"></script>
+<script src="js/avatar-editor.js"></script>
+<script src="js/tutorial.js"></script>
+<script src="js/notifiche.js"></script>
+<script src="js/immersivo.js"></script>
+<script src="js/regola.js"></script>
+<script src="js/carriera.js"></script>
+<script>
+showSplash = function () {};
+saveGame = function () { return true; };
+function info(b) {
+  const s = b.stages[b.stage] || {}, k = billKind(b), l = b.lawId ? getLaw(b.lawId) : null;
+  const pr = predictVote(b), pend = pendingVoteIds().includes(b.id);
+  return { s, k, pr, pend, effs: l ? effectsOf(l, b.from, b.opt) : [], aula: s.k === 'aula',
+    col: b.proposer === 'GOV' ? '#ffd60a' : G.parties[b.proposer] ? P(b.proposer).color : '#a78bfa',
+    who: b.proposer === 'GOV' ? (isPremier() ? 'Tuo governo' : 'Governo') : b.proposer === 'PLAYER' ? 'Tua proposta' : P(b.proposer).short,
+    kn: { ddl: 'DDL', pdl: 'Proposta', dl: 'Decreto', cost: 'Costituzionale', manovra: 'Manovra' }[k] || TYPE_INFO[k].n,
+    st: stageLabel(b) + (s.k === 'comm' && b.wait > 0 && !b.stalled ? ' · ' + b.wait + ' sett.' : '') };
+}
+function fcHTML(x, short) {
+  if (x.pend) return '<span class="fc v">Vota</span>';
+  if (x.aula) return '<span class="fc ' + (x.pr.passed ? 'g' : 'b') + '">' + (x.pr.passed ? '✓ passa' : '✗ bocciata') + (short ? '' : ' · ' + x.pr.yes + ' sì') + '</span>';
+  return '<span class="fc n">' + (x.pr.passed ? 'ha i voti' : 'mancano voti') + '</span>';
+}
+const miniEff = x => x.effs.slice(0, 4).map(e => `<span class="mi ${e.good ? 'g' : 'b'}">${icon(METRICS[e.k].ico, 13)}${e.up ? '▲' : '▼'}</span>`).join('');
+const progHTML = b => `<div class="prog">${b.stages.map((s, i) => `<i class="${i < b.stage ? 'd' : i === b.stage ? 'n' : ''}"></i>`).join('')}</div>`;
+const tap = b => `onclick="openBill(${b.id})"`;
+const V = {
+  L1: b => { const x = info(b); return `<div class="b1" style="--vc:${x.col}" ${tap(b)}><span class="vb"></span><div class="grow" style="min-width:0"><div class="t">${esc(billName(b))}</div><div class="m">${x.kn} · ${esc(x.who)} · ${esc(x.st)}</div></div>${fcHTML(x, true)}</div>`; },
+  L2: b => { const x = info(b); return `<div class="b2" style="--vc:${x.col}" ${tap(b)}><div class="top"><div class="t">${esc(billName(b))}</div>${proposerLabel(b)}</div>${progHTML(b)}<div class="ft"><span>${x.kn} · ${esc(x.st)}</span>${fcHTML(x)}</div>${x.effs.length ? `<div style="margin-top:7px">${miniEff(x)}</div>` : ''}</div>`; },
+  L3: b => {
+    const x = info(b), h0 = x.s.h || 'C', need = majority(h0), tot = totalSeats(h0);
+    const hs = ['C', 'S'].map(h => { const st = b.stages.map((s, i) => ({ s, i })).filter(o => o.s.h === h); if (!st.length) return ''; return `<span class="h">${h === 'C' ? 'Camera' : 'Senato'} ${st.map(o => `<i class="${o.i < b.stage ? 'd' : o.i === b.stage ? 'n' : ''}"></i>`).join('')}</span>`; }).join('');
+    return `<div class="b3" style="--vc:${x.col}" ${tap(b)}><span class="tab">${icon(TYPE_INFO[x.k].i, 12)} ${x.kn}</span><div class="body"><div class="t">${esc(billName(b))}</div><div class="steps">${hs}<span>· ${esc(x.who)}</span></div><div class="mtr"><div class="tr"><b style="width:${Math.min(100, x.pr.yes / tot * 100)}%"></b><s style="left:${need / tot * 100}%"></s></div><div class="lb"><span>Sì previsti <b style="color:var(--text)">${x.pr.yes}</b></span><span>${x.pend ? '<b class="gold">al voto: vota</b>' : 'ne servono ' + need}</span></div></div></div></div>`;
+  },
+  L4: b => {
+    const x = info(b), tot = (x.pr.yes + x.pr.no + x.pr.abst) || 1, p = x.pr.yes / tot, C = 2 * Math.PI * 22;
+    return `<div class="b4" ${tap(b)}><div class="ring"><svg viewBox="0 0 52 52"><circle cx="26" cy="26" r="22" fill="none" stroke="rgba(255,107,107,.3)" stroke-width="6"/><circle cx="26" cy="26" r="22" fill="none" stroke="${x.pr.passed ? 'var(--good)' : 'var(--bad)'}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${C * p} ${C}"/></svg><span>${Math.round(p * 100)}%</span></div><div class="grow" style="min-width:0"><div class="t">${esc(billName(b))}</div><div class="m"><span style="color:${x.col}">●</span> ${esc(x.who)} · ${esc(x.st)}</div></div>${x.pend ? '<span class="fc v">Vota</span>' : icon('chevron', 18)}</div>`;
+  },
+  L6: (b, i) => { const x = info(b); return `<div class="b6 ${i === 0 ? 'open' : ''}" style="--vc:${x.col}"><div class="hd" onclick="this.parentNode.classList.toggle('open')"><div class="grow" style="min-width:0"><div class="t">${esc(billName(b))}</div><div class="m">${x.kn} · ${esc(x.st)}</div></div>${fcHTML(x, true)}<span class="chev">${icon('chevron', 18)}</span></div><div class="more">${billCard(b).replace('class="card vote-card"', 'class="card"')}</div></div>`; },
+};
+function L5(bills) {
+  const g = { 'Al voto questa settimana': [], 'In aula': [], 'In commissione': [], 'Altre fasi': [] };
+  bills.forEach(b => { const x = info(b); (x.pend ? g['Al voto questa settimana'] : x.aula ? g['In aula'] : x.s.k === 'comm' ? g['In commissione'] : g['Altre fasi']).push(b); });
+  return Object.entries(g).filter(([k, v]) => v.length).map(([k, v]) => `<div class="grp"><div class="gh"><span>${k}</span><span>${v.length}</span></div>${v.map(b => { const x = info(b); return `<div class="r" style="--vc:${x.col}" ${tap(b)}><span class="dot"></span><div class="grow" style="min-width:0"><div class="t">${esc(billName(b))}</div><div class="m">${x.kn} · ${esc(x.who)}${x.s.h ? ' · ' + (x.s.h === 'C' ? 'Camera' : 'Senato') : ''}</div></div>${fcHTML(x, true)}</div>`; }).join('')}</div>`).join('<div style="height:10px"></div>');
+}
+const DESC = {
+  L1: ['Riga sottile', 'Una riga per legge: nome, tipo, chi la propone, fase e un bollino con la previsione. I tasti (pro e contro, fiducia, ritira, ostruzionismo) si aprono toccando.'],
+  L2: ['Card compatta con avanzamento', 'Nome su massimo due righe, una barra a tacche per il percorso (la tacca attuale pulsa), fase e previsione in basso, effetti come piccole icone.'],
+  L3: ['Fascicolo con contavoti', 'Come le cartelline del catalogo: linguetta col tipo, pallini separati per Camera e Senato, barra dei sì previsti con la linea bianca della maggioranza.'],
+  L4: ['Anello dei voti', 'Un anello mostra la quota di sì prevista: verde se passa, rosso se no. Si legge a colpo d’occhio.'],
+  L5: ['Raggruppate per fase', 'Un unico riquadro diviso in gruppi (al voto questa settimana, in aula, in commissione) con righe minime: tante leggi in poco spazio.'],
+  L6: ['Espandibile', 'Riga sottile che si apre toccando e mostra dentro la card completa di oggi (la prima è aperta come esempio).'],
+};
+window.addEventListener('load', () => setTimeout(() => {
+  try {
+    newGame({ mode: 'fondatore', diff: 'media', player: { name: 'Andrea Rossi', art: 'il', age: 42, region: 'LAZ', bg: 'gio' }, party: { name: 'Italia Domani', short: 'ID', symbol: '★', color: '#7b2ff7', ax: { eco: 1, soc: 2, eu: 0, imm: 4, amb: 2, giu: 2, terr: 0, ist: 3 }, people: ['Marco Bianchi', 'Giulia Conti', 'Luca Ferri', 'Sara Gallo'] } });
+    for (let i = 0; i < 14; i++) { advanceWeek(); G.queue = []; }
+    G.parties.MIO.seatsC = Math.max(G.parties.MIO.seatsC, 30); G.player.parl = 'C';
+    const aulaFirst = b => (b.stages[b.stage] && b.stages[b.stage].k === 'aula' ? 1 : 0);
+    const live = G.bills.filter(b => !b.dead).sort((a, b) => aulaFirst(b) - aulaFirst(a));
+    const ex = live.slice(0, 4);
+    let h = `<div class="ph"><span class="code old">Oggi</span><b>La card attuale</b></div><p class="pd">Per confronto, com’è adesso (una sola).</p><div class="stack">${billCard(ex[0])}</div>`;
+    ['L1', 'L2', 'L3', 'L4', 'L5', 'L6'].forEach(k => {
+      h += `<div class="ph"><span class="code">${k}</span><b>${DESC[k][0]}</b></div><p class="pd">${DESC[k][1]}</p><div class="stack">${k === 'L5' ? L5(live.slice(0, 7)) : ex.map((b, i) => V[k](b, i)).join('')}</div>`;
+    });
+    document.getElementById('out').innerHTML = h;
+  } catch (e) { document.getElementById('out').innerHTML = '<p class="pd">Errore: ' + e.message + '</p>'; console.error(e); }
+}, 50));
+</script>
+</body>
+</html>
