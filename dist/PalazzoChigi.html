@@ -1054,6 +1054,12 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .a2.plan { box-shadow: inset 4px 0 0 #ffe14d; padding-left: 10px; background: #15130a; }
 
 .tb5 { gap: 3px; } .tb5 .dot5 { margin: 0 -1px; }
+/* barra in alto centrata, menu a destra, si adatta alla larghezza */
+.tb5 { position: relative; justify-content: center; padding-right: 36px; padding-left: 36px; font-size: clamp(10px, 3vw, 13px); gap: clamp(2px, 1vw, 6px); }
+.tb5 .s4 { font-size: inherit; }
+.tb5 .s4 em, .tb5 em { font-family: inherit !important; font-style: normal; font-size: .85em; font-weight: 600; }
+.tb5 .ib5 { position: absolute; right: -6px; top: 50%; transform: translateY(-50%); margin: 0; }
+.tb5 { font-size: clamp(9px, 2.55vw, 12px); padding-left: 28px; padding-right: 30px; } .tb5 .s4 { flex: none; overflow: visible; }
 
 </style>
 </head>
@@ -11594,7 +11600,7 @@ homeHeroHTML = function () {
   const p = G.player, mp = myParty(), a = myApproval();
   return `<div class="hero2" style="--pc:${mp.color}"><span class="av-badge" onclick="openAvatarEditor()">${portrait(p.name, 48, { party: myPid() })}</span>
     <div class="grow tx2"><b class="nm">${esc(p.name)}</b><div class="rl">${esc(roleLabel())}</div></div>
-    <div class="nums"><div><span>Sondaggio</span><b>${fmt1(mp.poll)}%</b></div><div onclick="openMyApproval()" style="cursor:pointer"><span>Gradimento</span><b style="color:${pctColor(a.v * 1.4)}">${fmt0(a.v)}%</b></div></div></div>
+    <div class="nums">${(cc => `<div onclick="UI.partiti='alleanze';goTab('partiti')" style="cursor:pointer"><span>${cc ? 'Coalizione' : 'Partito'}</span><b>${fmt1(cc ? cc.members.reduce((s, m) => s + (G.parties[m] ? P(m).poll : 0), 0) : mp.poll)}%</b></div>`)(coalitionOf(myPid()))}<div onclick="openMyApproval()" style="cursor:pointer"><span>Gradimento</span><b style="color:${pctColor(a.v * 1.4)}">${fmt0(a.v)}%</b></div></div></div>
     <div class="hero2-sub">${icon('coin', 13)} ${euro(G.funds)} · fama ${fmt0(p.fama)} · stress ${fmt0(p.stress)} · ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</div>`;
 };
 

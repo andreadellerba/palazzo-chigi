@@ -245,6 +245,6 @@ homeHeroHTML = function () {
   const p = G.player, mp = myParty(), a = myApproval();
   return `<div class="hero2" style="--pc:${mp.color}"><span class="av-badge" onclick="openAvatarEditor()">${portrait(p.name, 48, { party: myPid() })}</span>
     <div class="grow tx2"><b class="nm">${esc(p.name)}</b><div class="rl">${esc(roleLabel())}</div></div>
-    <div class="nums"><div><span>Sondaggio</span><b>${fmt1(mp.poll)}%</b></div><div onclick="openMyApproval()" style="cursor:pointer"><span>Gradimento</span><b style="color:${pctColor(a.v * 1.4)}">${fmt0(a.v)}%</b></div></div></div>
+    <div class="nums">${(cc => `<div onclick="UI.partiti='alleanze';goTab('partiti')" style="cursor:pointer"><span>${cc ? 'Coalizione' : 'Partito'}</span><b>${fmt1(cc ? cc.members.reduce((s, m) => s + (G.parties[m] ? P(m).poll : 0), 0) : mp.poll)}%</b></div>`)(coalitionOf(myPid()))}<div onclick="openMyApproval()" style="cursor:pointer"><span>Gradimento</span><b style="color:${pctColor(a.v * 1.4)}">${fmt0(a.v)}%</b></div></div></div>
     <div class="hero2-sub">${icon('coin', 13)} ${euro(G.funds)} · fama ${fmt0(p.fama)} · stress ${fmt0(p.stress)} · ${!isLeader() ? esc(RANKS[p.rank].n) : (mp.seatsC + mp.seatsS) + ' parlamentari'}</div>`;
 };
