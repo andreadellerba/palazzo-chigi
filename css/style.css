@@ -1043,3 +1043,4 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .tb5 .s4 em, .tb5 em { font-family: inherit !important; font-style: normal; font-size: .85em; font-weight: 600; }
 .tb5 .ib5 { position: absolute; right: -6px; top: 50%; transform: translateY(-50%); margin: 0; }
 .tb5 { font-size: clamp(9px, 2.55vw, 12px); padding-left: 28px; padding-right: 30px; } .tb5 .s4 { flex: none; overflow: visible; }
+.tb5 .s4 em, .tb5 em { font-size: 1em !important; font-weight: 600; margin-left: 2px; }
