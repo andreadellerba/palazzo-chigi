@@ -4711,11 +4711,15 @@ const ARGS = {
   ist: { '-1': ['il Parlamento è il cuore della democrazia', 'servono contrappesi, non uomini soli al comando', 'la Costituzione va rispettata'], '1': ['i cittadini devono scegliere chi governa', 'serve stabilità, basta governi che durano un anno', 'chi vince deve poter governare'] },
 };
 
+// ---------- niente domande ripetute: ogni argomento torna solo dopo qualche settimana (interviste, telefonate) ----------
+const topicFresh = (k, weeks) => { const t = (G.topicSeen || {})[k]; return t === undefined || G.week - t >= weeks; };
+const topicMark = k => { G.topicSeen = G.topicSeen || {}; G.topicSeen[k] = G.week; };
+const TOPIC_COOL = { sondaggi: 10, alleanza: 5, governo: 4, personale: 8, leader: 5 };
 function interviewTopics(n) {
   const out = [];
   const live = G.bills.filter(b => !b.dead && b.lawId && b.opt !== G.laws[b.lawId]).sort(() => Math.random() - 0.5);
   live.slice(0, 1).forEach(b => out.push({ kind: 'law', law: getLaw(b.lawId), to: b.opt, from: G.laws[b.lawId], by: b.proposer }));
-  const hot = allLaws().filter(l => !l.custom && l.sal >= 2 && !out.some(t => t.law && t.law.id === l.id)).sort(() => Math.random() - 0.5);
+  const hot = allLaws().filter(l => !l.custom && l.sal >= 2 && !out.some(t => t.law && t.law.id === l.id)).sort(() => Math.random() - 0.5).sort((a, b) => topicFresh('law:' + b.id, 8) - topicFresh('law:' + a.id, 8));
   while (out.length < 2 && hot.length) {
     const l = hot.shift();
     const others = l.opts.map((o, i) => i).filter(i => i !== G.laws[l.id]);
@@ -4724,7 +4728,12 @@ function interviewTopics(n) {
   const kinds = ['alleanza', 'governo', 'sondaggi'];
   if (!isLeader()) kinds.push('leader', 'leader');
   if (G.player.fama > 40) kinds.push('personale');
+  // prima gli argomenti non sentiti di recente, poi altre leggi, solo alla fine si ripete
+  const fresh = kinds.filter((k, i) => kinds.indexOf(k) === i && topicFresh(k, TOPIC_COOL[k] || 5)).sort(() => Math.random() - 0.5);
+  while (out.length < n && fresh.length) out.push({ kind: fresh.shift() });
+  while (out.length < n && hot.length) { const l = hot.shift(); const others = l.opts.map((o, i) => i).filter(i => i !== G.laws[l.id]); out.push({ kind: 'law', law: l, to: pick(others), from: G.laws[l.id], by: null }); }
   while (out.length < n) out.push({ kind: pick(kinds) });
+  out.forEach(t => topicMark(t.kind === 'law' ? 'law:' + t.law.id : t.kind));
   return out.sort(() => Math.random() - 0.5);
 }
 function interviewQuestion(t, show) {
@@ -5362,6 +5371,7 @@ function eventFits(e) {
   if (e.chain) return false;
   if (e.once && G.seenEvents[e.id]) return false;
   if (G.evCool[e.id] && G.week < G.evCool[e.id]) return false;
+  if (e.id === 'sondaggio_shock' && !topicFresh('sondaggi', 10)) return false;
   try { if (e.cond && !e.cond()) return false; } catch (err) { return false; }
   return true;
 }
@@ -5378,7 +5388,7 @@ function rollEvents() {
     if (ev.prep) { ctx = ev.prep(); if (!ctx) continue; }
     // lo stesso evento non torna prima di un anno di gioco
     G.evCool[ev.id] = G.week + Math.max(ev.cool || 20, 52);
-    G.seenEvents[ev.id] = true;
+    G.seenEvents[ev.id] = true; if (ev.id === 'sondaggio_shock') topicMark('sondaggi');
     G.queue.push({ id: ev.id, ctx });
   }
 }
@@ -8916,9 +8926,12 @@ function callTick() {
   if (sg && chance(0.5)) cands.push({ kind: 'ricordo', pid: sg.pid, t: sg.t });
   // un giornalista
   if (G.player.fama > 15 && G.journalists) { const j = pick(G.journalists), sc = journalistScenario(j); if (sc) cands.push({ kind: 'giornalista', j: G.journalists.indexOf(j), sc: sc.id, d: sc.d, w: 1.6 }); }
-  if (!cands.length) return;
-  let tot = cands.reduce((s, c) => s + (c.w || 1), 0), x = Math.random() * tot, c = cands[0];
-  for (const k of cands) { x -= (k.w || 1); if (x <= 0) { c = k; break; } }
+  // una telefonata uguale a una recente non si ripete (stesso leader per lo stesso motivo, stesso tipo di articolo)
+  const fc = cands.filter(k => k.kind === 'giornalista' || topicFresh(callTopic(k), k.kind === 'voto' ? 3 : 8));
+  if (!fc.length) return;
+  let tot = fc.reduce((s, c) => s + (c.w || 1), 0), x = Math.random() * tot, c = fc[0];
+  for (const k of fc) { x -= (k.w || 1); if (x <= 0) { c = k; break; } }
+  topicMark(callTopic(c));
   G._wk.specials.push({ k: 'call', c });
 }
 function callView(c) {
@@ -9400,7 +9413,14 @@ function journalistScenario(j) {
   if (prom) out.push({ id: 'promessa', d: { l: prom.lawId, o: prom.opt } });
   if (weakAlly) out.push({ id: 'alleato', d: { p: weakAlly } });
   if (G.econ.spread > 150 || G.econ.deficit > 3.2) out.push({ id: 'conti' });
-  return pick(out);
+  // lo stesso tipo di telefonata non torna prima di qualche mese (il sondaggio vale anche per le interviste)
+  const fresh = out.filter(s => topicFresh(jTopic(s.id), s.id === 'voto' || s.id === 'alleato' ? 6 : 16));
+  return fresh.length ? pick(fresh) : null;
+}
+const jTopic = id => id === 'sondaggio' ? 'sondaggi' : 'j:' + id;
+function callTopic(c) {
+  if (c.kind === 'giornalista') return jTopic(c.sc);
+  return 'call:' + c.kind + ':' + (c.bill !== undefined ? c.bill : c.lawId || c.pid || '');
 }
 // il titolo che esce il giorno dopo
 const jHead = (j, t) => ({ head: t, run2: () => addNews(`${j.t}: «${t}»`, 'info') });

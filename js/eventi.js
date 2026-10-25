@@ -396,6 +396,7 @@ function eventFits(e) {
   if (e.chain) return false;
   if (e.once && G.seenEvents[e.id]) return false;
   if (G.evCool[e.id] && G.week < G.evCool[e.id]) return false;
+  if (e.id === 'sondaggio_shock' && !topicFresh('sondaggi', 10)) return false;
   try { if (e.cond && !e.cond()) return false; } catch (err) { return false; }
   return true;
 }
@@ -412,7 +413,7 @@ function rollEvents() {
     if (ev.prep) { ctx = ev.prep(); if (!ctx) continue; }
     // lo stesso evento non torna prima di un anno di gioco
     G.evCool[ev.id] = G.week + Math.max(ev.cool || 20, 52);
-    G.seenEvents[ev.id] = true;
+    G.seenEvents[ev.id] = true; if (ev.id === 'sondaggio_shock') topicMark('sondaggi');
     G.queue.push({ id: ev.id, ctx });
   }
 }

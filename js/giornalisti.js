@@ -15,7 +15,14 @@ function journalistScenario(j) {
   if (prom) out.push({ id: 'promessa', d: { l: prom.lawId, o: prom.opt } });
   if (weakAlly) out.push({ id: 'alleato', d: { p: weakAlly } });
   if (G.econ.spread > 150 || G.econ.deficit > 3.2) out.push({ id: 'conti' });
-  return pick(out);
+  // lo stesso tipo di telefonata non torna prima di qualche mese (il sondaggio vale anche per le interviste)
+  const fresh = out.filter(s => topicFresh(jTopic(s.id), s.id === 'voto' || s.id === 'alleato' ? 6 : 16));
+  return fresh.length ? pick(fresh) : null;
+}
+const jTopic = id => id === 'sondaggio' ? 'sondaggi' : 'j:' + id;
+function callTopic(c) {
+  if (c.kind === 'giornalista') return jTopic(c.sc);
+  return 'call:' + c.kind + ':' + (c.bill !== undefined ? c.bill : c.lawId || c.pid || '');
 }
 // il titolo che esce il giorno dopo
 const jHead = (j, t) => ({ head: t, run2: () => addNews(`${j.t}: «${t}»`, 'info') });

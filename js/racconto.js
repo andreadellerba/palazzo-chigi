@@ -139,9 +139,12 @@ function callTick() {
   if (sg && chance(0.5)) cands.push({ kind: 'ricordo', pid: sg.pid, t: sg.t });
   // un giornalista
   if (G.player.fama > 15 && G.journalists) { const j = pick(G.journalists), sc = journalistScenario(j); if (sc) cands.push({ kind: 'giornalista', j: G.journalists.indexOf(j), sc: sc.id, d: sc.d, w: 1.6 }); }
-  if (!cands.length) return;
-  let tot = cands.reduce((s, c) => s + (c.w || 1), 0), x = Math.random() * tot, c = cands[0];
-  for (const k of cands) { x -= (k.w || 1); if (x <= 0) { c = k; break; } }
+  // una telefonata uguale a una recente non si ripete (stesso leader per lo stesso motivo, stesso tipo di articolo)
+  const fc = cands.filter(k => k.kind === 'giornalista' || topicFresh(callTopic(k), k.kind === 'voto' ? 3 : 8));
+  if (!fc.length) return;
+  let tot = fc.reduce((s, c) => s + (c.w || 1), 0), x = Math.random() * tot, c = fc[0];
+  for (const k of fc) { x -= (k.w || 1); if (x <= 0) { c = k; break; } }
+  topicMark(callTopic(c));
   G._wk.specials.push({ k: 'call', c });
 }
 function callView(c) {

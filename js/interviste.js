@@ -13,11 +13,15 @@ const ARGS = {
   ist: { '-1': ['il Parlamento è il cuore della democrazia', 'servono contrappesi, non uomini soli al comando', 'la Costituzione va rispettata'], '1': ['i cittadini devono scegliere chi governa', 'serve stabilità, basta governi che durano un anno', 'chi vince deve poter governare'] },
 };
 
+// ---------- niente domande ripetute: ogni argomento torna solo dopo qualche settimana (interviste, telefonate) ----------
+const topicFresh = (k, weeks) => { const t = (G.topicSeen || {})[k]; return t === undefined || G.week - t >= weeks; };
+const topicMark = k => { G.topicSeen = G.topicSeen || {}; G.topicSeen[k] = G.week; };
+const TOPIC_COOL = { sondaggi: 10, alleanza: 5, governo: 4, personale: 8, leader: 5 };
 function interviewTopics(n) {
   const out = [];
   const live = G.bills.filter(b => !b.dead && b.lawId && b.opt !== G.laws[b.lawId]).sort(() => Math.random() - 0.5);
   live.slice(0, 1).forEach(b => out.push({ kind: 'law', law: getLaw(b.lawId), to: b.opt, from: G.laws[b.lawId], by: b.proposer }));
-  const hot = allLaws().filter(l => !l.custom && l.sal >= 2 && !out.some(t => t.law && t.law.id === l.id)).sort(() => Math.random() - 0.5);
+  const hot = allLaws().filter(l => !l.custom && l.sal >= 2 && !out.some(t => t.law && t.law.id === l.id)).sort(() => Math.random() - 0.5).sort((a, b) => topicFresh('law:' + b.id, 8) - topicFresh('law:' + a.id, 8));
   while (out.length < 2 && hot.length) {
     const l = hot.shift();
     const others = l.opts.map((o, i) => i).filter(i => i !== G.laws[l.id]);
@@ -26,7 +30,12 @@ function interviewTopics(n) {
   const kinds = ['alleanza', 'governo', 'sondaggi'];
   if (!isLeader()) kinds.push('leader', 'leader');
   if (G.player.fama > 40) kinds.push('personale');
+  // prima gli argomenti non sentiti di recente, poi altre leggi, solo alla fine si ripete
+  const fresh = kinds.filter((k, i) => kinds.indexOf(k) === i && topicFresh(k, TOPIC_COOL[k] || 5)).sort(() => Math.random() - 0.5);
+  while (out.length < n && fresh.length) out.push({ kind: fresh.shift() });
+  while (out.length < n && hot.length) { const l = hot.shift(); const others = l.opts.map((o, i) => i).filter(i => i !== G.laws[l.id]); out.push({ kind: 'law', law: l, to: pick(others), from: G.laws[l.id], by: null }); }
   while (out.length < n) out.push({ kind: pick(kinds) });
+  out.forEach(t => topicMark(t.kind === 'law' ? 'law:' + t.law.id : t.kind));
   return out.sort(() => Math.random() - 0.5);
 }
 function interviewQuestion(t, show) {
