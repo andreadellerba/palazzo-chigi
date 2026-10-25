@@ -66,7 +66,7 @@ function memoryAfterVotes(votes) {
 // ---------- STAFF ----------
 const STAFF_ROLES = {
   portavoce: { n: 'Portavoce', i: 'mic', d: 'Interviste e conferenze più efficaci, meno gaffe sui social.' },
-  gabinetto: { n: 'Capo di gabinetto', i: 'briefcase', d: 'Più capitale politico ogni settimana.' },
+  gabinetto: { n: 'Capo gabinetto', i: 'briefcase', d: 'Più capitale politico ogni settimana.' },
   sondaggista: { n: 'Sondaggista', i: 'chart', d: 'Campagne più mirate: il partito cresce un po’ di più ogni settimana.' },
   spin: { n: 'Spin doctor', i: 'eye', d: 'Attutisce scandali e attacchi: meno consenso perso negli imprevisti.' },
 };
