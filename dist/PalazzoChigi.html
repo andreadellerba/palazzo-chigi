@@ -845,6 +845,25 @@ html.bru { --band: env(safe-area-inset-top, 0px); --top-gap: calc(max(var(--safe
 /* app dalla schermata Home con barra dell'orologio nera piena (niente sfumatura di iOS):
    se iOS non mette più il contenuto sotto l'orologio, lo spazio in alto si riduce da solo */
 html.pwa { --top-gap: calc(var(--safe-t) + 14px); }
+/* creazione della partita: pagina nera (i controlli erano pensati per lo sfondo scuro) */
+html.bru .setup { background: #111; color: #fff; }
+html.bru .setup .body > h2, html.bru .setup .body h2, html.bru .setup .body > p, html.bru .setup .body .muted { color: #fff !important; }
+html.bru .setup .body .muted, html.bru .setup .body .small.muted, html.bru .setup .body .tiny { color: #cfcfcf !important; }
+html.bru .setup .lbl { color: #ffe14d !important; }
+html.bru .setup .opt { border: 2px solid #fff !important; box-shadow: none !important; background: #1c1c1c !important; }
+html.bru .setup .opt.on { outline: 4px solid #ffe14d; outline-offset: -4px; }
+html.bru .setup .steps i { background: #444; } html.bru .setup .steps i.on { background: #ffe14d; }
+html.bru .setup input, html.bru .setup select, html.bru .setup textarea { background: #000 !important; border: 2px solid #fff !important; color: #fff; }
+html.bru .setup .seg { border: 2px solid #fff !important; }
+html.bru .symgrid button { background: #000 !important; border: 2px solid #555 !important; color: #ffe14d; }
+html.bru .symgrid button.on { background: #ffe14d !important; color: #000; border-color: #ffe14d !important; }
+html.bru .colgrid button { border: 3px solid #000 !important; }
+html.bru .colgrid button.on { border-color: #fff !important; box-shadow: 0 0 0 3px #ffe14d; }
+html.bru .setup input[type=range], html.bru .sheet input[type=range] { background: transparent !important; border: 0 !important; }
+/* le card restano sempre bianche su nero, anche se hanno classi «di testo» */
+html.bru .content > .card, html.bru .content > .card.center, html.bru .content > .card.small, html.bru .content > .card.tiny { color: #fff !important; }
+html.bru .content > .card .muted, html.bru .content > .card .small.muted, html.bru .content > .card .tiny.muted { color: #cfcfcf !important; }
+html.bru .ach { opacity: .75; border: 2px solid #444 !important; } html.bru .ach.on { opacity: 1; border-color: #ffe14d !important; background: #1c1c1c !important; }
 
 </style>
 </head>
