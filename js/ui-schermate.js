@@ -492,6 +492,7 @@ function openMenu() {
     ${menuItem('save', 'Salva partita', 'Tre slot sul telefono', 'closeSheet();openSave()')}
     ${menuItem('upload', 'Sposta la partita', 'Su un altro telefono: file o testo', 'closeSheet();openTransfer()')}
     ${menuItem('search', 'Diagnostica', 'Gli ultimi errori, da mandarmi', 'closeSheet();openDiagnostics()')}
+    ${menuItem('palette', 'Stile grafico', styleNow() === 'bru' ? 'Brutalista: tocca per tornare al classico' : 'Classico: tocca per il brutalista', 'setStyle(styleNow() === \'bru\' ? \'classico\' : \'bru\');closeSheet()')}
     ${menuItem('radio', 'Suoni', soundOn() ? 'Attivi: tocca per spegnerli' : 'Spenti: tocca per accenderli', 'setSound(!soundOn());closeSheet();toast(soundOn() ? \'Suoni attivi\' : \'Suoni spenti\')')}
     ${menuItem('cap', 'Tutorial', 'Rivedi la guida passo passo', 'closeSheet();startTutorial(0)')}
     ${menuItem('info', 'Come si gioca', 'Riassunto delle regole', 'closeSheet();openGuide()')}

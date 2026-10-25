@@ -104,3 +104,13 @@ function toggleViceInline(mid) {
 // applausi insieme ai coriandoli
 const _confettiUi = confetti;
 confetti = function (...a) { sfx('applause'); return _confettiUi.apply(this, a); };
+
+// ---------- stile grafico: Brutalista (predefinito) o Classico ----------
+function styleNow() { try { return localStorage.getItem(SAVE_PREFIX + 'stile') || 'bru'; } catch (e) { return 'bru'; } }
+function applyStyle() {
+  if (/proposte/.test(location.pathname)) return;
+  const s = styleNow(); document.documentElement.classList.toggle('bru', s === 'bru');
+  const m = document.querySelector('meta[name=theme-color]'); if (m) m.content = s === 'bru' ? '#000000' : '#0a1024';
+}
+function setStyle(s) { try { localStorage.setItem(SAVE_PREFIX + 'stile', s); } catch (e) {} applyStyle(); if (G && G.player && $('#app') && $('#app').innerHTML) renderGame(); }
+applyStyle();
