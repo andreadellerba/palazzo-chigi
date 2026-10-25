@@ -1117,8 +1117,7 @@ function voteHeadHTML(b) {
   return `<div class="vh"><span class="house ${cam ? 'c' : 's'}">${icon('building')} ${cam ? 'CAMERA' : 'SENATO'}${s.r ? ` · ${s.r}ª LETTURA` : ''}</span>${proposerLabel(b)}</div>
     <h3 style="margin-top:10px">${esc(billName(b))}</h3>
     <div class="row wrap mt" style="gap:6px">${kindTag(b)}${b.lawId ? `<span class="tiny muted">${esc(getLaw(b.lawId).nome)}</span>` : ""}</div><div class="mt">${iterHTML(b)}</div>
-    <div class="change mt"><div><span class="tiny muted">OGGI</span><b>${b.lawId ? esc(getLaw(b.lawId).opts[b.from].t) : 'Bilancio in vigore'}</b></div><span class="arrow">${icon('chevron')}</span><div><span class="tiny muted">DIVENTEREBBE</span><b>${b.lawId ? esc(getLaw(b.lawId).opts[b.opt].t) : esc(billName(b))}</b></div></div>
-    <div class="mt">${b.lawId ? explainHTML(getLaw(b.lawId), b.opt) : `<div class="expl"><span class="k">In pratica</span>${billChangeText(b)}</div>`}</div>
+    ${billChangeHTML(b)}
     ${effs.length ? effChipsHTML(effs) : ''}
     <div class="verdict mt"><span class="${mine > 0.2 ? 'g' : mine < -0.2 ? 'b' : 'n'}">${mine > 0.2 ? icon('smile', 15) + ' In linea con le tue idee' : mine < -0.2 ? icon('frown', 15) + ' Contro le tue idee' : 'Neutra per le tue idee'}</span><span class="${pr.passed ? 'g' : 'b'}">${pr.passed ? '✓ Previsione: passa' : '✗ Previsione: bocciata'}</span></div>
     <button class="btn sm mt" onclick="openBill(${b.id})">${icon('scales')} Tutti i pro e contro</button>`;
