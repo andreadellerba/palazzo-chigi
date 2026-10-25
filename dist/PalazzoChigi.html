@@ -834,6 +834,10 @@ html.bru { background: #000 !important; }
 html.bru body { background: var(--bg) !important; }
 html.bru body::before { height: calc(env(safe-area-inset-top, 0px) + 10px); }
 html.bru body::after { top: calc(env(safe-area-inset-top, 0px) + 10px); }
+/* iOS sfoca la zona dell'orologio mescolando i colori vicini: la fascia nera è più alta, così sotto l'orologio resta solo nero */
+html.bru { --band: calc(env(safe-area-inset-top, 0px) + 30px); --top-gap: calc(max(var(--safe-t), 54px) + 44px); }
+html.bru body::before { height: var(--band); }
+html.bru body::after { top: var(--band); }
 
 </style>
 </head>
@@ -3970,7 +3974,7 @@ function saveGame(slot) {
 function migrate() { G.pacts = G.pacts || []; G.flags = G.flags || {}; G.queue = (G.queue || []).filter(q => q && (q.sp || (q.id && EVENT_BY_ID[q.id]))); G.hist = G.hist || {}; G.hist.me = G.hist.me || []; G.enacted = G.enacted || []; G.promises = G.promises || []; G.customLaws = G.customLaws || []; if (typeof LAWS !== 'undefined') LAWS.forEach(l => { if (G.laws[l.id] === undefined) G.laws[l.id] = l.cur; }); if (typeof ensureStory === 'function') ensureStory(); if (G.player && !G.player.av && typeof rerollPlayerAvatar === 'function') rerollPlayerAvatar(); G.stats.tv = G.stats.tv || 0; if (G.gov && !G.gov.premierParty) G.gov.premierParty = largestIn(G.gov.parties); G.myPersonal = G.myPersonal || {}; G.usedActs = G.usedActs || {}; G.tipsSeen = G.tipsSeen || {}; }
 function loadGame(slot) { try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return false; G = JSON.parse(s); migrate(); return true; } catch (e) { if (typeof toast === 'function') toast('Errore nel caricare la partita: ' + e.message, 'bad'); return false; } }
 function slotInfo(slot) {
-  try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return null; const g = JSON.parse(s); return { name: g.player.name, party: g.parties[g.player.party].short, date: fmtDate(g.week), premier: g.gov && g.gov.premier === 'PLAYER' }; } catch (e) { return null; }
+  try { const s = localStorage.getItem(SAVE_PREFIX + slot); if (!s) return null; const g = JSON.parse(s); const d = dateOf(g.week), nm = g.player.name.trim().split(/\s+/); return { name: g.player.name, short: nm.length > 1 ? nm[0][0].toUpperCase() + '. ' + nm.slice(1).join(' ') : nm[0], party: g.parties[g.player.party].short, date: fmtDate(g.week), dnum: `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`, premier: g.gov && g.gov.premier === 'PLAYER' }; } catch (e) { return null; }
 }
 
 </script>
@@ -5966,7 +5970,7 @@ function showSplash() {
     <div class="flag3"><i></i><i></i><i></i></div>
     <div class="sub">Simulatore politico italiano · dati reali a ottobre 2026</div>
     <div class="btns">
-      ${auto ? `<button class="btn gold block" onclick="continueGame()">${icon('chevron')} Continua · ${esc(auto.name)} (${esc(auto.party)}), ${esc(auto.date)}</button>` : ''}
+      ${auto ? `<button class="btn gold block" onclick="continueGame()">${icon('chevron')} Continua · ${esc(auto.short)} (${esc(auto.party)}) · ${esc(auto.dnum)}</button>` : ''}
       <button class="btn ${auto ? '' : 'pri'} block" onclick="startSetup()">${icon('plus')} Nuova partita</button>
       <button class="btn block" onclick="openLoad()">${icon('folder')} Carica partita</button>
       <button class="btn block" onclick="openGuide()">${icon('info')} Come si gioca</button>
@@ -6138,6 +6142,8 @@ if (window.visualViewport) visualViewport.addEventListener('resize', fixAppHeigh
 // ---------- errori visibili: se qualcosa si rompe sul telefono, lo mostriamo invece di bloccarci in silenzio ----------
 window.addEventListener('error', e => {
   try {
+    // «Script error.» senza file né riga arriva da script esterni (iOS, estensioni): nessuna informazione utile, non lo mostriamo
+    if (/^Script error\.?$/i.test(e.message || '') && !e.filename) return;
     const msg = `${e.message || 'errore'} (${String(e.filename || '').split('/').pop()}:${e.lineno || '?'})`;
     if (G) { G.flags = G.flags || {}; G.flags.lastError = msg; }
     toast(`Errore: ${esc(msg)}`, 'bad');

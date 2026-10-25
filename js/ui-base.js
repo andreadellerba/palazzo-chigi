@@ -224,7 +224,7 @@ function showSplash() {
     <div class="flag3"><i></i><i></i><i></i></div>
     <div class="sub">Simulatore politico italiano · dati reali a ottobre 2026</div>
     <div class="btns">
-      ${auto ? `<button class="btn gold block" onclick="continueGame()">${icon('chevron')} Continua · ${esc(auto.name)} (${esc(auto.party)}), ${esc(auto.date)}</button>` : ''}
+      ${auto ? `<button class="btn gold block" onclick="continueGame()">${icon('chevron')} Continua · ${esc(auto.short)} (${esc(auto.party)}) · ${esc(auto.dnum)}</button>` : ''}
       <button class="btn ${auto ? '' : 'pri'} block" onclick="startSetup()">${icon('plus')} Nuova partita</button>
       <button class="btn block" onclick="openLoad()">${icon('folder')} Carica partita</button>
       <button class="btn block" onclick="openGuide()">${icon('info')} Come si gioca</button>
@@ -396,6 +396,8 @@ if (window.visualViewport) visualViewport.addEventListener('resize', fixAppHeigh
 // ---------- errori visibili: se qualcosa si rompe sul telefono, lo mostriamo invece di bloccarci in silenzio ----------
 window.addEventListener('error', e => {
   try {
+    // «Script error.» senza file né riga arriva da script esterni (iOS, estensioni): nessuna informazione utile, non lo mostriamo
+    if (/^Script error\.?$/i.test(e.message || '') && !e.filename) return;
     const msg = `${e.message || 'errore'} (${String(e.filename || '').split('/').pop()}:${e.lineno || '?'})`;
     if (G) { G.flags = G.flags || {}; G.flags.lastError = msg; }
     toast(`Errore: ${esc(msg)}`, 'bad');

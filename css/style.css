@@ -817,3 +817,7 @@ html.bru { background: #000 !important; }
 html.bru body { background: var(--bg) !important; }
 html.bru body::before { height: calc(env(safe-area-inset-top, 0px) + 10px); }
 html.bru body::after { top: calc(env(safe-area-inset-top, 0px) + 10px); }
+/* iOS sfoca la zona dell'orologio mescolando i colori vicini: la fascia nera è più alta, così sotto l'orologio resta solo nero */
+html.bru { --band: calc(env(safe-area-inset-top, 0px) + 30px); --top-gap: calc(max(var(--safe-t), 54px) + 44px); }
+html.bru body::before { height: var(--band); }
+html.bru body::after { top: var(--band); }
