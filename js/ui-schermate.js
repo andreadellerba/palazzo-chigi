@@ -33,6 +33,7 @@ function topbarThird() {
   }
   if (!isLeader()) return `<span class="stat" onclick="openProfile()">Col leader<b style="${col(G.player.rap >= 0)}">${relNum(G.player.rap)}</b></span>`;
   const left = G.cal.election - G.week, c = coalitionOf(myPid());
+  if (G.gov && !inGov(myPid()) && !(left > 0 && left <= 12) && typeof govStrength === 'function') { const s = govStrength(); return `<span class="stat" onclick="openGovStrength()">Forza gov.<b style="${col(s.v < 45)}">${s.v}</b></span>`; }
   if (left > 0 && left <= 30) return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Al voto<b>${left} sett.</b></span>`;
   if (c) { const s = c.members.reduce((t, m) => t + (G.parties[m] ? P(m).poll : 0), 0); return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Coalizione<b style="${col(s >= 42)}">${fmt1(s)}%</b></span>`; }
   return `<span class="stat" onclick="UI.partiti='alleanze';goTab('partiti')">Soglia 3%<b style="${col(myParty().poll >= 3)}">${myParty().poll >= 3 ? 'sopra' : 'sotto'}</b></span>`;

@@ -309,7 +309,9 @@ function approvalTick() {
   let pc = 6;
   if (g.premier === 'PLAYER') pc = G.player.car; else { const pp = P(g.premierParty); pc = pp ? pp.lCar : 6; }
   const target = 38 + hm + 3 * (e.pil - 0.7) - 1.5 * (e.dis - 6) - 1.2 * Math.max(0, e.infl - 2) - Math.max(0, e.spread - 200) / 25 + g.popBank + (pc - 6) * 1.2 + (g.tecnico ? 6 : 0) + (g.premier === 'PLAYER' ? ((G.groups.sind || 0) * 0.8 + (G.groups.chiesa || 0) * 0.6 + (G.groups.media || 0) * 0.8) / 100 : 0);
-  g.approval += (target - g.approval) * 0.1 + gauss() * 0.4;
+  // usura del potere: dopo due anni i governi del computer perdono consenso
+  const usura = g.premier !== 'PLAYER' ? Math.min(8, Math.max(0, (G.week - g.start - 104) * 0.05)) : 0;
+  g.approval += (target - usura - g.approval) * 0.1 + gauss() * 0.4;
   g.approval = clamp(g.approval, 8, 85);
 }
 
@@ -332,6 +334,8 @@ function moodFx(pid) {
 function pollTick() {
   const ids = PIDS(), g = G.gov;
   const targets = {};
+  // il primo partito d'opposizione raccoglie di più il malcontento verso il governo
+  const oppTop = g ? ids.filter(p => !g.parties.includes(p)).sort((a, b) => P(b).poll - P(a).poll)[0] : null;
   let sum = 0;
   ids.forEach(id => {
     const p = P(id);
@@ -346,7 +350,7 @@ function pollTick() {
     p.base = Math.max(0.2, p.base);
     let x = 0.55 * Math.tanh(p.spinta / 10) + moodFx(id);
     if (g && g.parties.includes(id)) x += (g.approval - 42) * 0.01 * (id === g.premierParty ? 1.3 : 0.8);
-    else if (g) x += (42 - g.approval) * 0.003;
+    else if (g) x += (42 - g.approval) * (id === oppTop ? 0.012 : 0.006);
     targets[id] = p.base * Math.exp(clamp(x, -1.5, 1.5));
     sum += targets[id];
   });

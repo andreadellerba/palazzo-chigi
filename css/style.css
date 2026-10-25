@@ -665,3 +665,7 @@ html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolut
 .tune-arr[disabled] { opacity: .3; pointer-events: none; }
 .bmtr .tr b { background: var(--good); }
 .bmtr .tr u { position: absolute; right: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--bad); }
+.prog { display: flex; gap: 3px; }
+.prog i { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,.1); }
+.prog i.d { background: var(--oro); }
+.prog i.n { background: linear-gradient(90deg, var(--oro), rgba(214,178,94,.25)); }
