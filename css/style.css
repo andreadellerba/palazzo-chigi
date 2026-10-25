@@ -1057,3 +1057,6 @@ html.bru .content .btn.gold .lic, html.bru .content .btn.pri .lic { color: #ffe1
 .call .cbtn .no .lic { color: var(--bad); fill: var(--bad); }
 .call .cbtn .si .lic { color: var(--good); fill: var(--good); }
 html.bru .call .cbtn .no .lic > * { transform: none !important; }
+/* menu in basso: i tasti scendono fino al bordo del telefono, icone sopra la barra dei gesti */
+.nav4 { padding-bottom: 0; }
+.n4 { height: calc(52px + var(--safe-b)); padding-bottom: var(--safe-b); }
