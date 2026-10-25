@@ -18,7 +18,7 @@ function openGovStrength() {
   const s = govStrength(); if (!s) return;
   const al = G.gov.parties.filter(p => p !== G.gov.premierParty);
   openSheet(`${head('Fiducia nel governo', esc(G.gov.name))}
-    <div class="center"><div class="bignum" style="color:${(inGov(myPid()) ? s.v >= 50 : s.v < 40) ? 'var(--good)' : s.v >= 40 && s.v < 60 ? 'var(--warn)' : 'var(--bad)'}">${s.v}</div><div class="small muted">su 100: ${s.v >= 60 ? 'solido' : s.v >= 40 ? 'in bilico' : 'debole'}${inGov(myPid()) ? '' : s.v < 40 ? ': è il momento di attaccare' : s.v >= 60 ? ', difficile da far cadere' : ''}</div></div>
+    <div class="center"><div class="bignum" style="color:${s.v >= 50 ? 'var(--good)' : 'var(--bad)'}">${s.v}</div><div class="small muted">su 100: ${s.v >= 60 ? 'solido' : s.v >= 40 ? 'in bilico' : 'debole'}${inGov(myPid()) ? '' : s.v < 40 ? ': è il momento di attaccare' : s.v >= 60 ? ', difficile da far cadere' : ''}</div></div>
     <div class="card tight mt"><div class="list">
       <div class="li"><div class="grow small">Gradimento degli italiani</div><b>${fmt0(s.appr)}%</b></div>
       <div class="li"><div class="grow small">Soddisfazione media degli alleati</div><b>${fmt0(s.sat)}/100</b></div>

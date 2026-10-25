@@ -10234,7 +10234,7 @@ function openGovStrength() {
   const s = govStrength(); if (!s) return;
   const al = G.gov.parties.filter(p => p !== G.gov.premierParty);
   openSheet(`${head('Fiducia nel governo', esc(G.gov.name))}
-    <div class="center"><div class="bignum" style="color:${(inGov(myPid()) ? s.v >= 50 : s.v < 40) ? 'var(--good)' : s.v >= 40 && s.v < 60 ? 'var(--warn)' : 'var(--bad)'}">${s.v}</div><div class="small muted">su 100: ${s.v >= 60 ? 'solido' : s.v >= 40 ? 'in bilico' : 'debole'}${inGov(myPid()) ? '' : s.v < 40 ? ': è il momento di attaccare' : s.v >= 60 ? ', difficile da far cadere' : ''}</div></div>
+    <div class="center"><div class="bignum" style="color:${s.v >= 50 ? 'var(--good)' : 'var(--bad)'}">${s.v}</div><div class="small muted">su 100: ${s.v >= 60 ? 'solido' : s.v >= 40 ? 'in bilico' : 'debole'}${inGov(myPid()) ? '' : s.v < 40 ? ': è il momento di attaccare' : s.v >= 60 ? ', difficile da far cadere' : ''}</div></div>
     <div class="card tight mt"><div class="list">
       <div class="li"><div class="grow small">Gradimento degli italiani</div><b>${fmt0(s.appr)}%</b></div>
       <div class="li"><div class="grow small">Soddisfazione media degli alleati</div><b>${fmt0(s.sat)}/100</b></div>
@@ -11443,7 +11443,7 @@ topbar = function () {
   const d = mp.poll - (old || mp.poll);
   // sempre la fiducia del governo in carica: il tuo se ci sei dentro, quello degli altri se sei all'opposizione
   const gs = G.gov && typeof govStrength === 'function' ? govStrength() : null, mine = G.gov && inGov(myPid());
-  const third = gs ? `<span class="s4" onclick="openGovStrength()">Fiducia <b style="color:${(mine ? gs.v >= 50 : gs.v < 45) ? 'var(--good)' : 'var(--bad)'}">${gs.v}</b></span>` : topbarThird().replace('class="stat"', 'class="s4"');
+  const third = gs ? `<span class="s4" onclick="openGovStrength()">Fiducia <b style="color:${gs.v >= 50 ? 'var(--good)' : 'var(--bad)'}">${gs.v}</b></span>` : '<span class="s4">Fiducia <b class="y">–</b></span>';
   const dot = '<i class="dot5">·</i>';
   return `<div class="topbar t5"><div class="tb5">
     <span class="dt">${fmtDate(G.week).toUpperCase()}</span>${dot}
