@@ -410,7 +410,8 @@ function rollEvents() {
     for (const e of pool) { x -= e.w; if (x <= 0) { ev = e; break; } }
     let ctx = {};
     if (ev.prep) { ctx = ev.prep(); if (!ctx) continue; }
-    G.evCool[ev.id] = G.week + (ev.cool || 20);
+    // lo stesso evento non torna prima di un anno di gioco
+    G.evCool[ev.id] = G.week + Math.max(ev.cool || 20, 52);
     G.seenEvents[ev.id] = true;
     G.queue.push({ id: ev.id, ctx });
   }

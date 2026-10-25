@@ -331,7 +331,7 @@ function renderSetup() {
   }
   if (st === 'Difficoltà') {
     body = `<h2>Difficoltà</h2>
-    ${Object.entries(DIFF).map(([k, d]) => `<div class="opt ${SETUP.diff === k ? 'on' : ''}" onclick="SETUP.diff='${k}';renderSetup()"><div class="t">${d.n}</div><div class="small muted mt">${{ facile: 'Alleati più docili, mercati calmi, il tuo partito cresce più in fretta. Per imparare.', media: 'Equilibrata: la politica italiana com’è, con qualche aiuto.', realistica: 'Alleati permalosi, franchi tiratori, spread nervoso. Come nella Prima Repubblica: i governi durano poco.' }[k]}</div></div>`).join('')}
+    ${Object.entries(DIFF).map(([k, d]) => `<div class="opt ${SETUP.diff === k ? 'on' : ''}" onclick="SETUP.diff='${k}';renderSetup()"><div class="t">${d.n}</div><div class="small muted mt">${DIFF_DESC[k] || ''}</div></div>`).join('')}
     <div class="card mt"><h4>Riepilogo</h4><div class="mt small">
       <b>${esc(SETUP.player.name || '—')}</b>, ${SETUP.player.age} anni, ${BACKGROUNDS.find(b => b.id === SETUP.player.bg).n.toLowerCase()} da ${regionName(SETUP.player.region)}.<br>
       ${SETUP.mode === 'fondatore' ? `Fondi <b>${esc(SETUP.party.name || '—')}</b> (${esc(SETUP.party.short || '—')}).` : `Entri in <b>${PARTIES_DEF.find(p => p.id === SETUP.join.party).name}</b> come ${RANKS[SETUP.join.rank].n.toLowerCase()}.`}</div></div>`;

@@ -494,7 +494,8 @@ function openMenu() {
     ${menuItem('key', 'Istituzioni e poteri', 'Quirinale, Camere, UE, parti sociali', 'closeSheet();openInstitutions()')}
     </div></div><div class="card tight"><div class="list">
     ${menuItem('save', 'Salva partita', 'Tre slot sul telefono', 'closeSheet();openSave()')}
-    ${menuItem('upload', 'Esporta su file', 'Backup da conservare', 'exportSave()')}
+    ${menuItem('upload', 'Sposta la partita', 'Su un altro telefono: file o testo', 'closeSheet();openTransfer()')}
+    ${menuItem('search', 'Diagnostica', 'Gli ultimi errori, da mandarmi', 'closeSheet();openDiagnostics()')}
     ${menuItem('cap', 'Tutorial', 'Rivedi la guida passo passo', 'closeSheet();startTutorial(0)')}
     ${menuItem('info', 'Come si gioca', 'Riassunto delle regole', 'closeSheet();openGuide()')}
     ${menuItem('star', 'Crediti', 'Loghi, fonti dei dati, avatar', 'closeSheet();openCredits()')}

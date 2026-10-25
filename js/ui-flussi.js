@@ -485,7 +485,7 @@ function askPremiership(cid) {
   const c = G.coalitions.find(x => x.id === cid);
   const others = c.members.filter(m => m !== myPid());
   const big = others.sort((a, b) => P(b).poll - P(a).poll)[0];
-  const need = { facile: 0.6, media: 0.85, realistica: 1.0 }[G.diff];
+  const need = { storia: 0.5, facile: 0.6, media: 0.85, realistica: 1.0 }[G.diff] || 0.85;
   const ratio = myParty().poll / P(big).poll;
   if (ratio >= need || (ratio >= need - 0.15 && G.player.fama > 70 && chance(0.4))) {
     c.cand = 'PLAYER'; c.candParty = myPid(); c.candLocked = true; confetti();

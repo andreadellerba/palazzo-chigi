@@ -669,3 +669,6 @@ html.pwa .tabs-mobile2, html.pwa .fab, html.pwa .setup .foot { position: absolut
 .prog i { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,.1); }
 .prog i.d { background: var(--oro); }
 .prog i.n { background: linear-gradient(90deg, var(--oro), rgba(214,178,94,.25)); }
+.sg { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
+.sg:first-of-type { margin-top: 8px; }
+.sg .btn.sm { flex: none; }
