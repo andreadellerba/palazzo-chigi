@@ -355,7 +355,11 @@ function pollTick() {
     // basi strutturali
     if (id === myPid() && isLeader()) {
       if (id === 'MIO') { const pot = myPotential(); p.base += (pot - p.base) * 0.035; }
-      else { const tgt = p.base0 * (0.8 + 0.45 * (G.player.fama / 100) * (G.player.car / 7)) * (0.85 + G.cred / 330); p.base += (tgt - p.base) * 0.02; }
+      else {
+        // la spinta che dura nel tempo si consolida: il partito si allarga davvero, non solo un picco
+        p.cons = clamp((p.cons || 1) * (1 + 0.0007 * clamp(p.spinta, -20, 20) * (p.spinta > 0 ? Math.max(0, 1 - p.poll / 35) : 1)), 0.5, 5);
+        const tgt = p.base0 * p.cons * (0.8 + 0.45 * (G.player.fama / 100) * (G.player.car / 7)) * (0.85 + G.cred / 330); p.base += (tgt - p.base) * 0.03;
+      }
     } else {
       p.base += (p.base0 - p.base) * 0.004 + gauss() * 0.02;
     }
