@@ -812,3 +812,8 @@ html.bru body::before { height: env(safe-area-inset-top, 0px); }
 html.bru body::after { content: ''; position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; height: 44px; z-index: 200; pointer-events: none;
   background: radial-gradient(circle at 100% 100%, transparent 43.5px, #000 44px) left top / 44px 44px no-repeat,
               radial-gradient(circle at 0 100%, transparent 43.5px, #000 44px) right top / 44px 44px no-repeat; }
+/* iOS sfuma e tinge la zona dell'orologio con il colore della pagina: la pagina «sotto» è nera, solo il corpo è giallo */
+html.bru { background: #000 !important; }
+html.bru body { background: var(--bg) !important; }
+html.bru body::before { height: calc(env(safe-area-inset-top, 0px) + 10px); }
+html.bru body::after { top: calc(env(safe-area-inset-top, 0px) + 10px); }
