@@ -271,9 +271,10 @@ new MutationObserver(ms => { for (const m of ms) m.addedNodes.forEach(n => { if 
 // ---------- azioni ricorrenti: quante sono, quanto costano, e si possono togliere ----------
 function routineList() { return Object.keys(G.routine || {}).map(id => ({ id, a: ACTIONS.find(x => x.id === id) })).filter(x => x.a); }
 function routineLineHTML() {
+  ROUTINE_NO.forEach(id => G.routine && delete G.routine[id]);
   const L = routineList(); if (!L.length) return '';
   const cost = L.reduce((s, x) => s + actionCost(x.a), 0);
-  return `<button class="rt9" onclick="openRoutines()">↻ ${L.length} ricorrent${L.length > 1 ? 'i' : 'e'} · ⚡${cost} a settimana ›</button>`;
+  return `<button class="rt9" onclick="openRoutines()">↻ ${L.length} ricorrent${L.length > 1 ? 'i' : 'e'} · ⚡${cost} · max metà capitale ›</button>`;
 }
 function openRoutines() {
   const L = routineList();

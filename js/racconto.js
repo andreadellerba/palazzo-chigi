@@ -456,7 +456,7 @@ function animCounters() { document.querySelectorAll('.cnt-up').forEach(el => { i
 
 // ---------- AZIONI RICORRENTI: le fa il gioco ogni settimana ----------
 // solo le decisioni enormi non si ripetono da sole
-const ROUTINE_NO = ['crisi', 'dimissioni', 'sfiducia', 'anticipate', 'congresso', 'scissione', 'rimpasto'];
+const ROUTINE_NO = ['crisi', 'dimissioni', 'sfiducia', 'anticipate', 'congresso', 'scissione', 'rimpasto', 'riposo', 'ritiro', 'correnti'];
 const routineOK = a => !ROUTINE_NO.includes(a.id) && (a.run || a.id === 'comizio' || ROUTINE_AUTO[a.id]);
 function routineToggleHTML(a) {
   if (!routineOK(a)) return `<div class="tiny muted center mt2">È una decisione importante: non si può ripetere in automatico, la prendi tu ogni volta.</div>`;
@@ -471,6 +471,7 @@ function toggleRoutine(id) {
 function runRoutine() {
   const done = [];
   if (!G.routine || G.phase !== 'normale') return done;
+  ROUTINE_NO.forEach(id => delete G.routine[id]); // il riposo azzera il capitale: mai in automatico
   // le ricorrenti possono usare al massimo metà del capitale della settimana: il resto è tuo
   const floor = G.pc - Math.floor(G.pc / 2);
   Object.keys(G.routine).forEach(id => {
