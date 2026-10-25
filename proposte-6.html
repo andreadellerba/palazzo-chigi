@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nuovi stili grafici</title>
+<script>
+// partita di prova: non deve mai toccare i salvataggi veri
+(function () { try { const S = Storage.prototype; S.setItem = function () {}; S.removeItem = function () {}; S.clear = function () {}; } catch (e) {} })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;700;800&family=Rubik:wght@400;700;900&family=Nunito:wght@400;700;900&family=Inter:wght@400;600;800&family=Space+Grotesk:wght@400;700&family=Cormorant+Garamond:wght@600;700&family=Lato:wght@400;700;900&family=Libre+Baskerville:wght@400;700&family=Libre+Franklin:wght@400;700;900&family=Orbitron:wght@600;800&family=Archivo+Black&family=Righteous&family=VT323&family=IBM+Plex+Mono:wght@400;600&family=Press+Start+2P&family=Pixelify+Sans:wght@400;700&family=Bangers&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+html, body { height: auto !important; min-height: 0 !important; overflow: auto !important; }
+body { padding: max(env(safe-area-inset-top), 20px) 0 60px; background: #0b0f1d; }
+#app { display: none !important; }
+.pg { max-width: 760px; margin: 0 auto; }
+.pg h1 { font-family: var(--serif); font-weight: 900; font-size: 30px; text-align: center; margin: 12px 16px 6px; color: var(--cream); }
+.pg .lead { text-align: center; color: var(--muted); font-size: 14px; line-height: 1.5; margin: 0 16px 6px; }
+.pg .lead b { color: var(--oro2); }
+.grp-t { margin: 40px 16px 4px; font-family: var(--serif); font-weight: 900; font-size: 24px; color: var(--cream); display: flex; align-items: center; gap: 12px; }
+.grp-t::after { content: ''; flex: 1; height: 1.5px; background: linear-gradient(90deg, var(--oro), transparent); }
+.th { margin-top: 22px; }
+.th-hd { display: flex; align-items: center; gap: 10px; padding: 0 16px; }
+.th-hd .code { flex: none; display: inline-grid; place-items: center; min-width: 40px; height: 30px; padding: 0 10px; border-radius: 999px; background: linear-gradient(135deg, #a8842f, #ecd08a); color: #1a1405; font-weight: 900; font-size: 14px; }
+.th-hd b { font-size: 17px; color: var(--text); }
+.th-d { color: var(--muted); font-size: 13.5px; line-height: 1.5; margin: 6px 16px 10px; }
+.row-ph { display: flex; gap: 12px; overflow-x: auto; padding: 4px 16px 10px; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.row-ph::-webkit-scrollbar { display: none; }
+.ph-w { flex: none; width: 237px; scroll-snap-align: start; }
+.ph-b { width: 237px; height: 513px; border-radius: 26px; overflow: hidden; position: relative; background: #000; box-shadow: 0 0 0 5px #20232e, 0 14px 30px rgba(0,0,0,.5); }
+.ph-l { text-align: center; font-size: 12px; color: var(--muted); margin-top: 10px; font-weight: 700; }
+.phone { position: absolute; top: 0; left: 0; width: 430px; height: 932px; transform: scale(.551); transform-origin: 0 0; overflow: hidden; background: radial-gradient(120% 55% at 50% -5%, #1d2d5c 0%, #0a1024 62%), var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.4; }
+.phone .mock { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.phone .ticker .run { animation: none; }
+.phone *, .phone *::before, .phone *::after { animation-duration: 0s !important; animation-delay: 0s !important; }
+.ph-ph { display: grid; place-items: center; height: 100%; color: #555; font-size: 13px; }
+
+/* ===== regole comuni per gli stili nuovi ===== */
+.re { background: var(--pbg); }
+.re .card, .re .kpi, .re .folder .fbody, .re .act-t, .re .evcard { background: var(--card); box-shadow: var(--shadow); border-color: var(--line); }
+.re .card, .re .kpi, .re .act-t, .re .evcard { border-radius: var(--r); }
+.re .card.hero { background: var(--hero, var(--card)); }
+.re .sheet { background: var(--bg2); }
+.re .pill, .re .iconbtn, .re .stat, .re .tag, .re .btn, .re .fchip, .re .seg, .re .choice, .re .xbtn, .re .searchbox { background: var(--soft); border-color: var(--line2); }
+.re .btn.pri, .re .btn.gold, .re .fchip.on, .re .seg button.on, .re .ticker .lbl, .re .tag.kind .q { background: var(--acc); color: var(--on-acc); box-shadow: none; }
+.re .fchip.on .lic, .re .btn.gold .lic, .re .btn.pri .lic { color: var(--on-acc); }
+.re .ticker { background: var(--soft2); border-color: var(--line); }
+.re .tabs-mobile2 .tbar { background: var(--navbg); border-color: var(--line2); }
+.re .medal i, .re .medallion { background: var(--soft2); border-color: var(--oro); }
+.re .evcard .txt, .re .act-t .an, .re .medal b { color: var(--text); }
+.re .backdrop { background: var(--backdrop, rgba(3,6,16,.55)); }
+.re .portrait { background: var(--soft2); }
+.re .fab { background: var(--fab, var(--acc)); color: var(--on-acc); }
+.re .act-t .ac { color: var(--oro); }
+
+/* S1 Tricolore Pop */
+.th-tri { --pbg: #f6f7f2; --bg: #f6f7f2; --bg2: #ffffff; --card: #ffffff; --card2: #f0f2ea; --line: rgba(0,0,0,.08); --line2: rgba(0,0,0,.14); --text: #1b1f1d; --cream: #0c3b24; --muted: #5d6a63; --dim: #8a958f; --oro: #009246; --oro2: #00a651; --oroD: #007a3a; --good: #009246; --bad: #ce2b37; --soft: #eef3ec; --soft2: #e6efe8; --acc: linear-gradient(135deg, #009246, #2bb673); --on-acc: #fff; --navbg: rgba(255,255,255,.95); --shadow: 0 6px 18px rgba(0,60,30,.08); --serif: "Poppins", sans-serif; --sans: "Poppins", sans-serif; --r: 18px; --hero: linear-gradient(160deg, #e9f7ef, #fff 55%, #fdecee); --fab: linear-gradient(135deg, #ce2b37, #ff5864); }
+.th-tri h1, .th-tri h2, .th-tri h3, .th-tri h4, .th-tri .stat b, .th-tri .topbar .date { font-weight: 800; letter-spacing: -.02em; }
+/* S2 Aurora */
+.th-aur { --pbg: linear-gradient(165deg, #4c1d95 0%, #c026d3 48%, #fb923c 100%); --bg: #6d1fa8; --bg2: rgba(48,12,80,.94); --card: rgba(255,255,255,.14); --card2: rgba(255,255,255,.2); --line: rgba(255,255,255,.22); --line2: rgba(255,255,255,.35); --text: #fff; --cream: #fff; --muted: rgba(255,255,255,.78); --dim: rgba(255,255,255,.55); --oro: #ffe66d; --oro2: #fff3b0; --oroD: #f7c948; --good: #7dffb2; --bad: #ffd1d1; --soft: rgba(255,255,255,.14); --soft2: rgba(255,255,255,.2); --acc: #fff; --on-acc: #8a1fb0; --navbg: rgba(255,255,255,.2); --shadow: 0 10px 30px rgba(60,0,80,.25); --serif: "Plus Jakarta Sans", sans-serif; --sans: "Plus Jakarta Sans", sans-serif; --r: 24px; }
+.th-aur .card, .th-aur .act-t, .th-aur .kpi { -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+.th-aur h1, .th-aur h2, .th-aur h3, .th-aur h4, .th-aur .stat b, .th-aur .topbar .date { font-weight: 800; }
+/* S3 Memphis anni '80 */
+.th-mem { --pbg: radial-gradient(circle at 20% 30%, #ff5fa2 0 5px, transparent 6px) 0 0/90px 90px, radial-gradient(circle at 70% 70%, #00c2c7 0 4px, transparent 5px) 0 0/70px 70px, repeating-linear-gradient(45deg, transparent 0 22px, rgba(255,210,63,.35) 22px 26px), #fffdf5; --bg: #fffdf5; --bg2: #fffdf5; --card: #ffffff; --card2: #fff7d6; --line: #1d1d1b; --line2: #1d1d1b; --text: #1d1d1b; --cream: #1d1d1b; --muted: #4b4b48; --dim: #77776f; --oro: #ff5fa2; --oro2: #ff5fa2; --oroD: #ff5fa2; --good: #00a3a8; --bad: #ff3d6e; --soft: #fff; --soft2: #fff3b0; --acc: #ffd23f; --on-acc: #1d1d1b; --navbg: #ffffff; --shadow: 5px 5px 0 #00c2c7; --serif: "Rubik", sans-serif; --sans: "Rubik", sans-serif; --r: 14px; --fab: #ff5fa2; }
+.th-mem .card, .th-mem .act-t, .th-mem .kpi, .th-mem .folder .fbody, .th-mem .btn, .th-mem .stat { border-width: 2px; }
+.th-mem .card:nth-of-type(even) { box-shadow: 5px 5px 0 #ff5fa2; }
+.th-mem h1, .th-mem h2, .th-mem h3, .th-mem h4, .th-mem .topbar .date, .th-mem .stat b { font-weight: 900; text-transform: uppercase; letter-spacing: .01em; }
+/* S4 Clay pastello */
+.th-cla { --pbg: #e9ecff; --bg: #e9ecff; --bg2: #eef0ff; --card: #f7f8ff; --card2: #eef0ff; --line: transparent; --line2: rgba(139,124,246,.18); --text: #2e2f55; --cream: #2e2f55; --muted: #6c6f99; --dim: #9799bf; --oro: #8b7cf6; --oro2: #7c6cf0; --oroD: #a594ff; --good: #2fbf8f; --bad: #f2737f; --soft: #f1f2ff; --soft2: #e3e5ff; --acc: linear-gradient(135deg, #a594ff, #7c6cf0); --on-acc: #fff; --navbg: #f7f8ff; --shadow: 8px 8px 18px rgba(120,130,200,.35), -6px -6px 14px rgba(255,255,255,.9); --serif: "Nunito", sans-serif; --sans: "Nunito", sans-serif; --r: 28px; --fab: linear-gradient(135deg, #ffb38a, #ff8f6b); }
+.th-cla h1, .th-cla h2, .th-cla h3, .th-cla h4, .th-cla .topbar .date, .th-cla .stat b { font-weight: 900; }
+.th-cla .btn, .th-cla .stat, .th-cla .pill, .th-cla .iconbtn, .th-cla .fchip { box-shadow: 4px 4px 10px rgba(120,130,200,.25), -3px -3px 8px rgba(255,255,255,.9); border-color: transparent; }
+/* S5 Minimal chiaro */
+.th-ios { --pbg: #f2f2f7; --bg: #f2f2f7; --bg2: #f2f2f7; --card: #ffffff; --card2: #f2f2f7; --line: rgba(60,60,67,.12); --line2: rgba(60,60,67,.18); --text: #000; --cream: #000; --muted: #6e6e73; --dim: #a1a1a6; --oro: #007aff; --oro2: #007aff; --oroD: #007aff; --good: #34c759; --bad: #ff3b30; --soft: #ffffff; --soft2: #e9e9ee; --acc: #007aff; --on-acc: #fff; --navbg: rgba(250,250,252,.92); --shadow: none; --serif: -apple-system, "Inter", sans-serif; --sans: -apple-system, "Inter", sans-serif; --r: 14px; }
+.th-ios h1, .th-ios h2, .th-ios h3, .th-ios h4, .th-ios .topbar .date, .th-ios .stat b { font-weight: 700; letter-spacing: -.02em; }
+.th-ios h4::before, .th-ios h4::after { display: none; }
+.th-ios .sec h4 { justify-content: flex-start; font-size: 22px; }
+/* S6 Nero e lime */
+.th-ole { --pbg: #000; --bg: #000; --bg2: #0b0b0c; --card: #111113; --card2: #1a1a1d; --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.14); --text: #f5f5f5; --cream: #ffffff; --muted: #8a8a8e; --dim: #5b5b60; --oro: #c6f432; --oro2: #d8ff5a; --oroD: #a6d313; --good: #c6f432; --bad: #ff5b5b; --soft: #161618; --soft2: #1d1d20; --acc: #c6f432; --on-acc: #000; --navbg: rgba(22,22,24,.95); --shadow: none; --serif: "Space Grotesk", sans-serif; --sans: "Inter", sans-serif; --r: 22px; }
+.th-ole h1, .th-ole h2, .th-ole h3, .th-ole h4, .th-ole .topbar .date, .th-ole .stat b { font-weight: 700; letter-spacing: -.03em; }
+/* S7 Marmo istituzionale */
+.th-mar { --pbg: linear-gradient(115deg, transparent 38%, rgba(150,135,110,.10) 39%, transparent 41%), linear-gradient(65deg, transparent 60%, rgba(150,135,110,.08) 61%, transparent 63%), #f4efe6; --bg: #f4efe6; --bg2: #faf6ee; --card: #fffdf8; --card2: #f4efe6; --line: rgba(122,31,43,.14); --line2: rgba(122,31,43,.26); --text: #2a2420; --cream: #5a1520; --muted: #7a6e62; --dim: #a39888; --oro: #b8923a; --oro2: #9c7a2c; --oroD: #b8923a; --good: #2e7d4f; --bad: #a3222f; --soft: #fbf7ef; --soft2: #f1e9da; --acc: linear-gradient(135deg, #7a1f2b, #9b2c3a); --on-acc: #f6e7c8; --navbg: rgba(255,253,248,.96); --shadow: 0 4px 14px rgba(90,60,30,.08); --serif: "Cormorant Garamond", serif; --sans: "Lato", sans-serif; --r: 10px; }
+.th-mar h1, .th-mar h2, .th-mar h3, .th-mar h4, .th-mar .topbar .date, .th-mar .stat b { font-weight: 700; letter-spacing: .01em; }
+.th-mar .topbar .date { font-size: 27px; }
+/* S8 Giornale */
+.th-gio { --pbg: #f3eee2; --bg: #f3eee2; --bg2: #f3eee2; --card: #f8f4ea; --card2: #efe8d8; --line: rgba(0,0,0,.18); --line2: #111; --text: #141414; --cream: #111; --muted: #555; --dim: #888; --oro: #b3121b; --oro2: #b3121b; --oroD: #b3121b; --good: #1f6b3a; --bad: #b3121b; --soft: transparent; --soft2: #e9e1cf; --acc: #111; --on-acc: #f3eee2; --navbg: #111; --shadow: none; --serif: "Libre Baskerville", serif; --sans: "Libre Franklin", sans-serif; --r: 0px; }
+.th-gio .card, .th-gio .kpi, .th-gio .act-t, .th-gio .folder .fbody { border: 0; border-top: 2px solid #111; border-radius: 0; }
+.th-gio .btn, .th-gio .pill, .th-gio .stat, .th-gio .tag, .th-gio .fchip, .th-gio .iconbtn, .th-gio .seg, .th-gio .seg button { border-radius: 0; }
+.th-gio h4 { text-transform: uppercase; letter-spacing: .14em; font-size: 15px !important; }
+.th-gio h4::before, .th-gio h4::after { background: #111; height: 2px !important; }
+.th-gio .tabs-mobile2 .tbar { border-radius: 0; } .th-gio .tabs-mobile2 .tbtn { border-radius: 0; }
+.th-gio .topbar .date { font-style: italic; }
+/* S9 Neon notte */
+.th-neo { --pbg: radial-gradient(60% 30% at 15% 10%, rgba(255,43,214,.25), transparent), radial-gradient(60% 30% at 90% 60%, rgba(0,240,255,.18), transparent), #07020f; --bg: #07020f; --bg2: #0c0518; --card: rgba(15,8,35,.88); --card2: #150b2e; --line: rgba(0,240,255,.35); --line2: rgba(0,240,255,.55); --text: #e6f7ff; --cream: #00f0ff; --muted: #9a8fc0; --dim: #6d6496; --oro: #ff2bd6; --oro2: #ff7be6; --oroD: #ff2bd6; --good: #3dffa8; --bad: #ff4d79; --soft: rgba(0,240,255,.06); --soft2: rgba(255,43,214,.1); --acc: linear-gradient(135deg, #ff2bd6, #00f0ff); --on-acc: #07020f; --navbg: rgba(12,5,24,.92); --shadow: 0 0 16px rgba(0,240,255,.22); --serif: "Orbitron", sans-serif; --sans: "Inter", sans-serif; --r: 12px; }
+.th-neo h1, .th-neo h2, .th-neo h3, .th-neo h4, .th-neo .topbar .date, .th-neo .stat b { font-weight: 800; text-shadow: 0 0 10px rgba(0,240,255,.7); letter-spacing: .04em; }
+.th-neo .topbar .date { font-size: 18px; }
+/* S10 Brutalista */
+.th-bru { --pbg: #ffe14d; --bg: #ffe14d; --bg2: #ffe14d; --card: #fff; --card2: #fff; --line: #000; --line2: #000; --text: #000; --cream: #000; --muted: #222; --dim: #444; --oro: #000; --oro2: #000; --oroD: #000; --good: #007a3d; --bad: #e0001b; --soft: #fff; --soft2: #fff; --acc: #ff3d2e; --on-acc: #fff; --navbg: #fff; --shadow: 6px 6px 0 #000; --serif: "Archivo Black", sans-serif; --sans: "Space Grotesk", sans-serif; --r: 0px; --fab: #000; }
+.th-bru .card, .th-bru .kpi, .th-bru .act-t, .th-bru .folder .fbody, .th-bru .btn, .th-bru .stat, .th-bru .pill, .th-bru .iconbtn, .th-bru .tag, .th-bru .fchip, .th-bru .choice { border: 3px solid #000; border-radius: 0; }
+.th-bru .btn, .th-bru .stat, .th-bru .pill { box-shadow: 4px 4px 0 #000; }
+.th-bru h1, .th-bru h2, .th-bru h3, .th-bru h4, .th-bru .topbar .date { text-transform: uppercase; font-weight: 400; }
+.th-bru .tabs-mobile2 .tbar { border: 3px solid #000; border-radius: 0; box-shadow: 6px 6px 0 #000; } .th-bru .tabs-mobile2 .tbtn.active { border-radius: 0; border: 2px solid #000; }
+/* S11 Vaporwave */
+.th-vap { --pbg: linear-gradient(transparent 62%, rgba(1,205,254,.35) 62.3%, transparent 62.8%), repeating-linear-gradient(90deg, transparent 0 46px, rgba(255,113,206,.25) 46px 48px), linear-gradient(#2d0b59 0%, #7b2cbf 45%, #ff71ce 75%, #01cdfe 100%); --bg: #3a0d6e; --bg2: rgba(30,4,64,.95); --card: rgba(26,0,60,.7); --card2: rgba(40,4,80,.8); --line: rgba(255,113,206,.55); --line2: #ff71ce; --text: #fdf2ff; --cream: #01cdfe; --muted: #e0b3ff; --dim: #b98ad8; --oro: #fffb96; --oro2: #fffb96; --oroD: #fffb96; --good: #05ffa1; --bad: #ff6b9d; --soft: rgba(255,113,206,.14); --soft2: rgba(1,205,254,.18); --acc: linear-gradient(90deg, #ff71ce, #01cdfe); --on-acc: #1a0033; --navbg: rgba(30,4,64,.85); --shadow: 0 0 0 1px rgba(1,205,254,.4), 6px 6px 0 rgba(255,113,206,.5); --serif: "Righteous", sans-serif; --sans: "Plus Jakarta Sans", sans-serif; --r: 6px; }
+.th-vap h1, .th-vap h2, .th-vap h3, .th-vap h4, .th-vap .topbar .date { text-shadow: 3px 3px 0 #ff71ce; }
+/* S12 Terminale */
+.th-ter { --pbg: repeating-linear-gradient(0deg, rgba(0,0,0,.25) 0 1px, transparent 1px 3px), radial-gradient(80% 60% at 50% 40%, #04260f, #000); --bg: #000; --bg2: #010d04; --card: rgba(0,20,6,.8); --card2: #001a08; --line: #1d8f3f; --line2: #33ff66; --text: #33ff66; --cream: #9dffb5; --muted: #22b34c; --dim: #188a39; --oro: #33ff66; --oro2: #9dffb5; --oroD: #33ff66; --good: #9dffb5; --bad: #ff5555; --soft: transparent; --soft2: rgba(51,255,102,.08); --acc: #33ff66; --on-acc: #000; --navbg: #000; --shadow: 0 0 10px rgba(51,255,102,.15); --serif: "VT323", monospace; --sans: "IBM Plex Mono", monospace; --r: 0px; }
+.th-ter .card, .th-ter .kpi, .th-ter .act-t, .th-ter .folder .fbody, .th-ter .btn, .th-ter .stat, .th-ter .pill, .th-ter .iconbtn, .th-ter .tag, .th-ter .fchip, .th-ter .choice, .th-ter .tabs-mobile2 .tbar, .th-ter .tabs-mobile2 .tbtn { border-style: dashed; border-radius: 0; }
+.th-ter h1, .th-ter h2, .th-ter h3, .th-ter h4, .th-ter .topbar .date, .th-ter .stat b { font-weight: 400; text-shadow: 0 0 8px rgba(51,255,102,.8); font-size: 1.25em; }
+.th-ter .portrait, .th-ter .chip img, .th-ter .chip svg, .th-ter img { filter: grayscale(1) sepia(1) hue-rotate(70deg) saturate(3); }
+.th-ter * { text-shadow: 0 0 4px rgba(51,255,102,.35); }
+/* S13 Pixel 8 bit */
+.th-pix { --pbg: radial-gradient(#fff 1px, transparent 1.5px) 0 0/38px 38px, #1d1b3a; --bg: #1d1b3a; --bg2: #24214a; --card: #2b2858; --card2: #35317a; --line: #fff; --line2: #fff; --text: #fff; --cream: #ffcd38; --muted: #b9b6e8; --dim: #8a87c0; --oro: #ffcd38; --oro2: #ffcd38; --oroD: #ffcd38; --good: #5cff7a; --bad: #ff5c7a; --soft: #2b2858; --soft2: #35317a; --acc: #ffcd38; --on-acc: #1d1b3a; --navbg: #2b2858; --shadow: 4px 4px 0 #000; --serif: "Press Start 2P", monospace; --sans: "Pixelify Sans", sans-serif; --r: 0px; }
+.th-pix .card, .th-pix .kpi, .th-pix .act-t, .th-pix .folder .fbody, .th-pix .btn, .th-pix .stat, .th-pix .pill, .th-pix .iconbtn, .th-pix .tag, .th-pix .fchip, .th-pix .choice, .th-pix .tabs-mobile2 .tbar, .th-pix .tabs-mobile2 .tbtn { border: 4px solid #fff; border-radius: 0; }
+.th-pix h1, .th-pix h2, .th-pix h3, .th-pix h4, .th-pix .topbar .date, .th-pix .stat b { font-weight: 400; font-size: .72em; line-height: 1.5; }
+.th-pix .topbar .date { font-size: 15px; } .th-pix .sec h4 { font-size: 14px !important; }
+.th-pix img, .th-pix .portrait { image-rendering: pixelated; border-radius: 0; }
+/* S14 Fumetto */
+.th-fum { --pbg: radial-gradient(rgba(0,0,0,.18) 1.5px, transparent 2px) 0 0/9px 9px, #ffd400; --bg: #ffd400; --bg2: #fff8d6; --card: #fff; --card2: #fff; --line: #111; --line2: #111; --text: #111; --cream: #111; --muted: #333; --dim: #555; --oro: #ff2d55; --oro2: #ff2d55; --oroD: #ff2d55; --good: #0a8f4a; --bad: #e0002b; --soft: #fff; --soft2: #fff; --acc: #ff2d55; --on-acc: #fff; --navbg: #fff; --shadow: 4px 4px 0 #111; --serif: "Bangers", cursive; --sans: "Comic Neue", sans-serif; --r: 14px; --fab: #1e88ff; }
+.th-fum .card, .th-fum .kpi, .th-fum .act-t, .th-fum .folder .fbody, .th-fum .btn, .th-fum .stat, .th-fum .pill, .th-fum .iconbtn, .th-fum .choice, .th-fum .tabs-mobile2 .tbar { border: 3px solid #111; }
+.th-fum .card:nth-of-type(odd) { transform: rotate(-.6deg); } .th-fum .card:nth-of-type(even) { transform: rotate(.5deg); }
+.th-fum h1, .th-fum h2, .th-fum h3, .th-fum h4, .th-fum .topbar .date, .th-fum .stat b { font-weight: 400; letter-spacing: .04em; }
+.th-fum h2, .th-fum .topbar .date { color: #ff2d55; text-shadow: 2px 2px 0 #111; }
+.th-fum body, .th-fum { font-weight: 700; }
+/* S15 Vetro scuro (evoluzione dell'attuale) */
+.th-vet { --pbg: radial-gradient(70% 35% at 20% 0%, rgba(91,140,255,.35), transparent), radial-gradient(60% 30% at 100% 30%, rgba(214,178,94,.22), transparent), #070b19; --bg: #070b19; --bg2: rgba(14,20,42,.96); --card: rgba(255,255,255,.06); --card2: rgba(255,255,255,.09); --line: rgba(255,255,255,.1); --line2: rgba(255,255,255,.18); --text: #eef1f8; --cream: #ffffff; --muted: #a3acc7; --dim: #6c7596; --oro: #ecd08a; --oro2: #f4dc9e; --oroD: #d6b25e; --good: #4ade80; --bad: #fb7185; --soft: rgba(255,255,255,.06); --soft2: rgba(255,255,255,.1); --acc: linear-gradient(135deg, #d6b25e, #f4dc9e); --on-acc: #1a1405; --navbg: rgba(255,255,255,.08); --shadow: 0 10px 30px rgba(0,0,0,.35); --serif: "Plus Jakarta Sans", sans-serif; --sans: "Plus Jakarta Sans", sans-serif; --r: 22px; }
+.th-vet .card, .th-vet .act-t, .th-vet .kpi, .th-vet .tabs-mobile2 .tbar { -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
+.th-vet h1, .th-vet h2, .th-vet h3, .th-vet h4, .th-vet .topbar .date, .th-vet .stat b { font-weight: 800; letter-spacing: -.02em; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+<div class="pg">
+<h1>Nuovo stile grafico</h1>
+<p class="lead">Quindici stili applicati alle <b>schermate vere</b> del gioco (Home, Leggi, un evento). Scorri le tre schermate di lato. Dimmi i codici che ti piacciono, anche misti (es. «S5 con i colori di S1»).</p>
+<div id="out"><p class="lead" style="margin-top:30px">Preparo le schermate…</p></div>
+</div>
+<script src="js/dati.js"></script>
+<script src="js/mappa.js"></script>
+<script src="js/leggi.js"></script>
+<script src="js/manovra.js"></script>
+<script src="js/spiegazioni.js"></script>
+<script src="js/loghi.js"></script>
+<script src="js/motore.js"></script>
+<script src="js/avatar-base.js"></script>
+<script src="js/avatar.js"></script>
+<script src="js/analisi.js"></script>
+<script src="js/interviste.js"></script>
+<script src="js/effetti.js"></script>
+<script src="js/eventi.js"></script>
+<script src="js/eventi2.js"></script>
+<script src="js/eventi3.js"></script>
+<script src="js/eventi4.js"></script>
+<script src="js/provocazioni.js"></script>
+<script src="js/sfide.js"></script>
+<script src="js/ui-base.js"></script>
+<script src="js/questionario.js"></script>
+<script src="js/stile.js"></script>
+<script src="js/ui-schermate.js"></script>
+<script src="js/ui-flussi.js"></script>
+<script src="js/poteri.js"></script>
+<script src="js/racconto.js"></script>
+<script src="js/giornalisti.js"></script>
+<script src="js/discorsi.js"></script>
+<script src="js/avatar-editor.js"></script>
+<script src="js/tutorial.js"></script>
+<script src="js/notifiche.js"></script>
+<script src="js/immersivo.js"></script>
+<script src="js/regola.js"></script>
+<script src="js/carriera.js"></script>
+<script>
+showSplash = function () {};
+saveGame = function () { return true; };
+const THEMES = [
+  ['Colorati', [
+    ['tri', 'S1', 'Tricolore Pop', 'Chiaro e allegro: bianco caldo, verde e rosso della bandiera, font rotondo e moderno.'],
+    ['aur', 'S2', 'Aurora', 'Sfondo sfumato viola-rosa-arancio con card di vetro trasparente. Molto colorato e moderno.'],
+    ['mem', 'S3', 'Memphis anni ’80', 'Coriandoli, righe e ombre colorate sfalsate: vivace e giocoso.'],
+    ['cla', 'S4', 'Pastello morbido', 'Lilla e pesca, card “di plastilina” che sembrano in rilievo, tutto arrotondato.'],
+  ]],
+  ['Moderni e puliti', [
+    ['vet', 'S5', 'Vetro scuro', 'Evoluzione di quello di oggi: più luce, vetro sfocato, font moderno senza grazie.'],
+    ['ios', 'S6', 'Minimal chiaro', 'Come le app di sistema dell’iPhone: bianco, grigi, blu. Essenziale.'],
+    ['ole', 'S7', 'Nero e lime', 'Nero puro (risparmia batteria sull’iPhone) con un solo colore acceso.'],
+    ['mar', 'S8', 'Marmo istituzionale', 'Avorio, marmo, bordeaux e oro, caratteri classici: sembra il Quirinale.'],
+    ['gio', 'S9', 'Giornale', 'Carta, inchiostro e righe nere: il gioco diventa un quotidiano.'],
+  ]],
+  ['Diversi', [
+    ['neo', 'S10', 'Neon notte', 'Nero con luci ciano e magenta, titoli futuristici.'],
+    ['bru', 'S11', 'Brutalista', 'Giallo, bordi neri spessi, ombre dure, tutto squadrato. Forte e diretto.'],
+    ['vap', 'S12', 'Vaporwave', 'Tramonto rosa e azzurro con la griglia anni ’90.'],
+  ]],
+  ['Strani', [
+    ['ter', 'S13', 'Terminale', 'Verde fosforo su nero come un vecchio computer, con le righe dello schermo.'],
+    ['pix', 'S14', 'Pixel 8 bit', 'Come un videogioco anni ’80: caratteri a pixel e cornici squadrate.'],
+    ['fum', 'S15', 'Fumetto', 'Giallo a puntini, contorni neri, titoli da fumetto e card un po’ storte.'],
+  ]],
+];
+let SCREENS = null;
+function phoneHTML(cls, inner) { return `<div class="phone ${cls}"><div class="mock">${inner.app}</div>${inner.layer || ''}</div>`; }
+function themeBlock(id, code, name, d) {
+  return `<div class="th" data-id="${id}"><div class="th-hd"><span class="code">${code}</span><b>${name}</b></div><p class="th-d">${d}</p><div class="row-ph">${['Home', 'Leggi', 'Evento'].map(n => `<div class="ph-w"><div class="ph-b"><div class="ph-ph">…</div></div><div class="ph-l">${n}</div></div>`).join('')}</div></div>`;
+}
+function fill(el) {
+  if (el.dataset.done) return; el.dataset.done = 1;
+  const id = el.dataset.id, cls = id === 'att' ? 'th-att' : 'th-' + id + ' re';
+  const boxes = el.querySelectorAll('.ph-b');
+  [SCREENS.home, SCREENS.leggi, SCREENS.evento].forEach((s, i) => { boxes[i].innerHTML = phoneHTML(cls, s); });
+}
+window.addEventListener('load', () => setTimeout(() => {
+  try {
+    newGame({ mode: 'fondatore', diff: 'media', player: { name: 'Andrea Rossi', art: 'il', age: 42, region: 'LAZ', bg: 'gio' }, party: { name: 'Italia Domani', short: 'ID', symbol: '★', color: '#7b2ff7', ax: { eco: 1, soc: 2, eu: 0, imm: 4, amb: 2, giu: 2, terr: 0, ist: 3 }, people: ['Marco Bianchi', 'Giulia Conti', 'Luca Ferri', 'Sara Gallo'] } });
+    for (let i = 0; i < 14; i++) { advanceWeek(); G.queue = []; }
+    const grab = tab => { UI.tab = tab; renderGame(); return document.getElementById('app').innerHTML; };
+    const home = grab('home'), leggi = grab('leggi');
+    UI.tab = 'home'; renderGame(); showEvent({ id: 'sbarchi_opp', ctx: {} });
+    const layer = document.getElementById('modal-root').innerHTML; closeSheet(true);
+    SCREENS = { home: { app: home }, leggi: { app: leggi }, evento: { app: home, layer } };
+    let h = `<div class="th" data-id="att"><div class="th-hd"><span class="code" style="background:#2a3560;color:#9aa6c4">Oggi</span><b>Lo stile attuale</b></div><p class="th-d">Per confronto.</p><div class="row-ph">${['Home', 'Leggi', 'Evento'].map(n => `<div class="ph-w"><div class="ph-b"><div class="ph-ph">…</div></div><div class="ph-l">${n}</div></div>`).join('')}</div></div>`;
+    THEMES.forEach(([g, list]) => { h += `<div class="grp-t">${g}</div>` + list.map(t => themeBlock(...t)).join(''); });
+    document.getElementById('out').innerHTML = h;
+    const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) fill(e.target); }), { rootMargin: '400px' }) : null;
+    document.querySelectorAll('.th').forEach(el => io ? io.observe(el) : fill(el));
+    document.querySelectorAll('.phone').forEach(p => p.addEventListener('click', e => e.stopPropagation(), true));
+  } catch (e) { document.getElementById('out').innerHTML = '<p class="lead">Errore: ' + e.message + '</p>'; console.error(e); }
+}, 50));
+// le schermate di prova non sono cliccabili
+document.addEventListener('click', e => { if (e.target.closest('.phone')) { e.preventDefault(); e.stopPropagation(); } }, true);
+</script>
+</body>
+</html>
